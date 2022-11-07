@@ -1,0 +1,18 @@
+[package]
+name = "niumside-poptracker"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+auraxis = { git = "https://github.com/AnotherGenZ/auraxis-rs.git", version = "0.1.0" }
+tokio = { version = "1.21.0", features = ["full"] }
+tracing-subscriber = "0.3"
+tracing = "0.1.36"
+config = "0.13.2"
+url = { version = "2.3.1", features = ["serde"] }
+serde = { version = "1.0.147", features = ["derive"] }
+
+[patch."https://github.com/AnotherGenZ/auraxis-rs.git"]
+auraxis = { path = "../auraxis-rs" }
