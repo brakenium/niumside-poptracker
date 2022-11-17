@@ -13,6 +13,10 @@ tracing = "0.1.36"
 config = "0.13.2"
 url = { version = "2.3.1", features = ["serde"] }
 serde = { version = "1.0.147", features = ["derive"] }
+chrono = "0.4.22"
+dashmap = "5.4.0"
+rayon = "1.5.3"
+futures = "0.3.25"
 
 [patch."https://github.com/AnotherGenZ/auraxis-rs.git"]
 auraxis = { path = "../auraxis-rs" }
