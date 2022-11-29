@@ -1,0 +1,13 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Niumside-Dev",
+            "Group": "Servers",
+            "Host": "db",
+            "Port": 5432,
+            "Username": "postgres",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "niumside"
+        }
+    }
+}

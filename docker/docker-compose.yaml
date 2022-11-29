@@ -1,0 +1,22 @@
+version: "3.1"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_DB: niumside
+      POSTGRES_PASSWORD: ${PASSWORD}
+
+  pgadmin:
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PASSWORD}
+      PGADMIN_DISABLE_POSTFIX: "true"
+    image: dpage/pgadmin4
