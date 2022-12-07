@@ -14,7 +14,7 @@ services:
     ports:
       - "127.0.0.1:8080:80"
     volumes:
-      - ./pgadmin/servers.json:/pgadmin4/servers.json
+      - ./docker-data/pgadmin/servers.json:/pgadmin4/servers.json
     environment:
       PGADMIN_DEFAULT_EMAIL: niumside@example.com
       PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
