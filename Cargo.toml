@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-auraxis = { git = "https://github.com/AnotherGenZ/auraxis-rs.git", version = "0.1.0" }
+auraxis = { git = "https://github.com/AnotherGenZ/auraxis-rs", version = "0.1.0" }
 tokio = { version = "1.21.0", features = ["full"] }
 tracing-subscriber = "0.3"
 tracing = "0.1.36"
@@ -18,5 +18,5 @@ dashmap = "5.4.0"
 rayon = "1.5.3"
 futures = "0.3.25"
 
-[patch."https://github.com/AnotherGenZ/auraxis-rs.git"]
-auraxis = { path = "../auraxis-rs" }
+[patch."https://github.com/AnotherGenZ/auraxis-rs"]
+auraxis = { path = "../auraxis-rs/auraxis" }
