@@ -8,7 +8,7 @@ services:
       - 127.0.0.1:5432:5432
     environment:
       POSTGRES_DB: niumside
-      POSTGRES_PASSWORD: ${PASSWORD}
+      POSTGRES_PASSWORD: P@ssw0rd
 
   pgadmin:
     ports:
@@ -16,7 +16,7 @@ services:
     volumes:
       - ./pgadmin/servers.json:/pgadmin4/servers.json
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PASSWORD}
+      PGADMIN_DEFAULT_EMAIL: niumside@example.com
+      PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
       PGADMIN_DISABLE_POSTFIX: "true"
     image: dpage/pgadmin4
