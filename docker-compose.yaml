@@ -9,12 +9,15 @@ services:
     environment:
       POSTGRES_DB: niumside
       POSTGRES_PASSWORD: P@ssw0rd
+    volumes:
+      - ./niumisde-database.sql:/docker-entrypoint-initdb.d/niumisde-database.sql
 
   pgadmin:
     ports:
       - "127.0.0.1:8080:80"
     volumes:
       - ./docker-data/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./niumisde-database.pgerd:/var/lib/pgadmin/storage/niumside_example.com/niumisde-database.pgerd
     environment:
       PGADMIN_DEFAULT_EMAIL: niumside@example.com
       PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
