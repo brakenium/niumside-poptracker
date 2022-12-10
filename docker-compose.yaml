@@ -17,7 +17,6 @@ services:
       - "127.0.0.1:8080:80"
     volumes:
       - ./docker-data/pgadmin/servers.json:/pgadmin4/servers.json
-      - ./niumisde-database.pgerd:/var/lib/pgadmin/storage/niumside_example.com/niumisde-database.pgerd
     environment:
       PGADMIN_DEFAULT_EMAIL: niumside@example.com
       PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
