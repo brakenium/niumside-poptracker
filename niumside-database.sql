@@ -7,25 +7,25 @@ CREATE TABLE IF NOT EXISTS public.world_population
 (
     world_id smallint NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
-    population_id integer NOT NULL,
-    PRIMARY KEY (population_id),
+    population_id serial,
+    CONSTRAINT "PK_world_population" PRIMARY KEY (population_id),
     CONSTRAINT "AK_Unique_TimestampAndWorld" UNIQUE ("timestamp", world_id)
 );
 
 CREATE TABLE IF NOT EXISTS public.zone_population
 (
-    zone_population_id integer NOT NULL,
+    zone_population_id serial,
     zone_id smallint NOT NULL,
-    world_population_id integer NOT NULL,
+    world_population_id serial NOT NULL,
     CONSTRAINT "PK_zone_population" PRIMARY KEY (zone_population_id),
     CONSTRAINT "AK_UQ_population_zone" UNIQUE (zone_id, world_population_id)
 );
 
 CREATE TABLE IF NOT EXISTS public.faction_population
 (
-    faction_population_id integer NOT NULL,
+    faction_population_id serial,
     faction_id smallint NOT NULL,
-    zone_population_id integer NOT NULL,
+    zone_population_id serial NOT NULL,
     team_id smallint NOT NULL,
     CONSTRAINT "PK_faction_population" PRIMARY KEY (faction_population_id),
     CONSTRAINT "AK_UQ_faction_team_zone" UNIQUE (faction_id, zone_population_id, team_id)
@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS public.faction_population
 
 CREATE TABLE IF NOT EXISTS public.loadout_population
 (
-    loadout_population_id integer NOT NULL,
+    loadout_population_id serial,
     loadout_id smallint NOT NULL,
-    faction_population_id integer NOT NULL,
+    faction_population_id serial NOT NULL,
     amount smallint NOT NULL,
     CONSTRAINT "PK_loadout_population" PRIMARY KEY (loadout_population_id),
     CONSTRAINT "AK_UQ_loadout_faction" UNIQUE (faction_population_id, loadout_id)
@@ -86,8 +86,25 @@ CREATE TABLE IF NOT EXISTS public.zone
     PRIMARY KEY (zone_id)
 );
 
+CREATE TABLE IF NOT EXISTS public.world
+(
+    world_id smallint NOT NULL,
+    name character varying,
+    description character varying,
+    last_update timestamp without time zone NOT NULL,
+    CONSTRAINT "PK_world" PRIMARY KEY (world_id)
+);
+
+ALTER TABLE IF EXISTS public.world_population
+    ADD CONSTRAINT "FK_world_population_world" FOREIGN KEY (world_id)
+    REFERENCES public.world (world_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
 ALTER TABLE IF EXISTS public.zone_population
-    ADD CONSTRAINT "FK_zone_world" FOREIGN KEY (world_population_id)
+    ADD CONSTRAINT "FK_zone_population_world_population" FOREIGN KEY (world_population_id)
     REFERENCES public.world_population (population_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION

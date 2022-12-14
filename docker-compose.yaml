@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: niumside
       POSTGRES_PASSWORD: P@ssw0rd
     volumes:
-      - ./niumisde-database.sql:/docker-entrypoint-initdb.d/niumisde-database.sql
+      - ./niumside-database.sql:/docker-entrypoint-initdb.d/niumside-database.sql
 
   pgadmin:
     ports:

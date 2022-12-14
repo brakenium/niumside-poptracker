@@ -21,9 +21,16 @@ pub struct WorldConfig {
 
 #[derive(Debug, Deserialize)]
 #[allow(unused)]
+pub struct DatabaseConfig {
+    pub connection_string: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
 pub struct Settings {
     pub census: CensusConfig,
     pub worlds: Vec<WorldConfig>,
+    pub database: DatabaseConfig,
 }
 
 impl Settings {
@@ -36,7 +43,7 @@ impl Settings {
             // Add in the current environment file
             // Default to 'production' env
             // Note that this file is _optional_
-            .add_source(File::with_name(&format!("config/{}", run_mode)).required(false))
+            .add_source(File::with_name(&format!("config/{run_mode}")).required(false))
             // Add in a local configuration file
             // This file shouldn't be checked in to git
             .add_source(File::with_name("config/local").required(false))
