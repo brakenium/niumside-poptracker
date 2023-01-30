@@ -59,48 +59,36 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> LoadoutBreakdown {
     loadout_breakdown
 }
 
-pub async fn store_pop(loadout_breakdown: &LoadoutBreakdown, db_pool: &Pool<Postgres>) {
-    for (world_id, loadout_breakdown_world) in loadout_breakdown {
-        let db_conn = match db_pool.begin().await {
-            Ok(conn) => conn,
-            Err(error) => {
-                tracing::info!("Unable to obtain a connection and start a transaction for world pop insert: {}", error);
-                continue;
-            },
-        };
+// Create a function to generate the SQL queries to store all unique datatypes in the database.
+pub async fn generate_unique_datatype_queries(loadout_breakdown: &LoadoutBreakdown) {
+    let mut world_ids: Vec<WorldID> = Vec::new();
+    let mut zone_ids: Vec<ZoneID> = Vec::new();
+    let mut loadout_ids: Vec<Loadout> = Vec::new();
 
-        let world_query = match sqlx::query!("--sql
-            INSERT INTO world_population (world_id, timestamp)
-            VALUES ($1, NOW())
-            RETURNING population_id",
-            *world_id as i16
-        ).fetch_optional(&mut db_conn).await {
-            Ok(query_result) => query_result,
-            Err(_) => {
-                tracing::info!("Unable to insert world pop");
-                continue;
-            },
-        };
-        for (zone_id, loadout_breakdown_zone) in loadout_breakdown_world{
-            let zone_query = match sqlx::query!("--sql
-                INSERT INTO zone_population (world_population_id, zone_id)
-                VALUES ($1, $2)",
-                world_query.column(0),
-                *zone_id as i16,
-
-            ).fetch_one(&mut db_conn).await {
-                Ok(query_result) => query_result,
-                Err(_) => {
-                    tracing::info!("Unable to insert zone pop");
-                    continue;
-                },
-            };
-            for (loadout, loadout_player_amount) in loadout_breakdown_zone {
-                pop_inserts.append("--sql
-                ".to_string());
+    for (world_id, zone_map) in loadout_breakdown.iter() {
+        world_ids.push(*world_id);
+        for (zone_id, loadout_map) in zone_map.iter() {
+            zone_ids.push(*zone_id);
+            for (loadout_id, _count) in loadout_map.iter() {
+                loadout_ids.push(*loadout_id);
             }
         }
     }
+
+    world_ids.dedup();
+    zone_ids.sort();
+    zone_ids.dedup();
+    loadout_ids.dedup();
+
+    world_ids.par_iter().count();
+
+    info!("World IDs: {:?}", world_ids.par_iter().count());
+    info!("Zone IDs: {:?}", zone_ids.par_iter().count());
+    info!("Loadout IDs: {:?}", loadout_ids.par_iter().count());
+}
+
+
+pub async fn store_pop(loadout_breakdown: &LoadoutBreakdown, db_pool: &Pool<Postgres>) {
 }
 
 pub async fn process_loop(active_players: ActivePlayerDb, db_pool: Pool<Postgres>) -> Option<()> {
@@ -109,7 +97,8 @@ pub async fn process_loop(active_players: ActivePlayerDb, db_pool: Pool<Postgres
     loop {
         tokio::time::sleep(Duration::from_secs(30)).await;
         let loadout_breakdown_numbers = loadout_breakdown(&active_players);
-
+        generate_unique_datatype_queries(&loadout_breakdown_numbers).await;
         store_pop(&loadout_breakdown_numbers, &db_pool).await;
     }
 }
+ 
