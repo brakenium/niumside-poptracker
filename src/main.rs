@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         panic!("Unable to connect to Census realtime API");
     };
 
-    let Ok(db_pool) = storage::pool::create(&app_config.database.connection_string)
+    let Ok(db_pool) = storage::pool::create(&app_config.database.connection_string).await
     else {
         panic!("Unable to connect to database");
     };
