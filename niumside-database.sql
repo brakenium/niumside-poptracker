@@ -95,6 +95,15 @@ CREATE TABLE IF NOT EXISTS public.world
     CONSTRAINT "PK_world" PRIMARY KEY (world_id)
 );
 
+CREATE TABLE IF NOT EXISTS public.loadout
+(
+    loadout_id smallint NOT NULL,
+    name character varying,
+    description character varying,
+    last_update timestamp without time zone,
+    CONSTRAINT "PK_loadout" PRIMARY KEY (loadout_id)
+);
+
 ALTER TABLE IF EXISTS public.world_population
     ADD CONSTRAINT "FK_world_population_world" FOREIGN KEY (world_id)
     REFERENCES public.world (world_id) MATCH SIMPLE
@@ -148,6 +157,14 @@ ALTER TABLE IF EXISTS public.loadout_population
     REFERENCES public.faction_population (faction_population_id) MATCH SIMPLE
     ON UPDATE RESTRICT
     ON DELETE RESTRICT
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.loadout_population
+    ADD CONSTRAINT "FK_loadout_population_loadout" FOREIGN KEY (loadout_id)
+    REFERENCES public.loadout (loadout_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
     NOT VALID;
 
 
