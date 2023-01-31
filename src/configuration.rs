@@ -1,7 +1,8 @@
 use crate::constants;
 use auraxis::{WorldID, ZoneID};
 use config::{Config, ConfigError, Environment, File};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
+use tracing::Level;
 use std::env;
 use url::Url;
 
@@ -25,12 +26,40 @@ pub struct DatabaseConfig {
     pub connection_string: String,
 }
 
+pub trait DeserializeWith: Sized {
+    fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>;
+}
+
+impl DeserializeWith for Level {
+    fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+        let s = String::deserialize(de)?;
+
+        match s.as_ref() {
+            "Error" => Ok(Level::ERROR),
+            "Warn" => Ok(Level::WARN),
+            "Info" => Ok(Level::INFO),
+            "Debug" => Ok(Level::DEBUG),
+            "Trace" => Ok(Level::TRACE),
+            _ => Err(serde::de::Error::custom("error trying to deserialize log level"))
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
+pub struct AppConfig {
+    #[serde(deserialize_with="Level::deserialize_with")]
+    pub log_level: Level,
+}
+
 #[derive(Debug, Deserialize)]
 #[allow(unused)]
 pub struct Settings {
     pub census: CensusConfig,
     pub worlds: Vec<WorldConfig>,
     pub database: DatabaseConfig,
+    pub app: AppConfig,
 }
 
 impl Settings {

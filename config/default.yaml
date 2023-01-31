@@ -1,3 +1,6 @@
 census:
   service_id: example
   realtime_base_url: wss://push.nanite-systems.net/streaming
+
+app:
+  log_level: Info

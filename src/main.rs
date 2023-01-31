@@ -12,12 +12,12 @@ use std::sync::{Arc, Mutex};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let app_config = configuration::Settings::new()?;
+
     tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::DEBUG)
+        .with_max_level(app_config.app.log_level)
         .with_target(false)
         .init();
-
-    let app_config = configuration::Settings::new()?;
 
     let Ok(events) = realtime::init(app_config.census, app_config.worlds).await
     else {
