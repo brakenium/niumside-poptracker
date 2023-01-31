@@ -6,7 +6,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.world_population
 (
     world_id smallint NOT NULL,
-    "timestamp" timestamp without time zone NOT NULL,
+    "timestamp" timestamp without time zone NOT NULL DEFAULT NOW(),
     population_id serial,
     CONSTRAINT "PK_world_population" PRIMARY KEY (population_id),
     CONSTRAINT "AK_Unique_TimestampAndWorld" UNIQUE ("timestamp", world_id)
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS public.world
     world_id smallint NOT NULL,
     name character varying,
     description character varying,
-    last_update timestamp without time zone NOT NULL,
+    last_update timestamp without time zone NOT NULL DEFAULT NOW(),
     CONSTRAINT "PK_world" PRIMARY KEY (world_id)
 );
 
