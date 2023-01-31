@@ -1,8 +1,7 @@
 pub mod gain_experience;
 use auraxis::realtime::event::Event;
 use tokio::sync::mpsc::Receiver;
-
-use crate::{active_players::ActivePlayerDb, storage};
+use crate::{active_players::ActivePlayerDb};
 
 #[derive(thiserror::Error, Debug)]
 pub enum EventHandlerErrors {

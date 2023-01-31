@@ -5,7 +5,6 @@ mod event_handlers;
 mod active_players;
 mod storage;
 use futures::future;
-use sqlx::{Pool, Postgres};
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
