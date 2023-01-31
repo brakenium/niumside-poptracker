@@ -78,6 +78,8 @@ docker compose up -d db
 
 ## Database
 
+![Database Schema](niumside-database.pgerd.png)
+
 This project uses a Postgres database which has been configured with PGAdmin4. The generated schema can be found in [niumside-database.sql](niumside-database.sql). The PGAdmin4 project can be found in [niumside-database.pgerd](niumside-database.pgerd) and be opened with PGAdmin4 Desktop or a server install like the docker-compose.yaml sets up at [localhost:8080](https://localhost:8080). The local install will add the development server to the application, however the password will have to be entered manually.
 
 The database is designed to be modular. This means that it can be extended with other modules. The current modules are:
