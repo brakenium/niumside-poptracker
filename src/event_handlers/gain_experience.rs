@@ -13,7 +13,7 @@ pub async fn handle(event: GainExperience, active_players: ActivePlayerDb) -> Re
             loadout: event.loadout_id,
             world: event.world_id,
             last_change: event.timestamp,
-            faction: event.loadout_id.getFaction(),
+            faction: event.loadout_id.get_faction(),
         },
     );
     Ok(())
