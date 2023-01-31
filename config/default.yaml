@@ -1,6 +1,20 @@
 census:
   service_id: example
-  realtime_base_url: wss://push.nanite-systems.net/streaming
+  # realtime_base_url: wss://push.nanite-systems.net/streaming
+
+# worlds:
+#   - id: Miller
+#   - id: Cobalt
+#   - id: Jaeger
+#     zones: 
+#       - 2
+#       - 4
+#       - 6
+#       - 8
+#       - 344
+
+# database:
+  # connection_string: postgres://postgres:P@ssw0rd@localhost/niumside
 
 app:
   log_level: Info
