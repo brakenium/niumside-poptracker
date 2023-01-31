@@ -5,7 +5,7 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS public.world_population
 (
-    world_id smallint NOT NULL,
+    world_id integer NOT NULL,
     "timestamp" timestamp without time zone NOT NULL DEFAULT NOW(),
     population_id serial,
     CONSTRAINT "PK_world_population" PRIMARY KEY (population_id),
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.world_population
 CREATE TABLE IF NOT EXISTS public.zone_population
 (
     zone_population_id serial,
-    zone_id smallint NOT NULL,
+    zone_id integer NOT NULL,
     world_population_id serial NOT NULL,
     CONSTRAINT "PK_zone_population" PRIMARY KEY (zone_population_id),
     CONSTRAINT "AK_UQ_population_zone" UNIQUE (zone_id, world_population_id)
@@ -79,16 +79,16 @@ CREATE TABLE IF NOT EXISTS public.faction
 
 CREATE TABLE IF NOT EXISTS public.zone
 (
-    zone_id smallint NOT NULL,
+    zone_id integer NOT NULL,
     name character varying,
     description character varying,
     last_update timestamp without time zone,
-    PRIMARY KEY (zone_id)
+    CONSTRAINT "PK_zone" PRIMARY KEY (zone_id)
 );
 
 CREATE TABLE IF NOT EXISTS public.world
 (
-    world_id smallint NOT NULL,
+    world_id integer NOT NULL,
     name character varying,
     description character varying,
     last_update timestamp without time zone NOT NULL DEFAULT NOW(),
