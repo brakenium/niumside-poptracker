@@ -1,0 +1,17 @@
+version: "3.1"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: niumside
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./niumside-database.sql:/docker-entrypoint-initdb.d/niumside-database.sql
+  
+  pop-tracker:
+    image: niumside:latest
+    restart: always
+    environment:
+      NIUMSIDE_DATABASE_CONNECTION_STRING: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/niumside
