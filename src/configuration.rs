@@ -78,7 +78,8 @@ impl Settings {
             .add_source(File::with_name("config/local").required(false))
             // Add in settings from the environment (with a prefix of APP)
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-            .add_source(Environment::with_prefix(constants::APPLICATION_NAME))
+            .add_source(Environment::with_prefix(&constants::PROJECT_NAME.to_uppercase().replace(' ', "")))
+            .add_source(Environment::with_prefix(&constants::APPLICATION_NAME.to_uppercase().replace(' ', "")))
             .build()?;
 
         // You can deserialize (and thus freeze) the entire configuration as
