@@ -1,4 +1,4 @@
-FROM rustlang/rust:nightly-alpine as builder
+FROM docker.io/rustlang/rust:nightly-alpine as builder
 WORKDIR /usr/src/
 RUN apk add --no-cache git openssl-dev musl-dev
 RUN git clone https://github.com/brakenium/auraxis-rs.git
@@ -9,7 +9,7 @@ RUN cargo fetch
 COPY . .
 RUN cargo build --release
 
-FROM alpine:latest
+FROM docker.io/alpine:latest
 WORKDIR /usr/src/niumside-poptracker
 COPY --from=builder /usr/src/niumside-poptracker/target/release/niumside-poptracker .
 COPY --from=builder /usr/src/niumside-poptracker/config ./config
