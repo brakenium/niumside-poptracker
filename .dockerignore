@@ -1,0 +1,7 @@
+*
+!src/
+!config/
+!migrations/
+!sqlx-data.json
+!Cargo.*
+!build.rs
