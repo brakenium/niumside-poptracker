@@ -4,7 +4,6 @@ RUN apk add --no-cache git openssl-dev musl-dev
 RUN git clone https://github.com/brakenium/auraxis-rs.git
 WORKDIR /usr/src/niumside-poptracker
 COPY . .
-# RUN mkdir .cargo && cargo vendor > .cargo/config
 RUN cargo build --release
 
 FROM alpine:latest
