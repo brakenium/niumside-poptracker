@@ -3,6 +3,9 @@ WORKDIR /usr/src/
 RUN apk add --no-cache git openssl-dev musl-dev
 RUN git clone https://github.com/brakenium/auraxis-rs.git
 WORKDIR /usr/src/niumside-poptracker
+COPY Cargo.toml .
+COPY src/main.rs ./src/
+RUN cargo fetch
 COPY . .
 RUN cargo build --release
 
