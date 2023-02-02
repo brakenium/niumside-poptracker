@@ -21,7 +21,7 @@ sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "postgres", 
 thiserror = "1.0.37"
 
 [patch."https://github.com/AnotherGenZ/auraxis-rs"]
-auraxis = { path = "../auraxis-rs/auraxis" }
+auraxis = { path = "./auraxis-rs/auraxis" }
 
 [profile.dev.package.sqlx-macros]
 opt-level = 3
