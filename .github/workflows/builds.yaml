@@ -43,4 +43,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Build-Binary-${{ matrix.go-version }}
-        path: target/${{ matrix.target }}/release/niumside-poptracker
+        path: target/release/niumside-poptracker
