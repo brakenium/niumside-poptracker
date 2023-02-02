@@ -1,5 +1,9 @@
 name: Application binary builds
 
+env:
+  RUST_BACKTRACE: full
+  CARGO_TERM_COLOR: always
+
 on:
   push:
     branches:
@@ -11,7 +15,6 @@ jobs:
     name: Builds for ${{ matrix.target }} ${{ matrix.rust }} on ${{ matrix.os }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         rust: [nightly]
@@ -24,20 +27,17 @@ jobs:
           # Linux arm64 gnu and musl
           - aarch64-unknown-linux-gnu
           - aarch64-unknown-linux-musl
-    env:
-      RUST_BACKTRACE: full
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Rust ${{ matrix.target }} ${{ matrix.rust }}
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        target: ${{ matrix.target }}
-        override: true
+      run: |
+        rustup toolchain install ${{ matrix.rust }}
+        rustup target add ${{ matrix.target }} --toolchain ${{ matrix.rust }}
+        rustup default ${{ matrix.rust }}
     - name: ${{ matrix.target }} build
-      run: cargo build --release
+      run: cargo build --release --features vendored --target ${{ matrix.target }}
     - name: Upload binary artifact
       uses: actions/upload-artifact@v3
       with:
