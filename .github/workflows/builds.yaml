@@ -33,6 +33,7 @@ jobs:
         submodules: true
     - name: Install Rust ${{ matrix.target }} ${{ matrix.rust }}
       run: |
+        rustup update && \
         rustup install ${{ matrix.rust }} && \
         rustup target add ${{ matrix.target }} --toolchain ${{ matrix.rust }} && \
         rustup default ${{ matrix.rust }}
