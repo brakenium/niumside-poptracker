@@ -27,14 +27,19 @@ jobs:
     env:
       RUST_BACKTRACE: full
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Install Rust ${{ matrix.target }} ${{ matrix.rust }}
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.target }}
-          override: true
-      - name: ${{ matrix.target }}
-        run: cargo build --release
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Install Rust ${{ matrix.target }} ${{ matrix.rust }}
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ matrix.rust }}
+        target: ${{ matrix.target }}
+        override: true
+    - name: ${{ matrix.target }} build
+      run: cargo build --release
+    - name: Upload binary artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Build-Binary-${{ matrix.go-version }}
+        path: target/${{ matrix.target }}/release/niumside-poptracker
