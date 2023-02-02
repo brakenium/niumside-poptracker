@@ -33,7 +33,7 @@ jobs:
       - name: Install Rust ${{ matrix.rust }}-${{ matrix.target }}
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.target }}-${{ matrix.rust }}
+          toolchain: ${{ matrix.rust }}-${{ matrix.target }}
           override: true
       - name: ${{ matrix.target }}
         run: cargo build --release --target ${{ matrix.target }}
