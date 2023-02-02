@@ -1,0 +1,42 @@
+name: Application binary builds
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  builds:
+    name: ${{ matrix.make.name }} (ubuntu-latest)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        rust: [nightly]
+        target:
+          # Linux x64 gnu and musl
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          # Windows x86_64
+          - x86_64-pc-windows-msvc
+          # Linux arm64 gnu and musl
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+    env:
+      RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
+      RUSTV: ${{ matrix.rust }}
+      SCCACHE_CACHE_SIZE: 2G
+      SCCACHE_DIR: ${{ matrix.sccache-path }}
+      # SCCACHE_RECACHE: 1 # Uncomment this to clear cache, then comment it back out
+    steps:
+      - uses: actions/checkout@v3      
+      - name: Install Rust ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - name: ${{ matrix.target }}
+        run: cargo build --release --target ${{ matrix.target }}

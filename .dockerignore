@@ -1,6 +1,6 @@
 *
 !src/
-!config/
+!config/default.yaml
 !migrations/
 !sqlx-data.json
 !Cargo.*
