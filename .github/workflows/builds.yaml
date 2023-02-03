@@ -100,7 +100,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v4
         with:
-          platforms: linux
+          platforms: ${{ matrix.tags.platform }}
           push: true
           file: ./production.Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
