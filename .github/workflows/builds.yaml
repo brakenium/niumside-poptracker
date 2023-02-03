@@ -42,5 +42,5 @@ jobs:
     - name: Upload binary artifact
       uses: actions/upload-artifact@v3
       with:
-        name: Build-Binary-${{ matrix.channel }}}${{ matrix.target }}
+        name: Niumside-Pop-Tracker_${{ matrix.channel }}-${{ matrix.target }}
         path: target/release/niumside-poptracker
