@@ -52,16 +52,16 @@ jobs:
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
-      IMAGE_TAG: ${{ matrix.tags.name }}-unstable
+      IMAGE_TAG: ${{ matrix.images.name }}-unstable
     strategy:
       fail-fast: true
       matrix:
-        tags:
+        images:
           - name: alpine
-            artifact-name: x86_64-unknown-linux-musl
+            artifact-name: Niumside-Pop-Tracker_nightly-x86_64-unknown-linux-musl
             platform: amd64
           - name: alpine
-            artifact-name: aarch64-unknown-linux-musl
+            artifact-name: Niumside-Pop-Tracker_nightly-aarch64-unknown-linux-musl
             platform: arm64
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -91,16 +91,16 @@ jobs:
       - name: Download a single artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ matrix.tags.artifact-name }}
+          name: ${{ matrix.images.artifact-name }}
       # move the artifact to the current directory and rename to niumside-poptracker
       - name: Rename artifact
-        run: mv ${{ matrix.tags.artifact-name }}/niumside-poptracker niumside-poptracker
+        run: mv ${{ matrix.images.artifact-name }}/niumside-poptracker niumside-poptracker
 
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v4
         with:
-          platforms: ${{ matrix.tags.platform }}
+          platforms: ${{ matrix.images.platform }}
           push: true
           file: ./production.Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
