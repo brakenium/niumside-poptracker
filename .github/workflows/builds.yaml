@@ -186,13 +186,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: alpine-linux-amd64-image
-          path: /tmp
       - name: Download alpine image artifact
         uses: actions/download-artifact@v3
         with:
           name: alpine-linux-arm64-image
-          path: /tmp
-      - run: ls -al --recursive /tmp
+      - run: ls -al
       # Load the image artifacts into the local docker daemon
       - name: Load alpine image artifact
         run: docker load -i /tmp/image-linux-amd64.tar
