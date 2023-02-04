@@ -1,0 +1,17 @@
+version: "3.1"
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./niumside-database.sql:/docker-entrypoint-initdb.d/niumside-database.sql
+    restart: unless-stopped
+
+  pop-tracker:
+    image: ghcr.io/brakenium/niumside-poptracker:alpine-unstable
+    environment:
+      NIUMSIDE_DATABASE_CONNECTION_STRING: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/${DB_NAME}
+    restart: unless-stopped
