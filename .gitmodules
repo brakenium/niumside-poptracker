@@ -1,3 +1,3 @@
 [submodule "auraxis-rs"]
 	path = auraxis-rs
-	url = git@github.com:brakenium/auraxis-rs.git
+	url = https://github.com/brakenium/auraxis-rs.git
