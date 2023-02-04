@@ -110,10 +110,12 @@ jobs:
         images:
           - name: alpine
             artifact-name: Niumside-Pop-Tracker_nightly-x86_64-unknown-linux-musl
-            platform: linux/amd64
+            platform: amd64
+            os: linux
           - name: alpine
             artifact-name: Niumside-Pop-Tracker_nightly-aarch64-unknown-linux-musl
-            platform: linux/arm64
+            platform: arm64
+            os: linux
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -155,7 +157,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v4
         with:
-          platforms: ${{ matrix.images.platform }}
+          platforms: ${{ matrix.images.os}}/${{ matrix.images.platform }}
           push: false
           file: ./production.Dockerfile
           context: .
@@ -168,8 +170,8 @@ jobs:
       - name: Upload image artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.images.name }}-${{ matrix.images.platform }}-image
-          path: /tmp/image-${{ matrix.images.platform }}.tar
+          name: ${{ matrix.images.name }}-${{ matrix.images.os}}/${{ matrix.images.platform }}-image
+          path: /tmp/image-${{ matrix.images.os}}-${{ matrix.images.platform }}.tar
 
   publish-docker-image:
     env:
