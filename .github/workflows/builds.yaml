@@ -156,7 +156,7 @@ jobs:
           push: false
           file: ./production.Dockerfile
           context: .
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-${{ matrix.images.os}}_${{ matrix.images.platform }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.images.os}}_${{ matrix.images.platform }}:${{ env.IMAGE_TAG }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }},mode=max
           outputs: type=docker,dest=/tmp/image-${{ matrix.images.os}}-${{ matrix.images.platform }}.tar
@@ -214,6 +214,6 @@ jobs:
       - name: Push image
         run: |
           docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PUBLIC_IMAGE_TAG }} \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-linux_amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-linux_arm64
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-linux_amd64:${{ env.IMAGE_TAG }} \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-linux_arm64:${{ env.IMAGE_TAG }}
           docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PUBLIC_IMAGE_TAG }}
