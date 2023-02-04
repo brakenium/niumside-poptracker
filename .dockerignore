@@ -5,4 +5,4 @@
 !sqlx-data.json
 !Cargo.*
 !build.rs
-!niumside-poptracker
+!niumside-poptracker-*

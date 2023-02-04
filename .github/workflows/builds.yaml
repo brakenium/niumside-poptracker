@@ -157,6 +157,8 @@ jobs:
 
       - run: mv niumside-poptracker niumside-poptracker-aarch64-unknown-linux-musl
 
+      - run: ls -al
+
       # If github.ref_name is not master, then we append the branch name to the image tag as PUBLIC_IMAGE_TAG else we set PUBLIC_IMAGE_TAG to IMAGE_TAG
       - name: Set PUBLIC_IMAGE_TAG
         run: |
