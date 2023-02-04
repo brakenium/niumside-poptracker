@@ -148,11 +148,6 @@ jobs:
         with:
           name: ${{ matrix.images.artifact-name }}
 
-      # If github.ref_name is not master, then we append the branch name to the image tag
-      - name: Set IMAGE_TAG
-        if: github.ref_name != 'master'
-        run: echo "IMAGE_TAG=${{ env.IMAGE_TAG }}-${{ github.ref_name }}" >> $GITHUB_ENV
-
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v4
@@ -186,16 +181,17 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: alpine-linux-amd64-image
+
       - name: Download alpine image artifact
         uses: actions/download-artifact@v3
         with:
           name: alpine-linux-arm64-image
-      - run: ls -al
+
       # Load the image artifacts into the local docker daemon
-      - name: Load alpine image artifact
-        run: docker load -i image-linux-amd64.tar
-      - name: Load alpine image artifact
-        run: docker load -i image-linux-arm64.tar
+      - name: Load docker images
+        run: |
+          docker load -i image-linux-amd64.tar && \
+          docker load -i image-linux-arm64.tar
 
       # Login to ghcr.io
       - name: Login to ghcr.io
@@ -205,10 +201,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # If github.ref_name is not master, then we append the branch name to the image tag as PUBLIC_IMAGE_TAG else we set PUBLIC_IMAGE_TAG to IMAGE_TAG
+      - name: Set PUBLIC_IMAGE_TAG
+        run: |
+          if [ "${{ github.ref_name }}" != "master" ]; then
+            echo "PUBLIC_IMAGE_TAG=${{ env.IMAGE_TAG }}-${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "PUBLIC_IMAGE_TAG=${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
+          fi
+
       # Push the separate platform images to ghcr.io as one image
       - name: Push image
         run: |
           docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-linux_amd64 \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-linux_arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ PUBLIC_IMAGE_TAG }}
