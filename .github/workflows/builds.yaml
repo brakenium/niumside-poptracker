@@ -66,18 +66,18 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ matrix.target }}-cargo-
 
       - name: Save sccache
         uses: actions/cache@v2
         continue-on-error: false
         with:
           path: ${{ matrix.sccache-path }}
-          key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.target }}-sccache-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-sccache-
+            ${{ matrix.target }}-sccache-
 
       - name: Start sccache server
         run: sccache --start-server
