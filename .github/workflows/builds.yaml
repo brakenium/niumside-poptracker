@@ -44,11 +44,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         env:
           LINK: https://github.com/mozilla/sccache/releases/download
-          SCCACHE_VERSION: 0.2.13
+          SCCACHE_VERSION: 0.3.3
         run: |
-          SCCACHE_FILE=sccache-$SCCACHE_VERSION-${{ matrix.target }}
+          SCCACHE_FILE=sccache-v$SCCACHE_VERSION-${{ matrix.target }}
           mkdir -p $HOME/.local/bin
-          curl -L "$LINK/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
+          curl -L "$LINK/v$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
