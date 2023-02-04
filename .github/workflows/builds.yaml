@@ -170,7 +170,7 @@ jobs:
       - name: Upload image artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.images.name }}-${{ matrix.images.os}}/${{ matrix.images.platform }}-image
+          name: ${{ matrix.images.name }}-${{ matrix.images.os}}-${{ matrix.images.platform }}-image
           path: /tmp/image-${{ matrix.images.os}}-${{ matrix.images.platform }}.tar
 
   publish-docker-image:
