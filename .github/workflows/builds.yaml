@@ -192,7 +192,7 @@ jobs:
         with:
           name: alpine-linux-arm64-image
           path: /tmp
-
+      - run: ls -al --recursive /tmp
       # Load the image artifacts into the local docker daemon
       - name: Load alpine image artifact
         run: docker load -i /tmp/image-linux-amd64.tar
