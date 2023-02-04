@@ -59,10 +59,10 @@ jobs:
         images:
           - name: alpine
             artifact-name: Niumside-Pop-Tracker_nightly-x86_64-unknown-linux-musl
-            platform: amd64
+            platform: linux/amd64
           - name: alpine
             artifact-name: Niumside-Pop-Tracker_nightly-aarch64-unknown-linux-musl
-            platform: arm64
+            platform: linux/arm64
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
