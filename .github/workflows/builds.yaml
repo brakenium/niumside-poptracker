@@ -173,6 +173,7 @@ jobs:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
       IMAGE_TAG: alpine-unstable
+      PUBLIC_IMAGE_TAG: IF_YOU_SEE_THIS_SOMETHING_IS_WRONG
     needs: docker-image-build
     runs-on: ubuntu-latest
     steps:
