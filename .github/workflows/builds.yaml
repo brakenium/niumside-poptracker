@@ -195,9 +195,9 @@ jobs:
 
       # Load the image artifacts into the local docker daemon
       - name: Load alpine image artifact
-        run: docker load -i /tmp/image-linux_amd64.tar
+        run: docker load -i /tmp/image-linux-amd64.tar
       - name: Load alpine image artifact
-        run: docker load -i /tmp/image-linux_arm64.tar
+        run: docker load -i /tmp/image-linux-arm64.tar
 
       # Login to ghcr.io
       - name: Login to ghcr.io
