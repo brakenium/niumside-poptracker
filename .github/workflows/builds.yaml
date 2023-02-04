@@ -92,10 +92,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ matrix.images.artifact-name }}
-      - run: ls -al
-      # move the artifact to the current directory and rename to niumside-poptracker
-      - name: Rename artifact
-        run: mv ${{ matrix.images.artifact-name }}/niumside-poptracker niumside-poptracker
 
       - name: Build and push
         id: docker_build
