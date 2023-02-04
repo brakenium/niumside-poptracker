@@ -96,14 +96,14 @@ jobs:
       - name: Stop sccache server
         run: sccache --stop-server || true
 
-  docker-image-build:
+  docker-image-build-and-push:
     needs: binary-builds
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
-      IMAGE_TAG: ${{ matrix.images.name }}-unstable
+      IMAGE_TAG: alpine-unstable
     # strategy:
     #   fail-fast: true
     #   matrix:
