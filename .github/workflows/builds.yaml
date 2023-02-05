@@ -186,5 +186,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ./production.Dockerfile
-          cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
-          cache-to: type=registry,ref=${{ steps.meta.outputs.tags }},mode=max
+          # cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
+          # cache-to: type=registry,ref=${{ steps.meta.outputs.tags }},mode=max
