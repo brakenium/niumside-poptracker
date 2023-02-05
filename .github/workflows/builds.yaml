@@ -84,7 +84,7 @@ jobs:
         run: sccache --start-server
 
       - name: ${{ matrix.target }} build
-        run: cargo build --release
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v3
