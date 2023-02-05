@@ -169,6 +169,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
       # build and push the images the ghcr.io registry with PUBLIC_IMAGE_TAG as tag
       - name: Build and push
         id: docker_build
@@ -177,7 +183,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PUBLIC_IMAGE_TAG }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           file: ./production.Dockerfile
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PUBLIC_IMAGE_TAG }}
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PUBLIC_IMAGE_TAG }},mode=max
+          cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
+          cache-to: type=registry,ref=${{ steps.meta.outputs.tags }},mode=max
