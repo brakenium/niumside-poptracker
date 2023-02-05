@@ -85,12 +85,12 @@ jobs:
 
       - name: ${{ matrix.target }} build
         # Only run for gnu targets
-        if: matrix.target == endsWith(matrix.target, 'gnu')
+        if: endsWith(matrix.target, 'gnu')
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Rust w/musl
         uses: ./.github/actions/rust-musl-builder
-        if: matrix.target == endsWith(matrix.target, 'musl')
+        if: endsWith(matrix.target, 'musl')
         env:
           BUILD_TARGET: ${{ matrix.target }}
         with:
