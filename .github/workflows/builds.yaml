@@ -84,7 +84,17 @@ jobs:
         run: sccache --start-server
 
       - name: ${{ matrix.target }} build
+        # Only run for gnu targets
+        if: matrix.target == endsWith(matrix.target, 'gnu')
         run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Rust w/musl
+        uses: ./.github/actions/rust-musl-builder
+        if: matrix.target == endsWith(matrix.target, 'musl')
+        env:
+          BUILD_TARGET: ${{ matrix.target }}
+        with:
+          args: cargo build --release --target ${{ matrix.target }}
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v3
