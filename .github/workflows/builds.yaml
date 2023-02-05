@@ -89,12 +89,15 @@ jobs:
       - name: ${{ matrix.target.rust }} build
         run: cargo build --release --target ${{ matrix.target.rust }}
 
+      - run: ls -alh target/release
+
       - name: Upload binary artifact
         uses: actions/upload-artifact@v3
         with:
           name: Niumside-Pop-Tracker_${{ matrix.channel }}-${{ matrix.target.rust }}
           path: target/release/niumside-poptracker
           if-no-files-found: error
+        run: ls -alh && pwd
 
       - name: Print sccache stats
         run: sccache --show-stats
