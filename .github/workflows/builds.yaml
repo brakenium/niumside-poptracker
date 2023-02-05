@@ -41,7 +41,7 @@ jobs:
       - run: apk add --no-cache --upgrade git openssl-dev musl-dev curl
         if: endsWith(matrix.target.container, 'alpine')
 
-      - run: apt install -y git libssl-dev
+      - run: apt install -y git libssl-dev curl
         if: endsWith(matrix.target.container, 'alpine') == false
 
       - uses: actions/checkout@v3
