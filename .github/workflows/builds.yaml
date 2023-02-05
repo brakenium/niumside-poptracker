@@ -40,6 +40,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - run: apk add --no-cache git openssl-dev musl-dev
+        if: endsWith(matrix.target.container, 'alpine')
+
+      - run: apt install -y git libssl-dev
+        if: endsWith(matrix.target.container, 'alpine') == false
+
       - name: Checkout submodules
         run: |
           git submodule update --init --recursive
@@ -54,12 +60,6 @@ jobs:
           curl -L "$LINK/v$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - run: apk add --no-cache openssl-dev musl-dev
-        if: endsWith(matrix.target.container, 'alpine')
-
-      - run: apk add --no-cache libssl-dev
-        if: endsWith(matrix.target.container, 'alpine') == false
 
       - name: Cache cargo registry
         uses: actions/cache@v2
