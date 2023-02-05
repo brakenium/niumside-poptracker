@@ -55,6 +55,7 @@ jobs:
 
       - name: Install Rust ${{ matrix.target }} ${{ matrix.channel }}
         uses: actions-rs/toolchain@v1
+        if: endsWith(matrix.target, 'musl') == false
         with:
           toolchain: ${{ matrix.channel }}
           target: ${{ matrix.target }}
@@ -85,7 +86,7 @@ jobs:
 
       - name: ${{ matrix.target }} build
         # Only run for gnu targets
-        if: endsWith(matrix.target, 'gnu')
+        if: endsWith(matrix.target, 'musl') == false
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Rust w/musl
