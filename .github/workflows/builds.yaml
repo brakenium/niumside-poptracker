@@ -89,7 +89,7 @@ jobs:
       - name: ${{ matrix.target.rust }} build
         run: cargo build --release --target ${{ matrix.target.rust }}
 
-      - run: ls -alh target/release
+      - run: ls -alh target/ --recursive
       - run: ls -alh
 
       - name: Upload binary artifact
