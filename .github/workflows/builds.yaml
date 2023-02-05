@@ -13,36 +13,36 @@ on:
 
 jobs:
   binary-builds:
-    name: Builds for ${{ matrix.target }} ${{ matrix.channel }} on ${{ matrix.os }}
+    name: Builds for ${{ matrix.target }} ${{ matrix.channel }}
     runs-on: ubuntu-latest
     env:
       SCCACHE_CACHE_SIZE: 2G
       SCCACHE_DIR: ${{ matrix.sccache-path }}
       RUSTC_WRAPPER: sccache
       RUSTV: ${{ matrix.rust }}
+    container: ${{ matrix.target.container }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
         channel: [nightly]
         target:
           # Linux x64 gnu and musl
-          - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
+          - rust: x86_64-unknown-linux-gnu
+            container: docker.io/rustlang/rust:nightly
+          - rust: x86_64-unknown-linux-musl
+            container: docker.io/rustlang/rust:nightly-alpine
           # Windows x86_64
           # - x86_64-pc-windows-msvc
           # # Linux arm64 gnu and musl
           # - aarch64-unknown-linux-gnu
           # - aarch64-unknown-linux-musl
-        include:
-          - os: ubuntu-latest
-            sccache-path: /home/runner/.cache/sccache
+        sccache-path:
+          - /home/runner/.cache/sccache
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
 
-      - name: Install sccache (ubuntu-latest)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Install sccache
         env:
           LINK: https://github.com/mozilla/sccache/releases/download
           SCCACHE_VERSION: 0.3.3
@@ -53,13 +53,7 @@ jobs:
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Install Rust ${{ matrix.target }} ${{ matrix.channel }}
-        uses: actions-rs/toolchain@v1
-        if: endsWith(matrix.target, 'musl') == false
-        with:
-          toolchain: ${{ matrix.channel }}
-          target: ${{ matrix.target }}
-          override: true
+      - run: apk add --no-cache git openssl-dev musl-dev
 
       - name: Cache cargo registry
         uses: actions/cache@v2
@@ -68,45 +62,128 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.target.rust }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ matrix.target }}-cargo-
+            ${{ matrix.target.rust }}-cargo-
 
       - name: Save sccache
         uses: actions/cache@v2
         continue-on-error: false
         with:
           path: ${{ matrix.sccache-path }}
-          key: ${{ matrix.target }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.target.rust }}-sccache-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ matrix.target }}-sccache-
+            ${{ matrix.target.rust }}-sccache-
 
       - name: Start sccache server
         run: sccache --start-server
 
-      - name: ${{ matrix.target }} build
-        # Only run for gnu targets
-        if: endsWith(matrix.target, 'musl') == false
-        run: cargo build --release --target ${{ matrix.target }}
-
-      - name: Rust w/musl
-        uses: ./.github/actions/rust-musl-action
-        if: endsWith(matrix.target, 'musl')
-        env:
-          BUILD_TARGET: ${{ matrix.target }}
-        with:
-          args: cargo build --release --target ${{ matrix.target }}
+      - name: ${{ matrix.target.rust }} build
+        run: cargo build --release --target ${{ matrix.target.rust }}
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Niumside-Pop-Tracker_${{ matrix.channel }}-${{ matrix.target }}
+          name: Niumside-Pop-Tracker_${{ matrix.channel }}-${{ matrix.target.rust }}
           path: target/release/niumside-poptracker
 
       - name: Print sccache stats
         run: sccache --show-stats
       - name: Stop sccache server
         run: sccache --stop-server || true
+
+  # binary-builds:
+  #   name: Builds for ${{ matrix.target }} ${{ matrix.channel }}
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     SCCACHE_CACHE_SIZE: 2G
+  #     SCCACHE_DIR: ${{ matrix.sccache-path }}
+  #     RUSTC_WRAPPER: sccache
+  #     RUSTV: ${{ matrix.rust }}
+  #   strategy:
+  #     matrix:
+  #       channel: [nightly]
+  #       target:
+  #         # Linux x64 gnu and musl
+  #         - x86_64-unknown-linux-gnu
+  #         - x86_64-unknown-linux-musl
+  #         # Windows x86_64
+  #         # - x86_64-pc-windows-msvc
+  #         # # Linux arm64 gnu and musl
+  #         # - aarch64-unknown-linux-gnu
+  #         # - aarch64-unknown-linux-musl
+  #       sccache-path:
+  #         - /home/runner/.cache/sccache
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: true
+
+  #     - name: Install sccache (ubuntu-latest)
+  #       if: matrix.os == 'ubuntu-latest'
+  #       env:
+  #         LINK: https://github.com/mozilla/sccache/releases/download
+  #         SCCACHE_VERSION: 0.3.3
+  #       run: |
+  #         SCCACHE_FILE=sccache-v$SCCACHE_VERSION-x86_64-unknown-linux-musl
+  #         mkdir -p $HOME/.local/bin
+  #         curl -L "$LINK/v$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
+  #         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
+  #         echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+  #     - name: Install Rust ${{ matrix.target }} ${{ matrix.channel }}
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: ${{ matrix.channel }}
+  #         target: ${{ matrix.target }}
+  #         override: true
+
+  #     - name: Cache cargo registry
+  #       uses: actions/cache@v2
+  #       continue-on-error: false
+  #       with:
+  #         path: |
+  #           ~/.cargo/registry
+  #           ~/.cargo/git
+  #         key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+  #         restore-keys: |
+  #           ${{ matrix.target }}-cargo-
+
+  #     - name: Save sccache
+  #       uses: actions/cache@v2
+  #       continue-on-error: false
+  #       with:
+  #         path: ${{ matrix.sccache-path }}
+  #         key: ${{ matrix.target }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+  #         restore-keys: |
+  #           ${{ matrix.target }}-sccache-
+
+  #     - name: Start sccache server
+  #       run: sccache --start-server
+
+  #     - name: ${{ matrix.target }} build
+  #       # Only run for gnu targets
+  #       if: endsWith(matrix.target, 'musl') == false
+  #       run: cargo build --release --target ${{ matrix.target }}
+
+  #     - name: Rust w/musl
+  #       uses: ./.github/actions/rust-musl-action
+  #       if: endsWith(matrix.target, 'musl')
+  #       env:
+  #         BUILD_TARGET: ${{ matrix.target }}
+  #       with:
+  #         args: cargo build --release --target ${{ matrix.target }}
+
+  #     - name: Upload binary artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: Niumside-Pop-Tracker_${{ matrix.channel }}-${{ matrix.target }}
+  #         path: target/release/niumside-poptracker
+
+  #     - name: Print sccache stats
+  #       run: sccache --show-stats
+  #     - name: Stop sccache server
+  #       run: sccache --stop-server || true
 
   docker-image-build-and-push:
     needs: binary-builds
