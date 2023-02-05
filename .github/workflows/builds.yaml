@@ -38,13 +38,13 @@ jobs:
         sccache-path:
           - /home/runner/.cache/sccache
     steps:
-      - uses: actions/checkout@v3
-
       - run: apk add --no-cache git openssl-dev musl-dev
         if: endsWith(matrix.target.container, 'alpine')
 
       - run: apt install -y git libssl-dev
         if: endsWith(matrix.target.container, 'alpine') == false
+
+      - uses: actions/checkout@v3
 
       - name: Checkout submodules
         run: |
