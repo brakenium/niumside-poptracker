@@ -90,7 +90,7 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Rust w/musl
-        uses: ./.github/actions/rust-musl-builder
+        uses: ./.github/actions/rust-musl-action
         if: endsWith(matrix.target, 'musl')
         env:
           BUILD_TARGET: ${{ matrix.target }}
