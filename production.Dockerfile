@@ -14,5 +14,9 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
         echo "arm64"; \
     fi
 
+# Run in user mode
+RUN addgroup -S niumside && adduser -S niumside -G niumside
+RUN chown -R niumside:niumside /usr/src/niumside-poptracker && chmod u+x niumside-poptracker
+USER niumside
 
 CMD ["./niumside-poptracker"]
