@@ -1,7 +1,6 @@
 FROM docker.io/rustlang/rust:nightly-alpine as builder
 WORKDIR /usr/src/
-RUN apk add --no-cache git openssl-dev musl-dev
-RUN git clone https://github.com/brakenium/auraxis-rs.git
+RUN apk add --no-cache openssl-dev musl-dev
 WORKDIR /usr/src/niumside-poptracker
 COPY Cargo.toml .
 COPY src/main.rs ./src/
