@@ -4,6 +4,7 @@ RUN apk add --no-cache openssl-dev musl-dev
 WORKDIR /usr/src/niumside-poptracker
 COPY Cargo.toml .
 COPY src/main.rs ./src/
+COPY auraxis-rs/auraxis/Cargo.toml ./auraxis-rs/auraxis/
 RUN cargo fetch
 COPY . .
 RUN cargo build --release
