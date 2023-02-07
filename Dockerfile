@@ -30,6 +30,6 @@ LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-popt
 # LABEL org.opencontainers.image.licenses=
 
 WORKDIR /usr/src/niumside-poptracker
-COPY --from=builder /usr/src/niumside-poptracker/target/release/niumside-poptracker /niumside-poptracker
+COPY --from=builder /usr/src/niumside-poptracker/target/release/niumside-poptracker ./niumside-poptracker
 COPY --from=builder /usr/src/niumside-poptracker/config ./config
-ENTRYPOINT ["./niumside-poptracker"]
+CMD ["./niumside-poptracker"]
