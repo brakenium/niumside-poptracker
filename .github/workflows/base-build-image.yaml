@@ -38,7 +38,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/base-build-image
+          images: ${{ env.REGISTRY }}/brakenium/base-build-image
 
       - name: Build and push
         id: docker_build
