@@ -1,6 +1,3 @@
 [submodule "auraxis-rs"]
 	path = auraxis-rs
 	url = https://github.com/brakenium/auraxis-rs.git
-[submodule ".github/actions/rust-musl-action"]
-	path = .github/actions/rust-musl-action
-	url = https://github.com/brakenium/rust-musl-action.git
