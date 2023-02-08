@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - docker/base-build-image/**
+      - .github/workflows/base-build-image.yaml
+  workflow_dispatch:
 
 
 jobs:
@@ -49,4 +51,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
           cache-to: type=inline
-          file: ./alpine/Dockerfile
+          file: ./docker/base-build-image/Dockerfile
