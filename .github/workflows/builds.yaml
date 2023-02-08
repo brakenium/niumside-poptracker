@@ -6,9 +6,19 @@ env:
 
 on:
   push:
-    branches:
-      - master
-      - docker-compose
+    paths:
+      - .github/workflows/builds.yaml
+      - migrations/**
+      - src/**
+      - Cargo.toml
+      - Cargo.lock
+      - build.rs
+      - .Dockerfile
+      - auraxis-rs/**
+      - .dockerignore
+      - sqlx-data.json
+      - rust-toolchain.toml
+
   workflow_dispatch:
 
 jobs:
