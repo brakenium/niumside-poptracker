@@ -7,11 +7,17 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ./niumside-database.sql:/docker-entrypoint-initdb.d/niumside-database.sql
+      - ../../niumside-database.sql:/docker-entrypoint-initdb.d/niumside-database.sql
     restart: unless-stopped
 
   pop-tracker:
-    image: ghcr.io/brakenium/niumside-poptracker:alpine-unstable
+    build: ../../
+    # image: ghcr.io/brakenium/niumside-poptracker:docker-compose
     environment:
-      NIUMSIDE_DATABASE_CONNECTION_STRING: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/${DB_NAME}
+      NIUMSIDE_DATABASE: ""
+      NIUMSIDEPOPULATIONTRACKER_CONNECTION_STRING: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/${DB_NAME}
+      NIUMSIDE_REALTIME_BASE_URL: wss://push.nanite-systems.net/streaming
+    volumes:
+      - ./config.yaml:/usr/src/niumside-poptracker/config/local.yaml
+      # NIUMSIDE_SERVICE_ID: ${SERVICE_ID}
     restart: unless-stopped

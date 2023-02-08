@@ -1,12 +1,12 @@
 census:
   service_id: example
-  # realtime_base_url: wss://push.nanite-systems.net/streaming
+  realtime_base_url: wss://push.nanite-systems.net/streaming
 
 # worlds:
 #   - id: Miller
 #   - id: Cobalt
 #   - id: Jaeger
-#     zones: 
+#     zones:
 #       - 2
 #       - 4
 #       - 6
