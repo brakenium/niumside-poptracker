@@ -1,2 +1,16 @@
+database:
+  connection_string: postgres://postgres:P@ssw0rd@db/niumside
+
 worlds:
   - id: Miller
+  - id: Cobalt
+  - id: Jaeger
+    zones:
+      - 2
+      - 4
+      - 6
+      - 8
+      - 344
+
+app:
+  log_level: Debug
