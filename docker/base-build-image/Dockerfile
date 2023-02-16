@@ -15,6 +15,8 @@ RUN set -eux; \
         ca-certificates \
         gcc \
         libc6-dev \
+        libssl-dev \
+        pkg-config \
         wget \
         ; \
     dpkgArch="$(dpkg --print-architecture)"; \
