@@ -1,0 +1,19 @@
+database:
+  connection_string: postgres://postgres:PLEASE-CHANGE-ME-TO-A-SECURE-PASSWORD@db/niumside
+
+census:
+  service_id: asdf
+
+worlds:
+  - id: Miller
+  - id: Cobalt
+  - id: Jaeger
+    zones:
+      - 2
+      - 4
+      - 6
+      - 8
+      - 344
+
+app:
+  log_level: Debug

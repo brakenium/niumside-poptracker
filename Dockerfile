@@ -1,16 +1,17 @@
-FROM docker.io/rustlang/rust:nightly-alpine as builder
-WORKDIR /usr/src/
-RUN apk add --no-cache git openssl-dev musl-dev
-RUN git clone https://github.com/brakenium/auraxis-rs.git
-WORKDIR /usr/src/niumside-poptracker
-COPY Cargo.toml .
-COPY src/main.rs ./src/
-RUN cargo fetch
-COPY . .
-RUN cargo build --release
+FROM ghcr.io/rust-lang/rust:nightly-bullseye-slim as builder
+LABEL org.opencontainers.image.title=niumside-poptracker
+# LABEL org.opencontainers.image.description=
+LABEL org.opencontainers.image.url=https://github.com/brakenium/niumside-poptracker
+LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-poptracker
+# LABEL org.opencontainers.image.licenses=
 
-FROM docker.io/alpine:latest
 WORKDIR /usr/src/niumside-poptracker
-COPY --from=builder /usr/src/niumside-poptracker/target/release/niumside-poptracker .
-COPY --from=builder /usr/src/niumside-poptracker/config ./config
-CMD ["./niumside-poptracker"]
+# install libssl-dev and pkg-config
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+COPY . .
+RUN cargo build --release --bin niumside-poptracker
+
+CMD ["./target/release/niumside-poptracker"]
