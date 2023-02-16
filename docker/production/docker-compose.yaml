@@ -12,8 +12,9 @@ services:
 
   pop-tracker:
     image: ghcr.io/brakenium/niumside-poptracker
+    build: ../../
     depends_on:
       - db
     volumes:
-      - ./config.yaml:/usr/src/niumside-poptracker/config/local.yaml
+      - ./config.yaml:/etc/niumside-poptracker/config/local.yaml
     restart: unless-stopped
