@@ -9,6 +9,8 @@ WORKDIR /usr/src/niumside-poptracker
 COPY . .
 RUN cargo build --release --bin niumside-poptracker \
     && cp ./target/release/niumside-poptracker ./niumside-poptracker \
-    && rm -rf target
+    && rm -rf target \
+    && rm -rf /usr/local/cargo \
+    && rm -rf /usr/local/rustup
 
 CMD ["./niumside-poptracker"]
