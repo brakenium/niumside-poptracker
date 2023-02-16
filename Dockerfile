@@ -1,4 +1,4 @@
-FROM ghcr.io/rust-lang/rust:nightly-bullseye-slim as builder
+FROM ghcr.io/brakenium/base-build-image as builder
 LABEL org.opencontainers.image.title=niumside-poptracker
 # LABEL org.opencontainers.image.description=
 LABEL org.opencontainers.image.url=https://github.com/brakenium/niumside-poptracker
