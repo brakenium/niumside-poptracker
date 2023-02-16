@@ -62,6 +62,9 @@ pub struct Settings {
     pub app: AppConfig,
 }
 
+// TODO: Check system config directories for config files
+// TODO: Check user config directories for config files
+// TODO: Fix environment variable config
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
         let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "production".into());

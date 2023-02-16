@@ -41,3 +41,5 @@ RUN set -eux; \
         wget \
         ; \
     rm -rf /var/lib/apt/lists/*;
+
+RUN cargo install cargo-chef

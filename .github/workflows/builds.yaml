@@ -5,19 +5,19 @@ env:
   CARGO_TERM_COLOR: always
 
 on:
-  push:
-    paths:
-      - .github/workflows/builds.yaml
-      - migrations/**
-      - src/**
-      - Cargo.toml
-      - Cargo.lock
-      - build.rs
-      - Dockerfile
-      - auraxis-rs/**
-      - .dockerignore
-      - sqlx-data.json
-      - rust-toolchain.toml
+  # push:
+  #   paths:
+  #     - .github/workflows/builds.yaml
+  #     - migrations/**
+  #     - src/**
+  #     - Cargo.toml
+  #     - Cargo.lock
+  #     - build.rs
+  #     - Dockerfile
+  #     - auraxis-rs/**
+  #     - .dockerignore
+  #     - sqlx-data.json
+  #     - rust-toolchain.toml
 
   workflow_dispatch:
 
