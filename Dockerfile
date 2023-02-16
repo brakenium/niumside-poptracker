@@ -7,6 +7,8 @@ LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-popt
 
 WORKDIR /usr/src/niumside-poptracker
 COPY . .
-RUN cargo build --release --bin niumside-poptracker
+RUN cargo build --release --bin niumside-poptracker \
+    && cp ./target/release/niumside-poptracker ./niumside-poptracker \
+    && rm -rf target
 
-CMD ["./target/release/niumside-poptracker"]
+CMD ["./niumside-poptracker"]
