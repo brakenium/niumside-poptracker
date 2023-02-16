@@ -1,10 +1,10 @@
 name: Build base image
 
 on:
-  # push:
-  #   paths:
-  #     - docker/base-build-image/**
-  #     - .github/workflows/base-build-image.yaml
+  push:
+    paths:
+      - docker/base-build-image/**
+      - .github/workflows/base-build-image.yaml
   workflow_dispatch:
 
 
