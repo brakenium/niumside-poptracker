@@ -1,4 +1,9 @@
 FROM docker.io/debian:bullseye-slim
+LABEL org.opencontainers.image.title=niumside-base-build-image
+# LABEL org.opencontainers.image.description=
+LABEL org.opencontainers.image.url=https://github.com/brakenium/niumside-poptracker
+LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-poptracker
+# LABEL org.opencontainers.image.licenses=
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
