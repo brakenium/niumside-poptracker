@@ -1,5 +1,8 @@
 database:
-  connection_string: postgres://postgres:P@ssw0rd@db/niumside
+  connection_string: postgres://postgres:PLEASE-CHANGE-ME-TO-A-SECURE-PASSWORD@db/niumside
+
+census:
+  service_id: asdf
 
 worlds:
   - id: Miller
