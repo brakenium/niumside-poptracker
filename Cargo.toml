@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 auraxis = { git = "https://github.com/AnotherGenZ/auraxis-rs", version = "0.1.0" }
-tokio = { version = "1.23.1", features = ["full"] }
+tokio = { version = "1.25.0", features = ["full"] }
 tracing-subscriber = "0.3"
 tracing = "0.1.36"
 config = "0.13.2"
