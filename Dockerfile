@@ -12,7 +12,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         ca-certificates
 
-COPY ./binaries/ /usr/local/bin/
+COPY binaries/ .
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \
