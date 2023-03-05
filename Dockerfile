@@ -11,10 +11,12 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         ca-certificates
-FROM rust:latest
+
+COPY binaries/ /usr/local/bin/
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
-RUN ARCH=$(uname -m); \
+RUN set -eux; \
+    ARCH=$(uname -m); \
     if ldd /bin/sh | grep -q musl; then \
       LIBC="musl"; \
     elif getconf GNU_LIBC_VERSION >/dev/null 2>&1; then \
@@ -48,9 +50,7 @@ RUN ARCH=$(uname -m); \
         ;; \
     esac; \
     echo "Selected Rust target: ${TARGET}"; \
-    export RUST_TARGET=${TARGET}
-
-# Copy binary file based on the selected Rust target
-COPY binaries/${RUST_TARGET}/niumside-poptracker /usr/local/bin/niumside-poptracker
+    mv binaries/${TARGET}/niumside-poptracker /usr/local/bin/niumside-poptracker; \
+    rm -rf binaries
 
 CMD ["niumside-poptracker"]
