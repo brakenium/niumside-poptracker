@@ -1,9 +1,11 @@
-FROM docker.io/debian:bullseye-slim
+FROM --platform=$BUILDPLATFORM docker.io/debian:bullseye-slim
 LABEL org.opencontainers.image.title=niumside-base-build-image
 # LABEL org.opencontainers.image.description=
 LABEL org.opencontainers.image.url=https://github.com/brakenium/niumside-poptracker
 LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-poptracker
 # LABEL org.opencontainers.image.licenses=
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -19,12 +21,11 @@ RUN set -eux; \
         pkg-config \
         wget \
         ; \
-    dpkgArch="$(dpkg --print-architecture)"; \
-    case "${dpkgArch##*-}" in \
+    case "${TARGETPLATFORM##*-}" in \
         amd64) rustArch='x86_64-unknown-linux-gnu' ;; \
         arm64) rustArch='aarch64-unknown-linux-gnu' ;; \
         armhf) rustArch='armv7-unknown-linux-gnueabihf' ;; \
-        *) echo >&2 "unsupported architecture: ${dpkgArch}"; exit 1 ;; \
+        *) echo >&2 "unsupported architecture: ${TARGETPLATFORM}"; exit 1 ;; \
     esac; \
     \
     url="https://static.rust-lang.org/rustup/dist/${rustArch}/rustup-init"; \

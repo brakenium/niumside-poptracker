@@ -1,21 +1,25 @@
-FROM ghcr.io/brakenium/base-build-image as planner
+FROM --platform=$BUILDPLATFORM ghcr.io/brakenium/base-build-image as planner
+ARG BUILDPLATFORM
 WORKDIR /usr/src/niumside-poptracker
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM ghcr.io/brakenium/base-build-image as cacher
+FROM --platform=$BUILDPLATFORM ghcr.io/brakenium/base-build-image as cacher
+ARG BUILDPLATFORM
 WORKDIR /usr/src/niumside-poptracker
 COPY --from=planner /usr/src/niumside-poptracker/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
-FROM ghcr.io/brakenium/base-build-image as builder
+FROM --platform=$BUILDPLATFORM ghcr.io/brakenium/base-build-image as builder
+ARG BUILDPLATFORM
 WORKDIR /usr/src/niumside-poptracker
 COPY . .
 # Copy over the cached dependencies
 COPY --from=cacher /usr/src/niumside-poptracker/target target
 RUN cargo build --release --bin niumside-poptracker
 
-FROM docker.io/debian:bullseye-slim as runtime
+FROM --platform=$TARGETPLATFORM docker.io/debian:bullseye-slim as runtime
+ARG TARGETPLATFORM
 LABEL org.opencontainers.image.title=niumside-poptracker
 # LABEL org.opencontainers.image.description=
 LABEL org.opencontainers.image.url=https://github.com/brakenium/niumside-poptracker
