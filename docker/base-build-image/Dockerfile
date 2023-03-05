@@ -21,17 +21,24 @@ RUN set -eux; \
         pkg-config \
         wget \
         ; \
-    case "${TARGETPLATFORM##*-}" in \
-        amd64) rustArch='x86_64-unknown-linux-gnu' ;; \
-        arm64) rustArch='aarch64-unknown-linux-gnu' ;; \
-        armhf) rustArch='armv7-unknown-linux-gnueabihf' ;; \
+    case $BUILDPLATFORM in \
+        linux/amd64) rustArchBP='x86_64-unknown-linux-gnu' ;; \
+        linux/arm64) rustArchBP='aarch64-unknown-linux-gnu' ;; \
+        linux/arm/v7) rustArchBP='armv7-unknown-linux-gnueabihf' ;; \
+        *) echo >&2 "unsupported architecture: ${BUILDPLATFORM}"; exit 1 ;; \
+    esac; \
+    \
+    case $TARGETPLATFORM in \
+        linux/amd64) rustArchTP='x86_64-unknown-linux-gnu' ;; \
+        linux/arm64) rustArchTP='aarch64-unknown-linux-gnu' ;; \
+        linux/arm/v7) rustArchTP='armv7-unknown-linux-gnueabihf' ;; \
         *) echo >&2 "unsupported architecture: ${TARGETPLATFORM}"; exit 1 ;; \
     esac; \
     \
-    url="https://static.rust-lang.org/rustup/dist/${rustArch}/rustup-init"; \
+    url="https://static.rust-lang.org/rustup/dist/${rustArchBP}/rustup-init"; \
     wget "$url"; \
     chmod +x rustup-init; \
-    ./rustup-init -y --no-modify-path --default-toolchain nightly; \
+    ./rustup-init -y --no-modify-path --default-toolchain nightly --target $rustArchTP; \
     rm rustup-init; \
     chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
     rustup --version; \
