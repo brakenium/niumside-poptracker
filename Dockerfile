@@ -7,10 +7,11 @@ LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-popt
 
 WORKDIR /etc/niumside-poptracker/
 
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-        ca-certificates
+# TODO: replace with apk
+#RUN set -eux; \
+#    apt-get update; \
+#    apt-get install -y --no-install-recommends \
+#        ca-certificates
 
 COPY binaries/ .
 
