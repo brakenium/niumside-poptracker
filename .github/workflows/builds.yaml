@@ -43,7 +43,13 @@ jobs:
         run: rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
 
       - name: install cross-rs
-        run: cargo install cross
+        run: |
+          # Set the URL of the archive to download
+          url="https://github.com/cross-rs/cross/releases/latest/download/cross-x86_64-unknown-linux-gnu.tar.gz" &&
+
+          # Download the archive and extract the binaries to /usr/local/bin
+          curl -L "$url" | sudo tar xz -C /usr/local/bin --strip-components=1
+
 
       - name: Build
         run: cross build --release --target ${{ matrix.target }}
