@@ -86,7 +86,7 @@ jobs:
         # For these target platforms
         include:
         - os: ubuntu-20.04
-          dist-args: --artifacts=local --target=aarch64-unknown-linux-gnu --target=aarch64-unknown-linux-musl --target=armv7-unknown-linux-gnueabihf --target=armv7-unknown-linux-musl --target=x86_64-unknown-linux-gnu --target=x86_64-unknown-linux-musl
+          dist-args: --artifacts=local --target=aarch64-unknown-linux-gnu --target=aarch64-unknown-linux-musl --target=armv7-unknown-linux-gnueabihf --target=armv7-unknown-linux-musleabi --target=x86_64-unknown-linux-gnu --target=x86_64-unknown-linux-musl
           install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v0.0.4/cargo-dist-v0.0.4-installer.sh | sh
 
     runs-on: ${{ matrix.os }}

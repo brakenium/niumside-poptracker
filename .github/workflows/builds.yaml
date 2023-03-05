@@ -22,7 +22,37 @@ on:
   workflow_dispatch:
 
 jobs:
+  rust-binary-builds:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - armv7-unknown-linux-gnueabihf
+          - armv7-unknown-linux-musleabi
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Install Rust toolchain
+        run: rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
+      - name: install cross-rs
+        run: cargo install cross
+      - name: Build
+        run: cross build --release --target ${{ matrix.target }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: binary-${{ matrix.target }}
+          path: mv target/${{ matrix.target }}/release/niumside-poptracker
+          if-no-files-found: error
+
   docker-image-build-and-push:
+  # TODO: Use rust-binary-builds as a base for this job
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     env:
