@@ -108,6 +108,10 @@ jobs:
         with:
           path: binaries/
 
+      # Recursively list the contents of the binaries directory
+      - name: List binaries
+        run: ls -lR --color binaries
+
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v4
