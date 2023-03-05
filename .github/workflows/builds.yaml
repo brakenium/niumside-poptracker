@@ -50,12 +50,21 @@ jobs:
           # Download the archive and extract the binaries to /usr/local/bin
           curl -L "$url" | sudo tar xz -C /usr/local/bin --strip-components=1
 
-
       - name: Build
         run: cross build --release --target ${{ matrix.target }}
 
+      # List the contents of the target directory
+      - name: List target
+        run: ls -l --color target/${{ matrix.target }}/release
+      - name: List target
+        run: ls -l --color target/
+
       - name: Prepare artifact
         run: mkdir binaries && mv target/${{ matrix.target }}/release/niumside-poptracker binaries/${{ matrix.target }}-niumside-poptracker
+
+      # List the contents of the binaries directory
+      - name: List binaries
+        run: ls -l --color binaries
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
