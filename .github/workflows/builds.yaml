@@ -55,7 +55,7 @@ jobs:
         run: ls -l --color target/
 
       - name: Prepare artifact
-        run: mkdir binaries && mv target/niumside-poptracker binaries/niumside-poptracker || mv target/${{ matrix.target }}/release binaries/niumside-poptracker
+        run: mkdir binaries && mv target/niumside-poptracker binaries/niumside-poptracker || mv target/${{ matrix.target }}/release/niumside-poptracker binaries/niumside-poptracker
 
       # List the contents of the binaries directory
       - name: List binaries
