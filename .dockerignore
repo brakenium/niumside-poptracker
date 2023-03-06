@@ -6,3 +6,4 @@
 !Cargo.*
 !build.rs
 !auraxis-rs
+!binaries/**
