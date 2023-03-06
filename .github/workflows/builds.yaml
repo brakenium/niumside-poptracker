@@ -43,7 +43,7 @@ jobs:
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
 
       - name: Install cross-rs
-        run: curl -L https://github.com/cross-rs/cross/releases/latest/download/cross-x86_64-unknown-linux-gnu.tar.gz | tar xz -C $home/.cargo/bin
+        run: curl -L https://github.com/cross-rs/cross/releases/latest/download/cross-x86_64-unknown-linux-gnu.tar.gz | tar xz && sudo mv cross /usr/local/bin
 
       - name: Build
         run: cross build --release --target ${{ matrix.target }}
