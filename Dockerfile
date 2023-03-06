@@ -13,7 +13,7 @@ WORKDIR /etc/niumside-poptracker/
 #    apt-get install -y --no-install-recommends \
 #        ca-certificates
 
-COPY binaries/ .
+COPY binaries/ binaries/
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \
