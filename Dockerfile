@@ -15,6 +15,8 @@ WORKDIR /etc/niumside-poptracker/
 
 COPY binaries/ binaries/
 
+RUN ls -lR .
+
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \
     ARCH=$(uname -m); \
