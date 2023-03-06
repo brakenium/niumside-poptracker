@@ -34,6 +34,11 @@ jobs:
           - armv7-unknown-linux-gnueabihf
           - armv7-unknown-linux-musleabi
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
 
@@ -73,11 +78,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
