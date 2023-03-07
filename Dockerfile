@@ -41,10 +41,10 @@ RUN set -eux; \
       aarch64-musl) \
         TARGET="aarch64-unknown-linux-musl"; \
         ;; \
-      armv7-gnueabihf) \
+      armv7l-gnu) \
         TARGET="armv7-unknown-linux-gnueabihf"; \
         ;; \
-      armv7-musleabi) \
+      armv7l-musl) \
         TARGET="armv7-unknown-linux-musleabi"; \
         ;; \
       *) \
