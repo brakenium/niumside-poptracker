@@ -13,6 +13,8 @@ WORKDIR /etc/niumside-poptracker/
 #    apt-get install -y --no-install-recommends \
 #        ca-certificates
 
+COPY config/ config/
+
 COPY binaries/ binaries/
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
@@ -52,7 +54,7 @@ RUN set -eux; \
     esac; \
     echo "Selected Rust target: ${TARGET}"; \
     ls -lR; \
-    mv binaries/${TARGET}/niumside-poptracker /usr/local/bin/niumside-poptracker; \
+    mv binaries/${TARGET}-niumside-poptracker/niumside-poptracker /usr/local/bin/niumside-poptracker; \
     rm -rf binaries
 
 CMD ["niumside-poptracker"]
