@@ -42,11 +42,18 @@ jobs:
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
 
+      - name: Cache target directory
+        id: cache-target
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ matrix.target }}-target
+
       - name: Install cross-rs
         run: curl -L https://github.com/cross-rs/cross/releases/latest/download/cross-x86_64-unknown-linux-gnu.tar.gz | tar xz && sudo mv cross /usr/local/bin
 
       - name: Build
-        run: cross build --release --target ${{ matrix.target }}
+        run: cross build --release --target ${{ matrix.target }} || (cargo clean && cross build --release --target ${{ matrix.target }})
 
       # List the contents of the target directory
       - name: List target
