@@ -20,7 +20,7 @@ jobs:
           submodules: true
 
       - name: Install Rust toolchain
-        run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2) && rustup component add clippy
+        run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2
 
       - name: Cache target directory
         id: cache-target
@@ -79,7 +79,7 @@ jobs:
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install cargo-udeps
-        run: cargo install cargo-udeps
+        run: brew install cargo-udeps
 
       - name: Run cargo-udeps
         run: cargo udeps --all-targets --locked
