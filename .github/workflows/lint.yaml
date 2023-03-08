@@ -48,7 +48,6 @@ jobs:
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build
-        if: steps.cache-target.outputs.cache-hit != 'true'
         run: cargo build --target ${{ matrix.target }} --release
 
   clippy:
