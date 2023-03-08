@@ -123,6 +123,7 @@ jobs:
         run: |
           rustup update
           rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
+          rustup default $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
 
       - name: Cache target directory
         id: cache-target
