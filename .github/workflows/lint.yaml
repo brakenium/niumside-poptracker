@@ -17,18 +17,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
+          submodules: true
+
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
+
       - name: Cache target directory
         id: cache-target
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: target
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Build
         if: steps.cache-target.outputs.cache-hit != 'true'
-        run: cargo build --all-features --target ${{ matrix.target }}
+        run: cargo build --target ${{ matrix.target }}
 
   clippy:
     name: Cargo Clippy
@@ -39,9 +42,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
+          submodules: true
+
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
+      
+      - name: Cache target directory
+        id: cache-target
+        uses: actions/cache/restore@v3
+        with:
+          path: target
+          key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Run Clippy
         run: cargo clippy --all-features -- -D warnings
 
@@ -54,12 +66,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
+          submodules: true
+
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
+      
+      - name: Cache target directory
+        id: cache-target
+        uses: actions/cache/restore@v3
+        with:
+          path: target
+          key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Install cargo-udeps
-        run: |
-          curl -L https://github.com/est31/cargo-udeps/releases/latest/download/cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu.tar.gz | tar -zxf "./cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu/"
+        run: cargo install cargo-udeps
 
       - name: Run cargo-udeps
         run: cargo udeps --all-targets --locked
