@@ -3,7 +3,7 @@ name: Rust PR Lint
 on:
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
-      
+
       - name: Cache target directory
         id: cache-target
         uses: actions/cache/restore@v3
@@ -70,7 +70,7 @@ jobs:
 
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
-      
+
       - name: Cache target directory
         id: cache-target
         uses: actions/cache/restore@v3
