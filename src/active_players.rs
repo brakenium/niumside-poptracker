@@ -133,6 +133,8 @@ pub async fn store_pop(loadout_breakdown: &LoadoutBreakdown, db_pool: &Pool<Post
             }
         }
     }
+    println!("{loadout_breakdown:#?}");
+    info!("Stored pop");
 }
 
 pub async fn process_loop(active_players: ActivePlayerDb, db_pool: Pool<Postgres>) -> Option<()> {

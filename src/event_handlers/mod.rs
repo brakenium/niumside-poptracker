@@ -2,6 +2,7 @@ pub mod gain_experience;
 use auraxis::realtime::event::Event;
 use tokio::sync::mpsc::Receiver;
 use crate::{active_players::ActivePlayerDb};
+use tracing::error;
 
 #[derive(thiserror::Error, Debug)]
 pub enum EventHandlerErrors {
@@ -24,6 +25,6 @@ pub async fn receive_events(mut events: Receiver<Event>, active_players: ActiveP
             };
         });
     }
-    Some(())
+    panic!("Not receiving more events, this message should never be seen");
 }
 
