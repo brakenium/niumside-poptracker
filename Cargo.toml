@@ -18,10 +18,6 @@ futures = "0.3.25"
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "chrono", "offline"] }
 thiserror = "1.0.37"
 
-[advisories]
-# RUSTSEC-2020-0071 is a time crate vulnerability. The only dependency that uses it is chrono, which does not use the vulnerable code. Chrono 0.5 should fix this issue, but it is not out yet.
-ignore = ["RUSTSEC-2020-0071"]
-
 [profile.dev.package.sqlx-macros]
 opt-level = 3
 
