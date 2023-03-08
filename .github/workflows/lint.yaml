@@ -4,6 +4,18 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - .github/workflows/lint.yaml
+      - migrations/**
+      - src/**
+      - Cargo.toml
+      - Cargo.lock
+      - build.rs
+      - auraxis-rs/**
+      - sqlx-data.json
+      - rust-toolchain.toml
+
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.ref }}
