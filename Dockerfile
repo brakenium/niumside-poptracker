@@ -55,6 +55,7 @@ RUN set -eux; \
     echo "Selected Rust target: ${TARGET}"; \
     ls -lR; \
     mv binaries/${TARGET}-niumside-poptracker/niumside-poptracker /usr/local/bin/niumside-poptracker; \
-    rm -rf binaries
+    rm -rf binaries; \
+    chmod +x /usr/local/bin/niumside-poptracker
 
 CMD ["niumside-poptracker"]
