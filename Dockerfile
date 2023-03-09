@@ -7,15 +7,7 @@ LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-popt
 
 WORKDIR /etc/niumside-poptracker/
 
-# TODO: replace with apk
-#RUN set -eux; \
-#    apt-get update; \
-#    apt-get install -y --no-install-recommends \
-#        ca-certificates
-
-COPY config/ config/
-
-COPY binaries/ binaries/
+COPY . .
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \
