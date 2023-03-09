@@ -1,9 +1,3 @@
 *
-!src/
 !config/default.yaml
-!migrations/
-!sqlx-data.json
-!Cargo.*
-!build.rs
-!auraxis-rs
 !binaries/**
