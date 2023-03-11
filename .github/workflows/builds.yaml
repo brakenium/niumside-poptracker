@@ -48,9 +48,9 @@ jobs:
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
 
-      - name: Cache target directory
+      - name: Restore target directory cache
         id: cache-target
-        uses: actions/cache@v3
+        uses: actions/cache/restore@v3
         with:
           path: target
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
@@ -60,6 +60,13 @@ jobs:
 
       - name: Build
         run: cross build --release --target ${{ matrix.target }} || (cargo clean && cross build --release --target ${{ matrix.target }})
+
+      - name: Save target directory cache
+        id: cache-target
+        uses: actions/cache/save@v3
+        with:
+          path: target
+          key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
 
       # List the contents of the target directory
       - name: List target
