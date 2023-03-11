@@ -49,7 +49,6 @@ jobs:
         run: rustup update && rustup toolchain install $(cat rust-toolchain.toml | grep channel | cut -d '"' -f 2)
 
       - name: Restore target directory cache
-        id: cache-target
         uses: actions/cache/restore@v3
         with:
           path: target
@@ -62,7 +61,6 @@ jobs:
         run: cross build --release --target ${{ matrix.target }} || (cargo clean && cross build --release --target ${{ matrix.target }})
 
       - name: Save target directory cache
-        id: cache-target
         uses: actions/cache/save@v3
         with:
           path: target
