@@ -1,3 +1,4 @@
+#![allow(clippy::cast_lossless)]
 use auraxis::{Faction, CharacterID, Loadout, WorldID, ZoneID};
 use chrono::{DateTime, Utc};
 use sqlx::{Pool, Postgres};
@@ -20,26 +21,40 @@ type ActivePlayerHashmap = HashMap<CharacterID, ActivePlayer>;
 
 pub type ActivePlayerDb = Arc<Mutex<ActivePlayerHashmap>>;
 
-pub type LoadoutBreakdown =
-    HashMap<WorldID, HashMap<ZoneID, HashMap<Faction, HashMap<Faction, HashMap<Loadout, u16>>>>>;
+pub type LoadoutBreakdown = HashMap<Loadout, u16>;
 
-pub async fn clean_active_players(active_players: ActivePlayerDb) -> Option<()> {
+pub type FactionBreakdown = HashMap<Faction, HashMap<Faction, LoadoutBreakdown>>;
+
+pub type ZoneBreakdown = HashMap<ZoneID, FactionBreakdown>;
+
+pub type WorldBreakdown = HashMap<WorldID, ZoneBreakdown>;
+
+pub async fn clean(active_players: ActivePlayerDb) -> Option<()> {
     let active_players = active_players.clone();
     loop {
         tokio::time::sleep(Duration::from_secs(30)).await;
-        let mut active_players_lock = active_players.lock().unwrap();
-        active_players_lock.retain(|_character_id, player| {
-            player.last_change + chrono::Duration::minutes(3) > Utc::now()
-        });
+
+        match active_players.lock() {
+            Ok(mut guard) => {
+                guard.retain(|_character_id, player| { player.last_change + chrono::Duration::minutes(3) > Utc::now() });
+            }
+            Err(e) => {
+                panic!("Failed to lock active_players: {e}");
+            }
+        }
         info!("Cleaned active players");
     }
 }
 
-pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> LoadoutBreakdown {
-    let mut loadout_breakdown: LoadoutBreakdown = HashMap::new();
-    let active_players_lock = active_players.lock().unwrap();
+pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
+    let mut loadout_breakdown: WorldBreakdown = HashMap::new();
+    let active_players_lock = active_players.lock()
+        .unwrap_or_else(|poisoned| {
+            panic!("Failed to lock active_players: {poisoned}");
+        })
+        .clone();
 
-    for (_, player) in active_players_lock.iter() {
+    for player in active_players_lock.values() {
         loadout_breakdown
             .entry(player.world)
             .or_insert_with(HashMap::new)
@@ -57,14 +72,110 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> LoadoutBreakdown {
     loadout_breakdown
 }
 
-pub async fn store_pop(loadout_breakdown: &LoadoutBreakdown, db_pool: &Pool<Postgres>) {
+async fn insert_loadout(loadout_map: &LoadoutBreakdown, faction_population_id: i32, db_pool: &Pool<Postgres>) {
+    for (loadout_id, amount) in loadout_map.iter() {
+        sqlx::query!(
+            "INSERT INTO loadout (loadout_id) VALUES ($1) ON CONFLICT DO NOTHING",
+            *loadout_id as i32
+        )
+        .execute(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
+        sqlx::query!(
+            "INSERT INTO loadout_population (loadout_id, faction_population_id, amount) VALUES ($1, $2, $3)",
+            *loadout_id as i32,
+            faction_population_id,
+            *amount as i32
+        )
+        .execute(db_pool
+        )
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
+    }
+}
+
+async fn insert_zone(zone_map: &ZoneBreakdown, world_population_id: i32, db_pool: &Pool<Postgres>) {
+    for (zone_id, faction_map) in zone_map.iter() {
+        sqlx::query!(
+            "INSERT INTO zone (zone_id) VALUES ($1) ON CONFLICT DO NOTHING",
+            *zone_id as i64
+        )
+        .execute(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
+        let zone_population_id = sqlx::query!(
+            "INSERT INTO zone_population (zone_id, world_population_id) VALUES ($1, $2) RETURNING zone_population_id",
+            *zone_id as i64,
+            world_population_id
+        )
+        .fetch_one(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        })
+        .zone_population_id;
+
+        insert_faction(faction_map, zone_population_id, db_pool).await;
+
+    }
+}
+
+async fn insert_faction(faction_map: &FactionBreakdown, zone_population_id: i32, db_pool: &Pool<Postgres>) {
+    for (faction_id, team_map) in faction_map.iter() {
+        for (team_id, loadout_map) in team_map.iter() {
+            sqlx::query!(
+                "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
+                *faction_id as i32
+            )
+            .execute(db_pool)
+            .await
+            .unwrap_or_else(|error| {
+                panic!("Failed database insert: {error}");
+            });
+            sqlx::query!(
+                "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
+                *team_id as i32
+            )
+            .execute(db_pool)
+            .await
+            .unwrap_or_else(|error| {
+                panic!("Failed database insert: {error}");
+            });
+
+            let faction_population_id = sqlx::query!(
+                "INSERT INTO faction_population (faction_id, team_id, zone_population_id) VALUES ($1, $2, $3) RETURNING faction_population_id",
+                *faction_id as i32,
+                *team_id as i32,
+                zone_population_id
+            )
+            .fetch_one(db_pool)
+            .await
+            .unwrap_or_else(|error| {
+                panic!("Failed database insert: {error}");
+            })
+            .faction_population_id;
+
+            insert_loadout(loadout_map, faction_population_id, db_pool).await;
+        }
+    }
+}
+
+pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgres>) {
     for (world_id, zone_map) in loadout_breakdown.iter() {
         sqlx::query!(
             "INSERT INTO world (world_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *world_id as i32
         )
         .execute(db_pool)
-        .await.unwrap();
+        .await.unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
 
         let world_population_id = sqlx::query!(
             "INSERT INTO world_population (world_id) VALUES ($1) RETURNING population_id",
@@ -72,66 +183,12 @@ pub async fn store_pop(loadout_breakdown: &LoadoutBreakdown, db_pool: &Pool<Post
         )
         .fetch_one(db_pool)
         .await
-        .unwrap()
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        })
         .population_id;
 
-        for (zone_id, faction_map) in zone_map.iter() {
-            sqlx::query!(
-                "INSERT INTO zone (zone_id) VALUES ($1) ON CONFLICT DO NOTHING",
-                *zone_id as i32
-            )
-            .execute(db_pool)
-            .await
-            .unwrap();
-            let zone_population_id = sqlx::query!(
-                "INSERT INTO zone_population (zone_id, world_population_id) VALUES ($1, $2) RETURNING zone_population_id",
-                *zone_id as i32,
-                world_population_id
-            ).fetch_one(db_pool).await.unwrap().zone_population_id;
-
-
-            for (faction_id, team_map) in faction_map.iter() {
-                for (team_id, loadout_map) in team_map.iter() {
-                    sqlx::query!(
-                        "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
-                        *faction_id as i32
-                    )
-                    .execute(db_pool)
-                    .await
-                    .unwrap();
-                    sqlx::query!(
-                        "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
-                        *team_id as i32
-                    )
-                    .execute(db_pool)
-                    .await
-                    .unwrap();
-
-                    let faction_population_id = sqlx::query!(
-                        "INSERT INTO faction_population (faction_id, team_id, zone_population_id) VALUES ($1, $2, $3) RETURNING faction_population_id",
-                        *faction_id as i32,
-                        *team_id as i32,
-                        zone_population_id
-                    ).fetch_one(db_pool).await.unwrap().faction_population_id;
-
-                    for (loadout_id, amount) in loadout_map.iter() {
-                        sqlx::query!(
-                            "INSERT INTO loadout (loadout_id) VALUES ($1) ON CONFLICT DO NOTHING",
-                            *loadout_id as i32
-                        )
-                        .execute(db_pool)
-                        .await
-                        .unwrap();
-                        sqlx::query!(
-                            "INSERT INTO loadout_population (loadout_id, faction_population_id, amount) VALUES ($1, $2, $3)",
-                            *loadout_id as i32,
-                            faction_population_id,
-                            *amount as i32
-                        ).execute(db_pool).await.unwrap();
-                    }
-                }
-            }
-        }
+        insert_zone(zone_map, world_population_id, db_pool).await;
     }
     println!("{loadout_breakdown:#?}");
     info!("Stored pop");

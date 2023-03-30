@@ -1,3 +1,8 @@
+#![warn(clippy::pedantic)]
+#![warn(clippy::nursery)]
+#![warn(clippy::unwrap_used)]
+#![warn(clippy::expect_used)]
+
 mod configuration;
 mod constants;
 mod realtime;
@@ -33,7 +38,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let futures = vec![
         tokio::spawn(active_players::process_loop(active_players.clone(), db_pool)),
         tokio::spawn(event_handlers::receive_events(events, active_players.clone())),
-        tokio::spawn(active_players::clean_active_players(active_players.clone()))
+        tokio::spawn(active_players::clean(active_players.clone()))
     ];
 
     future::join_all(futures).await;

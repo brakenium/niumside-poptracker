@@ -36,11 +36,11 @@ impl DeserializeWith for Level {
         let s = String::deserialize(de)?;
 
         match s.as_ref() {
-            "Error" => Ok(Level::ERROR),
-            "Warn" => Ok(Level::WARN),
-            "Info" => Ok(Level::INFO),
-            "Debug" => Ok(Level::DEBUG),
-            "Trace" => Ok(Level::TRACE),
+            "Error" => Ok(Self::ERROR),
+            "Warn" => Ok(Self::WARN),
+            "Info" => Ok(Self::INFO),
+            "Debug" => Ok(Self::DEBUG),
+            "Trace" => Ok(Self::TRACE),
             _ => Err(serde::de::Error::custom("error trying to deserialize log level"))
         }
     }

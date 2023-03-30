@@ -3,10 +3,10 @@ use tracing::error;
 
 use crate::active_players::{ActivePlayerDb, ActivePlayer};
 
-use super::EventHandlerErrors;
-
-pub async fn handle(event: GainExperience, active_players: ActivePlayerDb) -> Result<(), EventHandlerErrors> {
-    if let Ok(mut active_players_lock) = active_players.lock() {
+pub fn handle(event: &GainExperience, active_players: &ActivePlayerDb) {
+    active_players.lock().map_or_else(|_| {
+        error!("Unable to lock active players");
+    }, |mut active_players_lock| {
         active_players_lock.insert(
             event.character_id,
             ActivePlayer {
@@ -18,8 +18,5 @@ pub async fn handle(event: GainExperience, active_players: ActivePlayerDb) -> Re
                 team_id: event.team_id,
             },
         );
-    } else {
-        error!("Unable to lock active players");
-    };
-    Ok(())
+    });
 }
