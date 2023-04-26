@@ -1,4 +1,4 @@
-name: CICD
+name: Builds
 
 env:
   RUST_BACKTRACE: full

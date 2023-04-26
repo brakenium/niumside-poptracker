@@ -1,4 +1,4 @@
-name: Rust PR Lint
+name: Static analysis
 
 on:
   push:
