@@ -9,7 +9,7 @@ mod realtime;
 mod event_handlers;
 mod active_players;
 mod storage;
-mod metrics;
+mod logging;
 use futures::future;
 use std::collections::HashMap;
 use std::error::Error;
@@ -19,12 +19,7 @@ use std::sync::{Arc, Mutex};
 async fn main() -> Result<(), Box<dyn Error>> {
     let app_config = configuration::Settings::new()?;
 
-    metrics::install();
-
-    tracing_subscriber::fmt()
-        .with_max_level(app_config.app.log_level)
-        .with_target(false)
-        .init();
+    logging::init(&app_config);
 
     // write a match expression for realtime::init(app_config.census, app_config.worlds).await
     // if events is Ok, then do the following
