@@ -34,18 +34,18 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
 
-  grafana:
-    image: grafana/grafana-oss:latest
-    user: 1000:1000
-    restart: always
-    ports:
-      - 3000:3000
-    volumes:
-      - ./docker/monitoring/grafana/data:/var/lib/grafana
-      - ./docker/monitoring/grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+  # grafana:
+  #   image: grafana/grafana-oss:latest
+  #   user: 1000:1000
+  #   restart: always
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./docker/monitoring/grafana/data:/var/lib/grafana
+  #     - ./docker/monitoring/grafana/provisioning:/etc/grafana/provisioning
+  #   environment:
+  #     GF_SECURITY_ADMIN_USER: admin
+  #     GF_SECURITY_ADMIN_PASSWORD: admin
 
   alertmanager:
     image: prom/alertmanager:latest
