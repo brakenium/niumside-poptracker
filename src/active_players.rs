@@ -1,7 +1,7 @@
 #![allow(clippy::cast_lossless)]
 use auraxis::{Faction, CharacterID, Loadout, WorldID, ZoneID};
 use chrono::{DateTime, Utc};
-use metrics::{increment_counter, histogram};
+use metrics::{increment_counter, gauge};
 use sqlx::{Pool, Postgres};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -77,7 +77,7 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
         total_players += 1;
     }
 
-    histogram!("niumside_active_players", total_players as f64);
+    gauge!("niumside_active_players", total_players as f64);
 
     loadout_breakdown
 }

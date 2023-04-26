@@ -1,4 +1,4 @@
-use metrics::{describe_counter, describe_histogram};
+use metrics::{describe_counter, describe_gauge};
 use metrics_exporter_prometheus::PrometheusBuilder;
 use tracing::{error, info, Level};
 
@@ -23,7 +23,7 @@ fn metrics() {
 fn describe_metrics() {
     describe_counter!("niumside_active_players_lock_failed", "Number of times the active_players lock failed");
     describe_counter!("niumside_active_players_cleanups", "Number of times the active_players cleanup ran");
-    describe_histogram!("niumside_active_players", "Number of active players");
+    describe_gauge!("niumside_active_players", "Number of active players");
     describe_counter!("niumside_process_loop_iterations", "The number of times the active player event process loop has ran");
     describe_counter!("niumside_gain_experience_events", "The number of gain experience events inserted into the active players");
 }
