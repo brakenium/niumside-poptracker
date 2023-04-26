@@ -25,6 +25,7 @@ fn describe_metrics() {
     describe_counter!("niumside_active_players_cleanups", "Number of times the active_players cleanup ran");
     describe_histogram!("niumside_active_players", "Number of active players");
     describe_counter!("niumside_process_loop_iterations", "The number of times the active player event process loop has ran");
+    describe_counter!("niumside_gain_experience_events", "The number of gain experience events inserted into the active players");
 }
 
 fn tracing(log_level: Level) {
