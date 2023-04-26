@@ -7,7 +7,8 @@ LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-popt
 
 WORKDIR /etc/niumside-poptracker/
 
-COPY . .
+COPY config/ config/
+COPY binaries/ binaries/
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \

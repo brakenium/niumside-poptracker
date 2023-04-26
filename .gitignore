@@ -1,3 +1,4 @@
 /target
 /config/local.yaml
+/config/docker.yaml
 /.env

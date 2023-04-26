@@ -1,3 +1,9 @@
 *
 !config/default.yaml
+!migrations/**
 !binaries/**
+!src/**
+!build.rs
+!Cargo.*
+!rust-toolchain.toml
+!sqlx-data.json
