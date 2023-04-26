@@ -1,6 +1,7 @@
 #![allow(clippy::cast_lossless)]
 use auraxis::{Faction, CharacterID, Loadout, WorldID, ZoneID};
 use chrono::{DateTime, Utc};
+use metrics::{increment_counter, histogram};
 use sqlx::{Pool, Postgres};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -39,10 +40,12 @@ pub async fn clean(active_players: ActivePlayerDb) -> Option<()> {
                 guard.retain(|_character_id, player| { player.last_change + chrono::Duration::minutes(3) > Utc::now() });
             }
             Err(e) => {
+                increment_counter!("niumside_active_players_lock_failed");
                 panic!("Failed to lock active_players: {e}");
             }
         }
         info!("Cleaned active players");
+        increment_counter!("niumside_active_players_cleanups");
     }
 }
 
@@ -50,9 +53,12 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
     let mut loadout_breakdown: WorldBreakdown = HashMap::new();
     let active_players_lock = active_players.lock()
         .unwrap_or_else(|poisoned| {
-            panic!("Failed to lock active_players: {poisoned}");
+                increment_counter!("niumside_active_players_lock_failed");
+                panic!("Failed to lock active_players: {poisoned}");
         })
         .clone();
+
+    let mut total_players = 0;
 
     for player in active_players_lock.values() {
         loadout_breakdown
@@ -67,7 +73,11 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
             .entry(player.loadout)
             .and_modify(|v| *v += 1)
             .or_insert(1);
+
+        total_players += 1;
     }
+
+    histogram!("niumside_active_players", total_players as f64);
 
     loadout_breakdown
 }
@@ -201,6 +211,6 @@ pub async fn process_loop(active_players: ActivePlayerDb, db_pool: Pool<Postgres
         tokio::time::sleep(Duration::from_secs(30)).await;
         let loadout_breakdown_numbers = loadout_breakdown(&active_players);
         store_pop(&loadout_breakdown_numbers, &db_pool).await;
-        // store_pop(&loadout_breakdown_numbers, &db_pool).await;
+        increment_counter!("niumside_process_loop_iterations");
     }
 }
