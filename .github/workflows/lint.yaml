@@ -1,6 +1,19 @@
 name: Rust PR Lint
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/lint.yaml
+      - migrations/**
+      - src/**
+      - Cargo.toml
+      - Cargo.lock
+      - build.rs
+      - auraxis-rs/**
+      - sqlx-data.json
+      - rust-toolchain.toml
   pull_request:
     branches:
       - master
