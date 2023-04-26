@@ -26,9 +26,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .with_target(false)
         .init();
 
-    let Ok(events) = realtime::init(app_config.census, app_config.worlds).await
-    else {
-        panic!("Unable to connect to Census realtime API");
+    // write a match expression for realtime::init(app_config.census, app_config.worlds).await
+    // if events is Ok, then do the following
+    // if events is Err, then do the following
+    let events = match realtime::init(app_config.census, app_config.worlds).await {
+        Ok(events) => events,
+        Err(e) => {
+            panic!("Unable to connect to realtime API: {}", e);
+        }
     };
 
     let Ok(db_pool) = storage::pool::create(&app_config.database.connection_string).await
