@@ -69,8 +69,6 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
 
   niumside:
-    ports:
-      - 9000:9000
     build:
       context: .
       dockerfile: ./dev.Dockerfile
