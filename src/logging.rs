@@ -1,21 +1,26 @@
 use metrics_exporter_prometheus::PrometheusBuilder;
+use tracing::{error, info, Level};
 
-use crate::configuration::Settings;
-
-pub fn init(app_config: &Settings) {
-    tracing(app_config);
+pub fn init(log_level: Level) {
+    tracing(log_level);
     metrics();
 }
 
 fn metrics() {
-    let builder = PrometheusBuilder::new();
-    builder.install().unwrap();
-
+    let prometheus_metrics = PrometheusBuilder::new().install();
+    match prometheus_metrics {
+        Ok(_m) => {
+            info!("Prometheus metrics enabled");
+        }
+        Err(e) => {
+            error!("Unable to start Prometheus metrics: {}", e);
+        }
+    }
 }
 
-fn tracing(app_config: &Settings) {
+fn tracing(log_level: Level) {
     tracing_subscriber::fmt()
-        .with_max_level(app_config.app.log_level)
+        .with_max_level(log_level)
         .with_target(true)
         .init();
 }

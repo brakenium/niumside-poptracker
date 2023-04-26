@@ -19,7 +19,7 @@ use std::sync::{Arc, Mutex};
 async fn main() -> Result<(), Box<dyn Error>> {
     let app_config = configuration::Settings::new()?;
 
-    logging::init(&app_config);
+    logging::init(app_config.app.log_level);
 
     // write a match expression for realtime::init(app_config.census, app_config.worlds).await
     // if events is Ok, then do the following
