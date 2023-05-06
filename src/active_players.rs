@@ -200,7 +200,7 @@ pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgr
 
         insert_zone(zone_map, world_population_id, db_pool).await;
     }
-    println!("{loadout_breakdown:#?}");
+
     info!("Stored pop");
 }
 
