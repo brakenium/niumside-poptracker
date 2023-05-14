@@ -62,7 +62,7 @@ dependencies = [
 [[package]]
 name = "auraxis"
 version = "0.1.0"
-source = "git+https://github.com/brakenium/auraxis-rs.git#79e68444ae654bdc5b52b1dbae4b685354db4542"
+source = "git+https://github.com/brakenium/auraxis-rs.git#8a47579e61cb24f98b1f920e43315754f899ec7e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -85,7 +85,7 @@ dependencies = [
 [[package]]
 name = "auraxis_macros"
 version = "0.1.0"
-source = "git+https://github.com/brakenium/auraxis-rs.git#79e68444ae654bdc5b52b1dbae4b685354db4542"
+source = "git+https://github.com/brakenium/auraxis-rs.git#8a47579e61cb24f98b1f920e43315754f899ec7e"
 dependencies = [
  "darling 0.14.4",
  "quote",
