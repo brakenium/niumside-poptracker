@@ -61,8 +61,8 @@ dependencies = [
 
 [[package]]
 name = "auraxis"
-version = "0.1.0"
-source = "git+https://github.com/brakenium/auraxis-rs.git#8a47579e61cb24f98b1f920e43315754f899ec7e"
+version = "0.2.0"
+source = "git+https://github.com/brakenium/auraxis-rs.git#d898c36741119c174b4961d9e541fec06f99a01b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -76,6 +76,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_with",
+ "stream-reconnect",
  "thiserror",
  "tokio",
  "tokio-tungstenite",
@@ -85,7 +86,7 @@ dependencies = [
 [[package]]
 name = "auraxis_macros"
 version = "0.1.0"
-source = "git+https://github.com/brakenium/auraxis-rs.git#8a47579e61cb24f98b1f920e43315754f899ec7e"
+source = "git+https://github.com/brakenium/auraxis-rs.git#d898c36741119c174b4961d9e541fec06f99a01b"
 dependencies = [
  "darling 0.14.4",
  "quote",
@@ -1943,6 +1944,17 @@ dependencies = [
  "once_cell",
  "tokio",
  "tokio-rustls",
+]
+
+[[package]]
+name = "stream-reconnect"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9831f47a89f0d699b3a0c74ae7c48b30974ccca14a571f342a0eb41b6f7f2a56"
+dependencies = [
+ "futures",
+ "log",
+ "tokio",
 ]
 
 [[package]]
