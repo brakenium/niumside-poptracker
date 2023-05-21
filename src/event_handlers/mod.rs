@@ -11,28 +11,32 @@ pub enum EventHandlerErrors {
 }
 
 pub async fn receive_events(mut events: Receiver<Event>, active_players: ActivePlayerDb) -> Option<()> {
-    while let Some(event) = events.recv().await {
-        let active_players = active_players.clone();
-        tokio::spawn(async move {
-            match event {
-                Event::GainExperience(event) => gain_experience::handle(&event, &active_players),
-                Event::PlayerLogin(_) => todo!(),
-                Event::PlayerLogout(_) => todo!(),
-                Event::Death(_) => todo!(),
-                Event::VehicleDestroy(_) => todo!(),
-                Event::PlayerFacilityCapture(_) => todo!(),
-                Event::PlayerFacilityDefend(_) => todo!(),
-                Event::ContinentLock(_) => todo!(),
-                Event::ContinentUnlock(_) => todo!(),
-                Event::FacilityControl(_) => todo!(),
-                Event::MetagameEvent(_) => todo!(),
-                Event::ItemAdded => todo!(),
-                Event::AchievementEarned => todo!(),
-                Event::SkillAdded => todo!(),
-                Event::BattleRankUp => todo!(),
-            };
-        });
+    loop {
+        match events.recv().await {
+            Some(event) => {
+                let active_players = active_players.clone();
+                tokio::spawn(async move {
+                    match event {
+                        Event::GainExperience(event) => gain_experience::handle(&event, &active_players),
+                        Event::PlayerLogin(_) => todo!(),
+                        Event::PlayerLogout(_) => todo!(),
+                        Event::Death(_) => todo!(),
+                        Event::VehicleDestroy(_) => todo!(),
+                        Event::PlayerFacilityCapture(_) => todo!(),
+                        Event::PlayerFacilityDefend(_) => todo!(),
+                        Event::ContinentLock(_) => todo!(),
+                        Event::ContinentUnlock(_) => todo!(),
+                        Event::FacilityControl(_) => todo!(),
+                        Event::MetagameEvent(_) => todo!(),
+                        Event::ItemAdded => todo!(),
+                        Event::AchievementEarned => todo!(),
+                        Event::SkillAdded => todo!(),
+                        Event::BattleRankUp => todo!(),
+                    };
+                });
+            }
+            None => return None,
+        };
     }
-    panic!("Not receiving more events, this message should never be seen");
 }
 
