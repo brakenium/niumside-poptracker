@@ -1,14 +1,17 @@
+use std::net::SocketAddr;
 use metrics::{describe_counter, describe_gauge};
 use metrics_exporter_prometheus::PrometheusBuilder;
 use tracing::{error, info, Level};
 
-pub fn init(log_level: Level) {
-    tracing(log_level);
-    metrics();
+pub fn init(address: impl Into<SocketAddr>) {
+    // tracing(log_level);
+    metrics(address);
 }
 
-fn metrics() {
-    let prometheus_metrics = PrometheusBuilder::new().install();
+fn metrics(address: impl Into<SocketAddr>) {
+    let prometheus_metrics = PrometheusBuilder::new()
+        .with_http_listener(address)
+        .install();
     match prometheus_metrics {
         Ok(_m) => {
             info!("Prometheus metrics enabled");

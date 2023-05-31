@@ -18,6 +18,7 @@ impl shuttle_runtime::Service for NiumsideService {
         mut self,
         addr: std::net::SocketAddr,
     ) -> Result<(), shuttle_runtime::Error> {
+        logging::init(addr);
         // write a match expression for realtime::init(app_config.census, app_config.worlds).await
         // if events is Ok, then do the following
         // if events is Err, then do the following
