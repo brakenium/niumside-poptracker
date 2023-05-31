@@ -22,10 +22,9 @@ async fn init(
     #[shuttle_shared_db::Postgres] postgres: PgPool,
     #[shuttle_secrets::Secrets] secrets: shuttle_secrets::SecretStore,
 ) -> Result<shuttle::NiumsideService, shuttle_runtime::Error> {
-    postgres.execute(include_str!("../niumside-database.sql"))
+    sqlx::migrate!().run(&postgres.clone())
         .await
         .map_err(CustomError::new)?;
-
 
     let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
 
