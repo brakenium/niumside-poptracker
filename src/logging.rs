@@ -1,26 +1,18 @@
-use std::net::SocketAddr;
 use metrics::{describe_counter, describe_gauge};
-use metrics_exporter_prometheus::PrometheusBuilder;
-use tracing::{error, info, Level};
+use metrics_exporter_prometheus::{PrometheusBuilder, PrometheusHandle};
+use tracing::{info, Level};
 
-pub fn init(address: impl Into<SocketAddr>) {
-    // tracing(log_level);
-    metrics(address);
-}
+// pub fn init() {
+//     // tracing(log_level);
+//     metrics();
+// }
 
-fn metrics(address: impl Into<SocketAddr>) {
+pub fn metrics() -> PrometheusHandle {
     let prometheus_metrics = PrometheusBuilder::new()
-        .with_http_listener(address)
-        .install();
-    match prometheus_metrics {
-        Ok(_m) => {
-            info!("Prometheus metrics enabled");
-            describe_metrics();
-        }
-        Err(e) => {
-            error!("Unable to start Prometheus metrics: {}", e);
-        }
-    }
+        .install_recorder().expect("failed to install recorder");
+    info!("Prometheus metrics enabled");
+    describe_metrics();
+    prometheus_metrics
 }
 
 fn describe_metrics() {
@@ -31,7 +23,7 @@ fn describe_metrics() {
     describe_counter!("niumside_gain_experience_events", "The number of gain experience events inserted into the active players");
 }
 
-fn tracing(log_level: Level) {
+pub fn tracing(log_level: Level) {
     tracing_subscriber::fmt()
         .with_max_level(log_level)
         .with_target(true)
