@@ -9,7 +9,7 @@ mod event_handlers;
 mod active_players;
 mod logging;
 mod shuttle;
-mod api;
+mod web;
 
 use futures::future;
 use std::collections::HashMap;
@@ -29,7 +29,7 @@ async fn init(
 
     let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
 
-    let rocket = rocket::build().mount("/", api::get_routes());
+    let rocket = web::init();
 
     Ok(shuttle::NiumsideService {
         active_players,

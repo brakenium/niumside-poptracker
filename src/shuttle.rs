@@ -3,6 +3,10 @@ use crate::{active_players, logging};
 use crate::event_handlers;
 use crate::realtime;
 
+pub struct DbState {
+    pub(crate) pool: PgPool,
+}
+
 pub struct NiumsideService {
     pub(crate) active_players: active_players::ActivePlayerDb,
     pub(crate) db_pool: PgPool,
@@ -29,6 +33,12 @@ impl shuttle_runtime::Service for NiumsideService {
             .merge((rocket::Config::LOG_LEVEL, rocket::config::LogLevel::Off))
             .merge((rocket::Config::SHUTDOWN, shutdown));
 
+        let db_state = DbState { pool: self.db_pool.clone() };
+        let rocket = self.rocket
+            .configure(config)
+            .manage(logging::metrics())
+            .manage(db_state);
+
         // write a match expression for realtime::init(app_config.census, app_config.worlds).await
         // if events is Ok, then do the following
         // if events is Err, then do the following
@@ -40,7 +50,7 @@ impl shuttle_runtime::Service for NiumsideService {
         };
 
         tokio::select!(
-            _ = self.rocket.configure(config).manage(logging::metrics()).launch() => {},
+            _ = rocket.launch() => {},
             _ = active_players::process_loop(self.active_players.clone(), self.db_pool) => {},
             _ = event_handlers::receive_events(events, self.active_players.clone()) => {},
             _ = active_players::clean(self.active_players.clone()) => {},
