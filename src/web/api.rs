@@ -7,6 +7,7 @@ use crate::shuttle::DbState;
 
 #[derive(Serialize)]
 pub struct Response {
+    #[serde(flatten)]
     result: PossibleResults,
 }
 
