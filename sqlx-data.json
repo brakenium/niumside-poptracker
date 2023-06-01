@@ -12,6 +12,24 @@
     },
     "query": "INSERT INTO zone (zone_id) VALUES ($1) ON CONFLICT DO NOTHING"
   },
+  "1982f239dcad7a5c27d0e2f6481fd3b4dbb124454455c0f0c055b6d071873d1f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "world_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT world_id FROM world"
+  },
   "4cb271f200ea59bad193edd34f43735997253285d5cdbfcf6ecdd82598f67148": {
     "describe": {
       "columns": [
@@ -33,6 +51,38 @@
     },
     "query": "INSERT INTO zone_population (zone_id, world_population_id) VALUES ($1, $2) RETURNING zone_population_id"
   },
+  "888114bf91849f1826230bca441dc9df3a5fab8ed4b63016c86f3f2226a31ad5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "timestamp",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "world_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "world_population",
+          "ordinal": 2,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4Array"
+        ]
+      }
+    },
+    "query": "\n        SELECT wp.timestamp, wp.world_id, SUM(lp.amount) AS world_population FROM world_population wp\n        JOIN zone_population zp ON wp.population_id = zp.world_population_id\n        JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id\n        JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id\n        AND wp.population_id = (SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id)\n        WHERE wp.world_id = ANY($1)\n        GROUP BY wp.population_id, wp.timestamp, wp.population_id\n        ORDER BY wp.timestamp\n        "
+  },
   "8b5dedef3329eddfbf7a29892035cbe3cec3d3666ba739d748d496fe41856c7d": {
     "describe": {
       "columns": [],
@@ -46,30 +96,6 @@
       }
     },
     "query": "INSERT INTO loadout_population (loadout_id, faction_population_id, amount) VALUES ($1, $2, $3)"
-  },
-  "8c555d3514d3159eb246512cd9cd3557e2cb3f78e048cc8ccbfce4d0d07bc103": {
-    "describe": {
-      "columns": [
-        {
-          "name": "world_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "world_population",
-          "ordinal": 1,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT wp.world_id, SUM(lp.amount) AS world_population FROM world_population wp\n        JOIN zone_population zp ON wp.population_id = zp.world_population_id\n        JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id\n        JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id\n        AND wp.population_id = (SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id)\n        GROUP BY wp.population_id, wp.timestamp, wp.population_id\n        ORDER BY wp.timestamp"
   },
   "8e05c28001e733f850bcce963c7f39e89dc4631aa6e6fc7f68c650c3e7da9d58": {
     "describe": {
