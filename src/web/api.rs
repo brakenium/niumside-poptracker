@@ -35,7 +35,6 @@ pub async fn population(world: Option<Vec<i32>>, db_pool_state: &State<DbState>)
         world.into_iter().map(|w| w.world_id).collect()
     };
 
-    // TODO: Jaeger/worlds with no recent population won't be returned
     let population = sqlx::query!(
         "
         SELECT wp.timestamp, wp.world_id, SUM(lp.amount) AS world_population FROM world_population wp
