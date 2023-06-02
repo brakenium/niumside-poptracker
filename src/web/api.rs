@@ -24,9 +24,27 @@ pub struct PopWorld {
     timestamp: chrono::NaiveDateTime,
 }
 
+#[utoipa::path(
+    responses(
+        (status = 200, description = "Successful response", body = Response::PopResult),
+        (status = 400, description = "Bad request", body = BadRequest<String>, example = BadRequest {
+            reason: Some("Invalid world ID".to_string()),
+            ..Default::default()
+        }),
+    )
+)]
 #[get("/population?<world>")]
 pub async fn population(world: Option<Vec<i32>>, db_pool_state: &State<DbState>) -> Result<Json<Response>, BadRequest<String>> {
-    let world = if let Some(world) = world { world } else {
+    let world = if let Some(world) = world {
+        // Check if the world IDs are valid
+        let worlds = sqlx::query!(
+            "SELECT world_id FROM world WHERE world_id = ANY($1)",
+            &world
+        )
+            .fetch_all(&db_pool_state.pool).await
+            .map_err(|e| BadRequest(Some(e.to_string())))?;
+        world
+    } else {
         let world = sqlx::query!(
             "SELECT world_id FROM world"
         )
