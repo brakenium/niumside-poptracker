@@ -11,12 +11,10 @@ mod realtime;
 mod shuttle;
 mod web;
 
-use futures::future;
 use shuttle_runtime::CustomError;
-use sqlx::{Executor, PgPool};
+use sqlx::PgPool;
 use std::{
     collections::HashMap,
-    error::Error,
     sync::{Arc, Mutex},
 };
 

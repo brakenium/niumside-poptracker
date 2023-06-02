@@ -1467,6 +1467,7 @@ dependencies = [
  "metrics-exporter-prometheus",
  "rocket",
  "serde",
+ "serde_json",
  "shuttle-runtime",
  "shuttle-secrets",
  "shuttle-shared-db",

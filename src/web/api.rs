@@ -1,39 +1,43 @@
-use crate::shuttle::DbState;
 use rocket::{
     get,
     response::status::BadRequest,
+    Rocket,
     routes,
-    serde::{json::Json, Serialize},
-    Build, Rocket, State,
+    serde::{json::Json, Serialize}, State,
 };
+use serde_json::json;
 use sqlx::FromRow;
+use utoipa::ToSchema;
+use crate::shuttle::DbState;
 
-#[derive(Serialize)]
-pub struct Response {
-    #[serde(flatten)]
-    result: PossibleResults,
+#[derive(Serialize, ToSchema)]
+pub struct Error {
+    pub error: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
+pub struct Response {
+    #[serde(flatten)]
+    pub result: PossibleResults,
+}
+
+#[derive(Serialize, ToSchema)]
 pub enum PossibleResults {
     #[serde(rename = "pop")]
     PopResult(Vec<PopWorld>),
 }
 
-#[derive(Serialize, FromRow)]
+#[derive(Serialize, ToSchema, FromRow)]
 pub struct PopWorld {
-    world_id: i32,
-    world_population: i64,
-    timestamp: chrono::NaiveDateTime,
+    pub world_id: i32,
+    pub world_population: i64,
+    pub timestamp: chrono::NaiveDateTime,
 }
 
 #[utoipa::path(
     responses(
-        (status = 200, description = "Successful response", body = Response::PopResult),
-        (status = 400, description = "Bad request", body = BadRequest<String>, example = BadRequest {
-            reason: Some("Invalid world ID".to_string()),
-            ..Default::default()
-        }),
+        (status = 200, description = "Successful response", body = Response),
+        (status = 400, description = "Bad request", body = Error, example = json!(Error { error: "Invalid world ID".to_string() })),
     )
 )]
 #[get("/population?<world>")]
@@ -43,13 +47,16 @@ pub async fn population(
 ) -> Result<Json<Response>, BadRequest<String>> {
     let world = if let Some(world) = world {
         // Check if the world IDs are valid
-        let worlds = sqlx::query!(
+        match sqlx::query!(
             "SELECT world_id FROM world WHERE world_id = ANY($1)",
             &world
         )
         .fetch_all(&db_pool_state.pool)
         .await
-        .map_err(|e| BadRequest(Some(e.to_string())))?;
+        .map_err(|e| BadRequest(Some(e.to_string())))? {
+            worlds if worlds.len() == world.len() => (),
+            _ => return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string()))),
+        };
         world
     } else {
         let world = sqlx::query!("SELECT world_id FROM world")
