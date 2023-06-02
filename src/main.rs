@@ -14,9 +14,11 @@ mod web;
 use futures::future;
 use shuttle_runtime::CustomError;
 use sqlx::{Executor, PgPool};
-use std::collections::HashMap;
-use std::error::Error;
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::HashMap,
+    error::Error,
+    sync::{Arc, Mutex},
+};
 
 #[shuttle_runtime::main]
 async fn init(

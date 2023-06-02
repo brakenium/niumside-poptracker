@@ -3,9 +3,11 @@ use auraxis::{CharacterID, Faction, Loadout, WorldID, ZoneID};
 use chrono::{DateTime, Utc};
 use metrics::{gauge, increment_counter};
 use sqlx::{Pool, Postgres};
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 use tracing::info;
 
 #[derive(Debug, Clone)]

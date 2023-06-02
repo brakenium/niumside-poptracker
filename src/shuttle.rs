@@ -1,6 +1,4 @@
-use crate::event_handlers;
-use crate::realtime;
-use crate::{active_players, logging};
+use crate::{active_players, event_handlers, logging, realtime};
 use sqlx::PgPool;
 
 pub struct DbState {

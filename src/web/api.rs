@@ -1,8 +1,11 @@
 use crate::shuttle::DbState;
-use rocket::response::status::BadRequest;
-use rocket::serde::json::Json;
-use rocket::serde::Serialize;
-use rocket::{get, routes, Build, Rocket, State};
+use rocket::{
+    get,
+    response::status::BadRequest,
+    routes,
+    serde::{json::Json, Serialize},
+    Build, Rocket, State,
+};
 use sqlx::FromRow;
 
 #[derive(Serialize)]

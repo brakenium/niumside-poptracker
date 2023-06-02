@@ -1,9 +1,13 @@
-use auraxis::realtime::client::{RealtimeClient, RealtimeClientConfig};
-use auraxis::realtime::event::{Event, EventNames};
-use auraxis::realtime::subscription::{
-    CharacterSubscription, EventSubscription, SubscriptionSettings, WorldSubscription,
+use auraxis::{
+    realtime::{
+        client::{RealtimeClient, RealtimeClientConfig},
+        event::{Event, EventNames},
+        subscription::{
+            CharacterSubscription, EventSubscription, SubscriptionSettings, WorldSubscription,
+        },
+    },
+    AuraxisError, WorldID,
 };
-use auraxis::{AuraxisError, WorldID};
 use tokio::sync::mpsc::Receiver;
 
 pub async fn init(secrets: shuttle_secrets::SecretStore) -> Result<Receiver<Event>, AuraxisError> {
