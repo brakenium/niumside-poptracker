@@ -35,6 +35,7 @@ pub struct PopWorld {
 }
 
 #[utoipa::path(
+    context_path = "/api",
     responses(
         (status = 200, description = "Successful response", body = Response),
         (status = 400, description = "Bad request", body = Error, example = json!(Error { error: "Invalid world ID".to_string() })),
