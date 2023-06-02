@@ -1,7 +1,7 @@
-use sqlx::PgPool;
-use crate::{active_players, logging};
 use crate::event_handlers;
 use crate::realtime;
+use crate::{active_players, logging};
+use sqlx::PgPool;
 
 pub struct DbState {
     pub(crate) pool: PgPool,
@@ -16,16 +16,14 @@ pub struct NiumsideService {
 
 #[shuttle_runtime::async_trait]
 impl shuttle_runtime::Service for NiumsideService {
-    async fn bind(
-        mut self,
-        addr: std::net::SocketAddr,
-    ) -> Result<(), shuttle_runtime::Error> {
+    async fn bind(mut self, addr: std::net::SocketAddr) -> Result<(), shuttle_runtime::Error> {
         let shutdown = rocket::config::Shutdown {
             ctrlc: false,
             ..rocket::config::Shutdown::default()
         };
 
-        let config = self.rocket
+        let config = self
+            .rocket
             .figment()
             .clone()
             .merge((rocket::Config::ADDRESS, addr.ip()))
@@ -33,8 +31,11 @@ impl shuttle_runtime::Service for NiumsideService {
             .merge((rocket::Config::LOG_LEVEL, rocket::config::LogLevel::Off))
             .merge((rocket::Config::SHUTDOWN, shutdown));
 
-        let db_state = DbState { pool: self.db_pool.clone() };
-        let rocket = self.rocket
+        let db_state = DbState {
+            pool: self.db_pool.clone(),
+        };
+        let rocket = self
+            .rocket
             .configure(config)
             .manage(logging::metrics())
             .manage(db_state);

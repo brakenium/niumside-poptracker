@@ -1,9 +1,9 @@
-use rocket::{Build, get, Rocket, routes, State};
+use crate::shuttle::DbState;
 use rocket::response::status::BadRequest;
 use rocket::serde::json::Json;
 use rocket::serde::Serialize;
+use rocket::{get, routes, Build, Rocket, State};
 use sqlx::FromRow;
-use crate::shuttle::DbState;
 
 #[derive(Serialize)]
 pub struct Response {
@@ -34,21 +34,24 @@ pub struct PopWorld {
     )
 )]
 #[get("/population?<world>")]
-pub async fn population(world: Option<Vec<i32>>, db_pool_state: &State<DbState>) -> Result<Json<Response>, BadRequest<String>> {
+pub async fn population(
+    world: Option<Vec<i32>>,
+    db_pool_state: &State<DbState>,
+) -> Result<Json<Response>, BadRequest<String>> {
     let world = if let Some(world) = world {
         // Check if the world IDs are valid
         let worlds = sqlx::query!(
             "SELECT world_id FROM world WHERE world_id = ANY($1)",
             &world
         )
-            .fetch_all(&db_pool_state.pool).await
-            .map_err(|e| BadRequest(Some(e.to_string())))?;
+        .fetch_all(&db_pool_state.pool)
+        .await
+        .map_err(|e| BadRequest(Some(e.to_string())))?;
         world
     } else {
-        let world = sqlx::query!(
-            "SELECT world_id FROM world"
-        )
-            .fetch_all(&db_pool_state.pool).await
+        let world = sqlx::query!("SELECT world_id FROM world")
+            .fetch_all(&db_pool_state.pool)
+            .await
             .map_err(|e| BadRequest(Some(e.to_string())))?;
 
         world.into_iter().map(|w| w.world_id).collect()
@@ -70,11 +73,14 @@ pub async fn population(world: Option<Vec<i32>>, db_pool_state: &State<DbState>)
         .fetch_all(&db_pool_state.pool).await
         .map_err(|e| BadRequest(Some(e.to_string())))?;
 
-    let worlds = population.into_iter().map(|p| PopWorld {
-        world_id: p.world_id,
-        world_population: p.world_population.unwrap_or(0),
-        timestamp: p.timestamp,
-    }).collect();
+    let worlds = population
+        .into_iter()
+        .map(|p| PopWorld {
+            world_id: p.world_id,
+            world_population: p.world_population.unwrap_or(0),
+            timestamp: p.timestamp,
+        })
+        .collect();
 
     let response = Response {
         result: PossibleResults::PopResult(worlds),

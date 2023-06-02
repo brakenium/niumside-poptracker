@@ -1,17 +1,12 @@
 mod api;
 
 use metrics_exporter_prometheus::PrometheusHandle;
-use rocket::{Build, get, Rocket, routes, State};
+use rocket::{get, routes, Build, Rocket, State};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(OpenApi)]
-#[openapi(
-    paths(
-        api::population,
-        prom_metrics,
-    )
-)]
+#[openapi(paths(api::population, prom_metrics,))]
 struct ApiDoc;
 
 #[get("/")]
@@ -30,8 +25,7 @@ fn prom_metrics(prometheus: &State<PrometheusHandle>) -> String {
 }
 
 fn swagger_ui() -> SwaggerUi {
-    SwaggerUi::new("/swagger-ui/<_..>")
-        .url("/api-docs/openapi.json", ApiDoc::openapi())
+    SwaggerUi::new("/swagger-ui/<_..>").url("/api-docs/openapi.json", ApiDoc::openapi())
 }
 
 pub fn init() -> Rocket<Build> {
