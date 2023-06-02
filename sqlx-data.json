@@ -117,6 +117,26 @@
     },
     "query": "INSERT INTO world_population (world_id) VALUES ($1) RETURNING population_id"
   },
+  "a35d5d3c3d513a9cd21290130c7e691f53662101f565ab7ff7c5cba8820b458c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "world_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4Array"
+        ]
+      }
+    },
+    "query": "SELECT world_id FROM world WHERE world_id = ANY($1)"
+  },
   "af03a08be00c0c46fd7fb8b3bf4ac44b92de06598a3650bc1e17ce90074e09f7": {
     "describe": {
       "columns": [],
