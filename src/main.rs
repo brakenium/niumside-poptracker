@@ -17,11 +17,13 @@ use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
+use std::path::PathBuf;
 
 #[shuttle_runtime::main]
 async fn init(
     #[shuttle_shared_db::Postgres] postgres: PgPool,
     #[shuttle_secrets::Secrets] secrets: shuttle_secrets::SecretStore,
+    #[shuttle_static_folder::StaticFolder(folder = "swagger-v4.19.0")] swagger: PathBuf,
 ) -> Result<shuttle::NiumsideService, shuttle_runtime::Error> {
     sqlx::migrate!()
         .run(&postgres.clone())
@@ -30,7 +32,7 @@ async fn init(
 
     let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
 
-    let rocket = web::init();
+    let rocket = web::init(swagger);
 
     Ok(shuttle::NiumsideService {
         active_players,

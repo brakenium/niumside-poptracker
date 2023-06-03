@@ -1,9 +1,10 @@
 mod api;
 
+use std::path::PathBuf;
 use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
+use rocket::fs::{FileServer, Options};
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -78,18 +79,11 @@ pub fn prom_metrics(prometheus: &State<PrometheusHandle>) -> String {
     prometheus.render()
 }
 
-fn swagger_ui() -> SwaggerUi {
-    SwaggerUi::new("/swagger-ui/<_..>").url("/swagger-ui/api-docs/openapi.json", ApiDoc::openapi())
-}
-
-pub fn init() -> Rocket<Build> {
+pub fn init(swagger: PathBuf) -> Rocket<Build> {
     let mut rocket: Rocket<Build> = rocket::build()
         .mount("/metrics", routes![prom_metrics])
-        .mount(
-            "/",
-            swagger_ui(),
-        )
-        .mount("/api", routes![api::population]);
+        .mount("/api", api::routes())
+        .mount("/api/swagger", FileServer::from(swagger));
 
     rocket
 }

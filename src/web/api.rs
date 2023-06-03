@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use rocket::{
     get,
     response::status::BadRequest,
@@ -5,10 +6,12 @@ use rocket::{
     routes,
     serde::{json::Json, Serialize}, State,
 };
+use rocket::fs::{FileServer, NamedFile};
 use serde_json::json;
 use sqlx::FromRow;
+use utoipa::openapi::OpenApi;
 use utoipa::ToSchema;
-use crate::shuttle::DbState;
+use crate::shuttle::{DbState};
 
 #[derive(Serialize, ToSchema)]
 pub struct Error {
@@ -98,4 +101,13 @@ pub async fn population(
     };
 
     Ok(Json(response))
+}
+
+#[get("/openapi.json")]
+fn serve_api_doc(openapi: &State<OpenApi>) -> Json<OpenApi> {
+    Json(openapi.inner().clone())
+}
+
+pub fn routes() -> Vec<rocket::Route> {
+    routes![population, serve_api_doc]
 }
