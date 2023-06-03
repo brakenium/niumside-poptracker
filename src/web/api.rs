@@ -1,12 +1,11 @@
-use std::path::PathBuf;
+
 use rocket::{
     get,
     response::status::BadRequest,
-    Rocket,
     routes,
     serde::{json::Json, Serialize}, State,
 };
-use rocket::fs::{FileServer, NamedFile};
+
 use serde_json::json;
 use sqlx::FromRow;
 use utoipa::openapi::OpenApi;

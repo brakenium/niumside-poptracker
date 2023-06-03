@@ -6,7 +6,7 @@ use auraxis::{
             CharacterSubscription, EventSubscription, SubscriptionSettings, WorldSubscription,
         },
     },
-    AuraxisError, WorldID,
+    AuraxisError,
 };
 use tokio::sync::mpsc::Receiver;
 

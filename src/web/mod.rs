@@ -3,7 +3,7 @@ mod api;
 use std::path::PathBuf;
 use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
-use rocket::fs::{FileServer, Options};
+use rocket::fs::{FileServer};
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]
@@ -21,7 +21,7 @@ use utoipa::OpenApi;
         )
     )
 )]
-pub(crate) struct ApiDoc;
+pub struct ApiDoc;
 
 #[utoipa::path(
     context_path = "/metrics",
@@ -80,7 +80,7 @@ pub fn prom_metrics(prometheus: &State<PrometheusHandle>) -> String {
 }
 
 pub fn init(swagger: PathBuf) -> Rocket<Build> {
-    let mut rocket: Rocket<Build> = rocket::build()
+    let rocket: Rocket<Build> = rocket::build()
         .mount("/metrics", routes![prom_metrics])
         .mount("/api", api::routes())
         .mount("/api/swagger", FileServer::from(swagger));
