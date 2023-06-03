@@ -1,6 +1,9 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 use crate::{active_players, event_handlers, logging, realtime};
 use sqlx::PgPool;
+use utoipa::OpenApi;
+use crate::web::ApiDoc;
 
 pub struct DbState {
     pub(crate) pool: PgPool,
@@ -37,7 +40,8 @@ impl shuttle_runtime::Service for NiumsideService {
             .rocket
             .configure(config)
             .manage(logging::metrics())
-            .manage(db_state);
+            .manage(db_state)
+            .manage(ApiDoc::openapi());
 
         // write a match expression for realtime::init(app_config.census, app_config.worlds).await
         // if events is Ok, then do the following

@@ -21,7 +21,7 @@ use utoipa::OpenApi;
         )
     )
 )]
-struct ApiDoc;
+pub(crate) struct ApiDoc;
 
 #[utoipa::path(
     context_path = "/metrics",
