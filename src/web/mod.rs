@@ -83,7 +83,7 @@ pub fn init(swagger: PathBuf) -> Rocket<Build> {
     let rocket: Rocket<Build> = rocket::build()
         .mount("/metrics", routes![prom_metrics])
         .mount("/api", api::routes())
-        .mount("/api/swagger", FileServer::from(swagger));
+        .mount("/api", FileServer::from(swagger));
 
     rocket
 }
