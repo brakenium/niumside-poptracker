@@ -23,8 +23,6 @@ pub async fn population(
         None,
     ).await?;
 
-    info!("Got population: {:?}", population);
-
     let mut response = formatting::world_breakdown_message(&population);
 
     ctx.send(|m| {

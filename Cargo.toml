@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#auraxis = { git = "https://github.com/brakenium/auraxis-rs.git", branch = "strum", features = ["strum"] }
-auraxis = { path = "../auraxis-rs/auraxis", features = ["strum"] }
+auraxis = { git = "https://github.com/brakenium/auraxis-rs.git", features = ["strum"] }
+#auraxis = { path = "../auraxis-rs/auraxis", features = ["strum"] }
 tokio = { version = "1.25.0", features = ["full"] }
 tracing-subscriber = "0.3"
 tracing = "0.1.36"
@@ -20,13 +20,13 @@ sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "postgres", 
 thiserror = "1.0.37"
 metrics-exporter-prometheus = "0.12.0"
 metrics = "0.21.0"
-shuttle-runtime = "0.19.0"
-shuttle-shared-db = { version = "0.19.0", features = ["postgres"] }
-shuttle-secrets = "0.19.0"
+shuttle-runtime = "0.20.0"
+shuttle-shared-db = { version = "0.20.0", features = ["postgres"] }
+shuttle-secrets = "0.20.0"
 rocket = { version = "0.5.0-rc.3", features = ["json"] }
 utoipa = { version = "3.3.0", features = ["rocket_extras", "chrono"] }
 serde_json = "1.0.96"
-shuttle-static-folder = "0.19.0"
+shuttle-static-folder = "0.20.0"
 #serenity = { version = "0.11.5", default-features = false, features = ["standard_framework", "framework", "client", "gateway", "rustls_backend", "model"] }
 poise = "0.5.5"
 strum = "0.25.0"
