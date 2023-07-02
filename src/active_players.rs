@@ -9,6 +9,7 @@ use std::{
     time::Duration,
 };
 use tracing::info;
+use crate::controllers::population::{FactionBreakdown, LoadoutBreakdown, WorldBreakdown, ZoneBreakdown};
 
 #[derive(Debug, Clone)]
 pub struct ActivePlayer {
@@ -20,17 +21,9 @@ pub struct ActivePlayer {
     pub last_change: DateTime<Utc>,
 }
 
-type ActivePlayerHashmap = HashMap<CharacterID, ActivePlayer>;
+pub type ActivePlayerHashmap = HashMap<CharacterID, ActivePlayer>;
 
 pub type ActivePlayerDb = Arc<Mutex<ActivePlayerHashmap>>;
-
-pub type LoadoutBreakdown = HashMap<Loadout, u16>;
-
-pub type FactionBreakdown = HashMap<Faction, HashMap<Faction, LoadoutBreakdown>>;
-
-pub type ZoneBreakdown = HashMap<ZoneID, FactionBreakdown>;
-
-pub type WorldBreakdown = HashMap<WorldID, ZoneBreakdown>;
 
 pub async fn clean(active_players: ActivePlayerDb) -> Option<()> {
     let active_players = active_players.clone();

@@ -1,9 +1,8 @@
-
-
 use crate::{active_players, event_handlers, logging, realtime};
 use sqlx::PgPool;
 use utoipa::OpenApi;
 use crate::web::ApiDoc;
+use crate::discord::{Data, Error};
 
 pub struct DbState {
     pub(crate) pool: PgPool,
@@ -14,6 +13,7 @@ pub struct NiumsideService {
     pub(crate) db_pool: PgPool,
     pub(crate) secrets: shuttle_secrets::SecretStore,
     pub(crate) rocket: rocket::Rocket<rocket::Build>,
+    pub(crate) poise: poise::FrameworkBuilder<Data, Error>,
 }
 
 #[shuttle_runtime::async_trait]
@@ -36,12 +36,23 @@ impl shuttle_runtime::Service for NiumsideService {
         let db_state = DbState {
             pool: self.db_pool.clone(),
         };
+
         let rocket = self
             .rocket
             .configure(config)
             .manage(logging::metrics())
             .manage(db_state)
             .manage(ApiDoc::openapi());
+
+        let poise_db = self.db_pool.clone();
+        let poise = self.poise.setup(|ctx, _ready, framework| {
+                Box::pin(async move {
+                    poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                    Ok(Data {
+                        db_pool: poise_db,
+                    })
+                })
+            });
 
         // write a match expression for realtime::init(app_config.census, app_config.worlds).await
         // if events is Ok, then do the following
@@ -54,6 +65,7 @@ impl shuttle_runtime::Service for NiumsideService {
         };
 
         tokio::select!(
+            _ = poise.run() => {},
             _ = rocket.launch() => {},
             _ = active_players::process_loop(self.active_players.clone(), self.db_pool) => {},
             _ = event_handlers::receive_events(events, self.active_players.clone()) => {},

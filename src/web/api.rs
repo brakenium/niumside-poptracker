@@ -1,4 +1,3 @@
-
 use rocket::{
     get,
     response::status::BadRequest,
@@ -10,6 +9,7 @@ use serde_json::json;
 use sqlx::FromRow;
 use utoipa::openapi::OpenApi;
 use utoipa::ToSchema;
+use crate::controllers;
 use crate::shuttle::{DbState};
 
 #[derive(Serialize, ToSchema)]
@@ -48,26 +48,22 @@ pub async fn population(
     world: Option<Vec<i32>>,
     db_pool_state: &State<DbState>,
 ) -> Result<Json<Response>, BadRequest<String>> {
-    let world = if let Some(world) = world {
-        // Check if the world IDs are valid
-        match sqlx::query!(
-            "SELECT world_id FROM world WHERE world_id = ANY($1)",
-            &world
-        )
-        .fetch_all(&db_pool_state.pool)
-        .await
-        .map_err(|e| BadRequest(Some(e.to_string())))? {
-            worlds if worlds.len() == world.len() => (),
-            _ => return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string()))),
-        };
-        world
+    let world: Vec<i32> = if let Some(world) = world {
+        match controllers::world::get_existing(&db_pool_state.pool, &world[..]).await {
+            Ok(worlds) => {
+                let worlds: Vec<i32> = worlds.into_iter().map(|w| w.0).collect();
+                if worlds.len() > 0 {
+                    worlds
+                } else {
+                    return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string())));
+                }
+            },
+            Err(e) => return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string()))),
+        }
     } else {
-        let world = sqlx::query!("SELECT world_id FROM world")
-            .fetch_all(&db_pool_state.pool)
-            .await
-            .map_err(|e| BadRequest(Some(e.to_string())))?;
-
-        world.into_iter().map(|w| w.world_id).collect()
+        controllers::world::get_all(&db_pool_state.pool).await
+            .map(|worlds| worlds.into_iter().map(|w| w.0).collect())
+            .map_err(|e| BadRequest(Some(e.to_string())))?
     };
 
     let population = sqlx::query!(
