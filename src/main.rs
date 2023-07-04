@@ -57,12 +57,11 @@ async fn agnostic_init(postgres: PgPool, swagger: &Path, app_config: Settings) -
 #[shuttle_runtime::main]
 async fn init(
     #[shuttle_shared_db::Postgres] postgres: PgPool,
-    #[shuttle_static_folder::StaticFolder(folder = "swagger-v4.19.0")] swagger: PathBuf,
-    #[shuttle_static_folder::StaticFolder(folder = "config")] config_folder: PathBuf,
+    #[shuttle_static_folder::StaticFolder] static_folder: PathBuf,
 ) -> Result<shuttle::NiumsideService, shuttle_runtime::Error> {
-    let app_config = Settings::new(&config_folder).map_err(anyhow::Error::new)?;
+    let app_config = Settings::new(&static_folder.join("config")).map_err(anyhow::Error::new)?;
 
-    let initialised_services = agnostic_init(postgres, &swagger, app_config.clone()).await?;
+    let initialised_services = agnostic_init(postgres, &static_folder.join("swagger-v4.19.0"), app_config.clone()).await?;
 
     Ok(shuttle::NiumsideService {
         active_players: initialised_services.active_players,
@@ -84,7 +83,7 @@ async fn main() -> anyhow::Result<()> {
 
     let initialised_services = agnostic_init(
         postgres,
-        Path::new("swagger-v4.19.0"),
+        Path::new("../static/swagger-v4.19.0"),
         app_config.clone()
     ).await?;
 

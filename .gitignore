@@ -4,3 +4,4 @@
 /.env
 /Secrets.toml
 /config/production.yaml
+/static/config
