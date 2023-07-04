@@ -3,47 +3,101 @@
 #![warn(clippy::unwrap_used)]
 #![warn(clippy::expect_used)]
 
-mod configuration;
-mod constants;
-mod realtime;
-mod event_handlers;
 mod active_players;
-mod storage;
+mod event_handlers;
 mod logging;
-use futures::future;
-use std::collections::HashMap;
-use std::error::Error;
-use std::sync::{Arc, Mutex};
+mod realtime;
+#[cfg(not(feature = "standalone"))]
+mod shuttle;
+mod web;
+mod discord;
+mod controllers;
+mod constants;
+mod storage;
+mod startup;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    let app_config = configuration::Settings::new()?;
+use sqlx::PgPool;
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
+use std::path::Path;
+#[cfg(not(feature = "standalone"))]
+use std::path::PathBuf;
+use poise::FrameworkBuilder;
+use crate::storage::configuration::Settings;
 
-    logging::init(app_config.app.log_level);
+struct Services {
+    active_players: active_players::ActivePlayerDb,
+    db_pool: PgPool,
+    rocket: rocket::Rocket<rocket::Build>,
+    poise: FrameworkBuilder<discord::Data, discord::Error>,
+}
 
-    // write a match expression for realtime::init(app_config.census, app_config.worlds).await
-    // if events is Ok, then do the following
-    // if events is Err, then do the following
-    let events = match realtime::init(app_config.census, app_config.worlds).await {
-        Ok(events) => events,
-        Err(e) => {
-            panic!("Unable to connect to realtime API: {e}");
-        }
-    };
-
-    let Ok(db_pool) = storage::pool::create(&app_config.database.connection_string).await
-    else {
-        panic!("Unable to connect to database");
-    };
+async fn agnostic_init(postgres: PgPool, swagger: &Path, app_config: Settings) -> anyhow::Result<Services> {
+    sqlx::migrate!()
+        .run(&postgres.clone())
+        .await?;
 
     let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
 
-    let futures = vec![
-        tokio::spawn(active_players::process_loop(active_players.clone(), db_pool)),
-        tokio::spawn(event_handlers::receive_events(events, active_players.clone())),
-        tokio::spawn(active_players::clean(active_players.clone()))
-    ];
+    let rocket = web::init(swagger);
 
-    future::join_all(futures).await;
+    let poise = discord::init(&app_config.discord.token);
+
+    Ok(Services {
+        active_players,
+        db_pool: postgres,
+        rocket,
+        poise,
+    })
+}
+
+#[cfg(not(feature = "standalone"))]
+#[shuttle_runtime::main]
+async fn init(
+    #[shuttle_shared_db::Postgres] postgres: PgPool,
+    #[shuttle_static_folder::StaticFolder(folder = "swagger-v4.19.0")] swagger: PathBuf,
+    #[shuttle_static_folder::StaticFolder(folder = "config")] config_folder: PathBuf,
+) -> Result<shuttle::NiumsideService, shuttle_runtime::Error> {
+    let app_config = Settings::new(&config_folder).map_err(anyhow::Error::new)?;
+
+    let initialised_services = agnostic_init(postgres, &swagger, app_config.clone()).await?;
+
+    Ok(shuttle::NiumsideService {
+        active_players: initialised_services.active_players,
+        db_pool: initialised_services.db_pool,
+        app_config,
+        rocket: initialised_services.rocket,
+        poise: initialised_services.poise,
+    })
+}
+
+#[cfg(feature = "standalone")]
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let app_config = Settings::new(Path::new("config"))?;
+
+    logging::tracing(app_config.app.log_level);
+
+    let postgres = storage::db_pool::create(&app_config.database.connection_string.clone()).await?;
+
+    let initialised_services = agnostic_init(
+        postgres,
+        Path::new("swagger-v4.19.0"),
+        app_config.clone()
+    ).await?;
+
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
+
+    Box::pin(startup::services(
+        initialised_services.rocket,
+        initialised_services.db_pool,
+        app_config,
+        initialised_services.poise,
+        initialised_services.active_players,
+        addr,
+    )).await?;
+
     Ok(())
 }

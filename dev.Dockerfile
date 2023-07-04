@@ -11,7 +11,7 @@ COPY . .
 
 # Build the binary
 
-RUN cargo build
+RUN cargo build -F standalone
 
 # This image will run the niumside-poptracker binary
 

@@ -1,12 +1,15 @@
 #![allow(clippy::cast_lossless)]
-use auraxis::{Faction, CharacterID, Loadout, WorldID, ZoneID};
+use auraxis::{CharacterID, Faction, Loadout, WorldID, ZoneID};
 use chrono::{DateTime, Utc};
-use metrics::{increment_counter, gauge};
+use metrics::{gauge, increment_counter};
 use sqlx::{Pool, Postgres};
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
-use tracing::{info};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+use tracing::info;
+use crate::controllers::population::{FactionBreakdown, LoadoutBreakdown, WorldBreakdown, ZoneBreakdown};
 
 #[derive(Debug, Clone)]
 pub struct ActivePlayer {
@@ -18,17 +21,9 @@ pub struct ActivePlayer {
     pub last_change: DateTime<Utc>,
 }
 
-type ActivePlayerHashmap = HashMap<CharacterID, ActivePlayer>;
+pub type ActivePlayerHashmap = HashMap<CharacterID, ActivePlayer>;
 
 pub type ActivePlayerDb = Arc<Mutex<ActivePlayerHashmap>>;
-
-pub type LoadoutBreakdown = HashMap<Loadout, u16>;
-
-pub type FactionBreakdown = HashMap<Faction, HashMap<Faction, LoadoutBreakdown>>;
-
-pub type ZoneBreakdown = HashMap<ZoneID, FactionBreakdown>;
-
-pub type WorldBreakdown = HashMap<WorldID, ZoneBreakdown>;
 
 pub async fn clean(active_players: ActivePlayerDb) -> Option<()> {
     let active_players = active_players.clone();
@@ -37,7 +32,9 @@ pub async fn clean(active_players: ActivePlayerDb) -> Option<()> {
 
         match active_players.lock() {
             Ok(mut guard) => {
-                guard.retain(|_character_id, player| { player.last_change + chrono::Duration::minutes(3) > Utc::now() });
+                guard.retain(|_character_id, player| {
+                    player.last_change + chrono::Duration::minutes(3) > Utc::now()
+                });
             }
             Err(e) => {
                 increment_counter!("niumside_active_players_lock_failed");
@@ -51,10 +48,11 @@ pub async fn clean(active_players: ActivePlayerDb) -> Option<()> {
 
 pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
     let mut loadout_breakdown: WorldBreakdown = HashMap::new();
-    let active_players_lock = active_players.lock()
+    let active_players_lock = active_players
+        .lock()
         .unwrap_or_else(|poisoned| {
-                increment_counter!("niumside_active_players_lock_failed");
-                panic!("Failed to lock active_players: {poisoned}");
+            increment_counter!("niumside_active_players_lock_failed");
+            panic!("Failed to lock active_players: {poisoned}");
         })
         .clone();
 
@@ -82,7 +80,11 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
     loadout_breakdown
 }
 
-async fn insert_loadout(loadout_map: &LoadoutBreakdown, faction_population_id: i32, db_pool: &Pool<Postgres>) {
+async fn insert_loadout(
+    loadout_map: &LoadoutBreakdown,
+    faction_population_id: i32,
+    db_pool: &Pool<Postgres>,
+) {
     for (loadout_id, amount) in loadout_map.iter() {
         sqlx::query!(
             "INSERT INTO loadout (loadout_id) VALUES ($1) ON CONFLICT DO NOTHING",
@@ -132,11 +134,14 @@ async fn insert_zone(zone_map: &ZoneBreakdown, world_population_id: i32, db_pool
         .zone_population_id;
 
         insert_faction(faction_map, zone_population_id, db_pool).await;
-
     }
 }
 
-async fn insert_faction(faction_map: &FactionBreakdown, zone_population_id: i32, db_pool: &Pool<Postgres>) {
+async fn insert_faction(
+    faction_map: &FactionBreakdown,
+    zone_population_id: i32,
+    db_pool: &Pool<Postgres>,
+) {
     for (faction_id, team_map) in faction_map.iter() {
         for (team_id, loadout_map) in team_map.iter() {
             sqlx::query!(
@@ -183,7 +188,8 @@ pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgr
             *world_id as i32
         )
         .execute(db_pool)
-        .await.unwrap_or_else(|error| {
+        .await
+        .unwrap_or_else(|error| {
             panic!("Failed database insert: {error}");
         });
 

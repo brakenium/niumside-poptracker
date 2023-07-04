@@ -2,3 +2,5 @@
 /config/local.yaml
 /config/docker.yaml
 /.env
+/Secrets.toml
+/config/production.yaml
