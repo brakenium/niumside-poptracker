@@ -1,10 +1,10 @@
 use auraxis::WorldID;
-use std::str::FromStr;
-use poise::serenity_prelude::CacheHttp;
+
+
 use crate::controllers::population;
 use crate::discord::{Context, Error, formatting};
 use strum::IntoEnumIterator;
-use tracing::info;
+
 
 /// Displays your or another user's account creation date
 #[poise::command(slash_command, track_edits)]
@@ -34,8 +34,8 @@ pub async fn population(
 }
 
 async fn world_id_autocomplete(
-    ctx: Context<'_>,
-    partial: &str,
+    _ctx: Context<'_>,
+    _partial: &str,
 ) -> impl Iterator<Item = poise::AutocompleteChoice<i16>> {
     WorldID::iter()
         .map(|v| poise::AutocompleteChoice {

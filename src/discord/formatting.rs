@@ -1,4 +1,4 @@
-use poise::serenity_prelude::{CreateEmbed, Embed, Mentionable};
+use poise::serenity_prelude::{CreateEmbed, Mentionable};
 use auraxis::WorldID;
 use crate::controllers::population::{WorldBreakdown, ZoneBreakdown};
 use crate::discord::icons::Icons;
@@ -26,7 +26,7 @@ pub fn single_world_breakdown_embed(
         let mut zone_faction_pop = String::new();
         for (faction_id, team_breakdown) in faction_breakdown.iter() {
             let mut faction_population = 0;
-            for (team_id, loadout_breakdown) in team_breakdown.iter() {
+            for (_team_id, loadout_breakdown) in team_breakdown.iter() {
                 for (_, loadout_population) in loadout_breakdown.iter() {
                     world_population += loadout_population;
                     zone_population += loadout_population;

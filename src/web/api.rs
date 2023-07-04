@@ -52,13 +52,13 @@ pub async fn population(
         match controllers::world::get_existing(&db_pool_state.pool, &world[..]).await {
             Ok(worlds) => {
                 let worlds: Vec<i32> = worlds.into_iter().map(|w| w.0).collect();
-                if worlds.len() > 0 {
+                if !worlds.is_empty() {
                     worlds
                 } else {
                     return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string())));
                 }
             },
-            Err(e) => return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string()))),
+            Err(_e) => return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string()))),
         }
     } else {
         controllers::world::get_all(&db_pool_state.pool).await

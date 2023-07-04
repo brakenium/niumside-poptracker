@@ -1,4 +1,4 @@
-use std::error::Error;
+
 use sqlx::PgPool;
 use utoipa::OpenApi;
 use crate::{active_players, event_handlers, logging, realtime};

@@ -1,4 +1,4 @@
-use poise::serenity_prelude::{Emoji, EmojiId, EmojiIdentifier, parse_emoji};
+use poise::serenity_prelude::{EmojiId, EmojiIdentifier};
 use auraxis::Faction;
 
 #[repr(u64)]
