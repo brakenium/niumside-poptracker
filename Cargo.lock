@@ -127,7 +127,7 @@ checksum = "c59bdb34bc650a32731b31bd8f0829cc15d24a708ee31559e0bb34f2bc320cba"
 [[package]]
 name = "auraxis"
 version = "0.2.0"
-source = "git+https://github.com/brakenium/auraxis-rs.git#38701bcf7183a102bbe9062271e2aad1848612a9"
+source = "git+https://github.com/brakenium/auraxis-rs.git#5b0f28341ceb611e9a778b03a32c2d3b49727eb3"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3095,12 +3095,13 @@ dependencies = [
 
 [[package]]
 name = "stream-reconnect"
-version = "0.3.4"
+version = "0.4.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9831f47a89f0d699b3a0c74ae7c48b30974ccca14a571f342a0eb41b6f7f2a56"
+checksum = "7831822002373adc1e139db41370c7723baa81a7922cecb20dde12970b9e8bc2"
 dependencies = [
  "futures",
  "log",
+ "rand",
  "tokio",
 ]
 
