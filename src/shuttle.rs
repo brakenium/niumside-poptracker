@@ -14,14 +14,14 @@ pub struct NiumsideService {
 #[shuttle_runtime::async_trait]
 impl shuttle_runtime::Service for NiumsideService {
     async fn bind(mut self, addr: std::net::SocketAddr) -> Result<(), shuttle_runtime::Error> {
-        startup::services(
+        Box::pin(startup::services(
             self.rocket,
             self.db_pool,
             self.app_config,
             self.poise,
             self.active_players,
             addr
-        ).await?;
+        )).await?;
 
         Ok(())
     }

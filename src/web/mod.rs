@@ -1,6 +1,6 @@
 mod api;
 
-use std::path::PathBuf;
+use std::path::Path;
 use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
 use rocket::fs::{FileServer};
@@ -79,7 +79,8 @@ pub fn prom_metrics(prometheus: &State<PrometheusHandle>) -> String {
     prometheus.render()
 }
 
-pub fn init(swagger: PathBuf) -> Rocket<Build> {
+pub fn init(swagger: &Path) -> Rocket<Build> {
+    #[allow(clippy::no_effect_underscore_binding)]
     let rocket: Rocket<Build> = rocket::build()
         .mount("/metrics", routes![prom_metrics])
         .mount("/api", api::routes())

@@ -9,14 +9,14 @@ pub fn world_breakdown_message(
     let mut embeds = Vec::new();
 
     for world in world_breakdown {
-        embeds.push(single_world_breakdown_embed(world.0, world.1));
+        embeds.push(single_world_breakdown_embed(*world.0, world.1));
     }
 
     embeds
 }
 
 pub fn single_world_breakdown_embed(
-    world: &WorldID,
+    world: WorldID,
     zone: &ZoneBreakdown,
 ) -> CreateEmbed {
     let mut world_embed = CreateEmbed::default();

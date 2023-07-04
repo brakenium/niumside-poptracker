@@ -21,6 +21,8 @@ use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
+use std::path::Path;
+#[cfg(not(feature = "standalone"))]
 use std::path::PathBuf;
 use poise::FrameworkBuilder;
 use crate::storage::configuration::Settings;
@@ -32,7 +34,7 @@ struct Services {
     poise: FrameworkBuilder<discord::Data, discord::Error>,
 }
 
-async fn agnostic_init(postgres: PgPool, swagger: PathBuf, app_config: Settings) -> anyhow::Result<Services> {
+async fn agnostic_init(postgres: PgPool, swagger: &Path, app_config: Settings) -> anyhow::Result<Services> {
     sqlx::migrate!()
         .run(&postgres.clone())
         .await?;
@@ -58,9 +60,9 @@ async fn init(
     #[shuttle_static_folder::StaticFolder(folder = "swagger-v4.19.0")] swagger: PathBuf,
     #[shuttle_static_folder::StaticFolder(folder = "config")] config_folder: PathBuf,
 ) -> Result<shuttle::NiumsideService, shuttle_runtime::Error> {
-    let app_config = Settings::new(config_folder).map_err(anyhow::Error::new)?;
+    let app_config = Settings::new(&config_folder).map_err(anyhow::Error::new)?;
 
-    let initialised_services = agnostic_init(postgres, swagger, app_config.clone()).await?;
+    let initialised_services = agnostic_init(postgres, &swagger, app_config.clone()).await?;
 
     Ok(shuttle::NiumsideService {
         active_players: initialised_services.active_players,
@@ -74,7 +76,7 @@ async fn init(
 #[cfg(feature = "standalone")]
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let app_config = Settings::new(PathBuf::from("config"))?;
+    let app_config = Settings::new(Path::new("config"))?;
 
     logging::tracing(app_config.app.log_level);
 
@@ -82,7 +84,7 @@ async fn main() -> anyhow::Result<()> {
 
     let initialised_services = agnostic_init(
         postgres,
-        PathBuf::from("swagger-v4.19.0"),
+        Path::new("swagger-v4.19.0"),
         app_config.clone()
     ).await?;
 

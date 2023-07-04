@@ -3,6 +3,7 @@ use metrics_exporter_prometheus::{PrometheusBuilder, PrometheusHandle};
 use tracing::{info};
 
 pub fn metrics() -> PrometheusHandle {
+    #[allow(clippy::expect_used)]
     let prometheus_metrics = PrometheusBuilder::new()
         .install_recorder()
         .expect("failed to install recorder");

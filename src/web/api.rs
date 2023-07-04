@@ -37,11 +37,11 @@ pub struct PopWorld {
 }
 
 #[utoipa::path(
-    context_path = "/api",
-    responses(
-        (status = 200, description = "Successful response", body = Response),
-        (status = 400, description = "Bad request", body = Error, example = json!(Error { error: "Invalid world ID".to_string() })),
-    )
+context_path = "/api",
+responses(
+(status = 200, description = "Successful response", body = Response),
+(status = 400, description = "Bad request", body = Error, example = json ! (Error { error: "Invalid world ID".to_string() })),
+)
 )]
 #[get("/population?<world>")]
 pub async fn population(
@@ -52,12 +52,11 @@ pub async fn population(
         match controllers::world::get_existing(&db_pool_state.pool, &world[..]).await {
             Ok(worlds) => {
                 let worlds: Vec<i32> = worlds.into_iter().map(|w| w.0).collect();
-                if !worlds.is_empty() {
-                    worlds
-                } else {
+                if worlds.is_empty() {
                     return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string())));
                 }
-            },
+                worlds
+            }
             Err(_e) => return Err(BadRequest(Some(json!({"error": "Invalid world ID" }).to_string()))),
         }
     } else {
@@ -103,6 +102,7 @@ fn serve_api_doc(openapi: &State<OpenApi>) -> Json<OpenApi> {
     Json(openapi.inner().clone())
 }
 
+#[allow(clippy::no_effect_underscore_binding)]
 pub fn routes() -> Vec<rocket::Route> {
     routes![population, serve_api_doc]
 }

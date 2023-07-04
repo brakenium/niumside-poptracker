@@ -66,35 +66,25 @@ pub async fn get_current(
     let mut world_breakdown: WorldBreakdown = HashMap::new();
 
     for record in population {
-        let world_id = match WorldID::try_from(record.world_id as i16) {
-            Ok(world_id) => world_id,
-            Err(_) => {
+        #[allow(clippy::cast_possible_truncation)]
+        let Ok(world_id) = WorldID::try_from(record.world_id as i16) else {
                 error!("Invalid world ID is not defined in auraxis-rs: {}", record.world_id);
                 continue;
-            },
-        };
+            };
+        #[allow(clippy::cast_sign_loss)]
         let zone_id = record.zone_id as ZoneID;
-        let faction_id = match Faction::try_from(record.faction_id) {
-            Ok(faction_id) => faction_id,
-            Err(_) => {
+        let Ok(faction_id) = Faction::try_from(record.faction_id) else {
                 error!("Invalid faction ID is not defined in auraxis-rs: {}", record.faction_id);
                 continue;
-            },
-        };
-        let team_id = match Faction::try_from(record.team_id) {
-            Ok(team_id) => team_id,
-            Err(_) => {
+            };
+        let Ok(team_id) = Faction::try_from(record.team_id) else {
                 error!("Invalid team ID (Faction enum) is not defined in auraxis-rs: {}", record.team_id);
                 continue;
-            },
-        };
-        let loadout_id = match Loadout::try_from(record.loadout_id) {
-            Ok(loadout_id) => loadout_id,
-            Err(_) => {
+            };
+        let Ok(loadout_id) = Loadout::try_from(record.loadout_id) else {
                 error!("Invalid loadout ID is not defined in auraxis-rs: {}", record.loadout_id);
                 continue;
-            },
-        };
+            };
         let amount = record.amount;
 
         let world = world_breakdown.entry(world_id).or_insert_with(HashMap::new);

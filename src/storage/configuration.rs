@@ -4,7 +4,7 @@ use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
 use tracing::Level;
 use std::env;
-use std::path::PathBuf;
+use std::path::Path;
 use url::Url;
 
 pub trait DeserializeWith: Sized {
@@ -74,7 +74,7 @@ pub struct Settings {
 // TODO: Check user config directories for config files
 // TODO: Fix environment variable config
 impl Settings {
-    pub fn new(config_folder: PathBuf) -> Result<Self, ConfigError> {
+    pub fn new(config_folder: &Path) -> Result<Self, ConfigError> {
         let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "production".into());
 
         let s = Config::builder()

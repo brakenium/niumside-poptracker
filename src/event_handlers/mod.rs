@@ -21,7 +21,7 @@ pub async fn receive_events(
                 tokio::spawn(async move {
                     match event {
                         Event::GainExperience(event) => {
-                            gain_experience::handle(&event, &active_players)
+                            gain_experience::handle(&event, &active_players);
                         }
                         Event::PlayerLogin(_) => todo!(),
                         Event::PlayerLogout(_) => todo!(),

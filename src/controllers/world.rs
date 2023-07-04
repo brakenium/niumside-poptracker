@@ -11,6 +11,7 @@ use sqlx::PgPool;
 ///
 /// * `Ok(bool)` - True if the world exists, false if it does not
 /// * `Err(sqlx::Error)` - The error returned by sqlx
+#[allow(dead_code)]
 pub async fn exists(db_pool: &PgPool, worlds: &i32) -> Result<bool, sqlx::Error> {
     match sqlx::query!(
         "SELECT EXISTS(SELECT 1 FROM world WHERE world_id = $1)",
@@ -19,7 +20,7 @@ pub async fn exists(db_pool: &PgPool, worlds: &i32) -> Result<bool, sqlx::Error>
     .fetch_one(db_pool)
     .await
     {
-        Ok(result) => Ok(result.exists.unwrap()),
+        Ok(result) => Ok(result.exists.unwrap_or(false)),
         Err(e) => Err(e),
     }
 }

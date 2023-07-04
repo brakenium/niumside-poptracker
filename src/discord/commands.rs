@@ -33,6 +33,7 @@ pub async fn population(
     Ok(())
 }
 
+#[allow(clippy::unused_async)]
 async fn world_id_autocomplete(
     _ctx: Context<'_>,
     _partial: &str,
