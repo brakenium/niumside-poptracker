@@ -1536,6 +1536,7 @@ dependencies = [
 name = "niumside-poptracker"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "auraxis",
  "chrono",
  "config",

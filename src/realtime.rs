@@ -9,18 +9,21 @@ use auraxis::{
     AuraxisError,
 };
 use tokio::sync::mpsc::Receiver;
+use crate::storage::configuration;
 
-pub async fn init(secrets: shuttle_secrets::SecretStore) -> Result<Receiver<Event>, AuraxisError> {
+pub async fn init(census_config: configuration::CensusConfig, worlds: Vec<configuration::WorldConfig>) -> Result<Receiver<Event>, AuraxisError> {
     let realtime_config = RealtimeClientConfig {
-        service_id: secrets.get("SERVICE_ID").unwrap(),
-        realtime_url: secrets.get("REALTIME_URL"),
+        service_id: census_config.service_id,
+        realtime_url: Some(census_config.realtime_base_url.to_string()),
         ..RealtimeClientConfig::default()
     };
+
+    let worlds = worlds.iter().map(|value| value.id).collect();
 
     let subscription = SubscriptionSettings {
         event_names: Some(EventSubscription::Ids(vec![EventNames::GainExperience])),
         characters: Some(CharacterSubscription::All),
-        worlds: Some(WorldSubscription::All),
+        worlds: Some(WorldSubscription::Ids(worlds)),
         logical_and_characters_with_worlds: Some(true),
         ..SubscriptionSettings::default()
     };

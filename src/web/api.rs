@@ -10,7 +10,7 @@ use sqlx::FromRow;
 use utoipa::openapi::OpenApi;
 use utoipa::ToSchema;
 use crate::controllers;
-use crate::shuttle::{DbState};
+use crate::startup::DbState;
 
 #[derive(Serialize, ToSchema)]
 pub struct Error {

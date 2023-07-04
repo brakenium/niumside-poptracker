@@ -2,11 +2,6 @@ use metrics::{describe_counter, describe_gauge};
 use metrics_exporter_prometheus::{PrometheusBuilder, PrometheusHandle};
 use tracing::{info, Level};
 
-// pub fn init() {
-//     // tracing(log_level);
-//     metrics();
-// }
-
 pub fn metrics() -> PrometheusHandle {
     let prometheus_metrics = PrometheusBuilder::new()
         .install_recorder()
@@ -36,6 +31,7 @@ fn describe_metrics() {
     );
 }
 
+#[cfg(feature = "standalone")]
 pub fn tracing(log_level: Level) {
     tracing_subscriber::fmt()
         .with_max_level(log_level)
