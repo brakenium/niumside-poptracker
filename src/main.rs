@@ -58,7 +58,7 @@ async fn init(
     #[shuttle_static_folder::StaticFolder(folder = "swagger-v4.19.0")] swagger: PathBuf,
     #[shuttle_static_folder::StaticFolder(folder = "config")] config_folder: PathBuf,
 ) -> Result<shuttle::NiumsideService, shuttle_runtime::Error> {
-    let app_config = Settings::new(config_folder).map_err(|e| anyhow::Error::new(e))?;
+    let app_config = Settings::new(config_folder).map_err(anyhow::Error::new)?;
 
     let initialised_services = agnostic_init(postgres, swagger, app_config.clone()).await?;
 
@@ -88,14 +88,14 @@ async fn main() -> anyhow::Result<()> {
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
 
-    startup::services(
+    Box::pin(startup::services(
         initialised_services.rocket,
         initialised_services.db_pool,
         app_config,
         initialised_services.poise,
         initialised_services.active_players,
         addr,
-    ).await?;
+    )).await?;
 
     Ok(())
 }

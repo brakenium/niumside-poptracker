@@ -6,6 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+shuttle-runtime = { version = "0.20.0", optional = true }
+shuttle-shared-db = { version = "0.20.0", features = ["postgres"], optional = true }
+shuttle-static-folder = { version = "0.20.0", optional = true }
+
 auraxis = { git = "https://github.com/brakenium/auraxis-rs.git", features = ["strum"] }
 #auraxis = { path = "../auraxis-rs/auraxis", features = ["strum"] }
 tokio = { version = "1.25.0", features = ["full"] }
@@ -16,7 +20,7 @@ url = { version = "2.3.1", features = ["serde"] }
 serde = { version = "1.0.147", features = ["derive"] }
 chrono = "0.4.23"
 futures = "0.3.25"
-sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "postgres", "offline", "chrono"] }
+sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "postgres", "offline", "chrono"] }
 thiserror = "1.0.37"
 metrics-exporter-prometheus = "0.12.0"
 metrics = "0.21.0"
@@ -25,15 +29,10 @@ utoipa = { version = "3.3.0", features = ["rocket_extras", "chrono"] }
 serde_json = "1.0.96"
 poise = "0.5.5"
 strum = "0.25.0"
-
-shuttle-runtime = { version = "0.20.0", optional = true }
-shuttle-shared-db = { version = "0.20.0", features = ["postgres"], optional = true }
-shuttle-secrets = { version = "0.20.0", optional = true }
-shuttle-static-folder = { version = "0.20.0", optional = true }
 anyhow = "1.0.71"
 
 [features]
-default = ["dep:shuttle-runtime", "dep:shuttle-shared-db", "dep:shuttle-secrets", "dep:shuttle-static-folder"]
+default = ["dep:shuttle-runtime", "dep:shuttle-shared-db", "dep:shuttle-static-folder"]
 standalone = []
 
 # The profile that 'cargo swagger-v4.19.0' will build with
