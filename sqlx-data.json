@@ -1,6 +1,63 @@
 {
   "db": "PostgreSQL",
-  "0802daa6fa5b24eba40452fea0df1385df7161b9096ac0ddcf0bfacfae907b0c": {
+  "100c35003002c5c29e570b4dc06152775891aeb03cccf9d7245e90eb8881e269": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO zone (zone_id) VALUES ($1) ON CONFLICT DO NOTHING"
+  },
+  "472ca79650de0d4b44726c042be6ff9f8bb5e91fd50ac102607372bfd2441c07": {
+    "describe": {
+      "columns": [
+        {
+          "name": "zone_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT zone_id, name FROM zone"
+  },
+  "4cb271f200ea59bad193edd34f43735997253285d5cdbfcf6ecdd82598f67148": {
+    "describe": {
+      "columns": [
+        {
+          "name": "zone_population_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO zone_population (zone_id, world_population_id) VALUES ($1, $2) RETURNING zone_population_id"
+  },
+  "5ebd6ea108c1d1ac357a9f47f4d1475decf30cdf14bc199797d6fcbe8db39fe8": {
     "describe": {
       "columns": [
         {
@@ -58,64 +115,25 @@
         ]
       }
     },
-    "query": "SELECT wp.timestamp, wp.world_id, zp.zone_id, fp.faction_id, fp.team_id, lp.loadout_id, lp.amount FROM world_population wp\n        JOIN zone_population zp ON wp.population_id = zp.world_population_id\n        JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id\n        JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id\n        WHERE ($1::INTEGER[] IS NULL OR wp.world_id = ANY($1::INTEGER[]))\n            AND ($2::INTEGER[] IS NULL OR zp.zone_id = ANY($2::INTEGER[]))\n            AND ($3::SMALLINT[] IS NULL OR fp.faction_id = ANY($3::SMALLINT[]))\n            AND ($4::SMALLINT[] IS NULL OR fp.team_id = ANY($4::SMALLINT[]))\n            AND ($5::SMALLINT[] IS NULL OR lp.loadout_id = ANY($5::SMALLINT[]))\n            AND wp.population_id = (\n                SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id\n            )\n        ORDER BY wp.timestamp"
+    "query": "SELECT\n            wp.timestamp,\n            wp.world_id,\n            zp.zone_id,\n            fp.faction_id,\n            fp.team_id,\n            lp.loadout_id,\n            lp.amount\n        FROM world_population wp\n        JOIN zone_population zp ON wp.population_id = zp.world_population_id\n        JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id\n        JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id\n        WHERE ($1::INTEGER[] IS NULL OR wp.world_id = ANY($1::INTEGER[]))\n            AND ($2::INTEGER[] IS NULL OR zp.zone_id = ANY($2::INTEGER[]))\n            AND ($3::SMALLINT[] IS NULL OR fp.faction_id = ANY($3::SMALLINT[]))\n            AND ($4::SMALLINT[] IS NULL OR fp.team_id = ANY($4::SMALLINT[]))\n            AND ($5::SMALLINT[] IS NULL OR lp.loadout_id = ANY($5::SMALLINT[]))\n            AND wp.population_id = (\n                SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id\n            )\n        ORDER BY wp.timestamp"
   },
-  "100c35003002c5c29e570b4dc06152775891aeb03cccf9d7245e90eb8881e269": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "INSERT INTO zone (zone_id) VALUES ($1) ON CONFLICT DO NOTHING"
-  },
-  "4cb271f200ea59bad193edd34f43735997253285d5cdbfcf6ecdd82598f67148": {
+  "7d4f30a4b09dde9da62d2101d8724c10ddfa91493610da40d2a51cc9422c3640": {
     "describe": {
       "columns": [
         {
-          "name": "zone_population_id",
+          "name": "zone_id",
           "ordinal": 0,
           "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "INSERT INTO zone_population (zone_id, world_population_id) VALUES ($1, $2) RETURNING zone_population_id"
-  },
-  "888114bf91849f1826230bca441dc9df3a5fab8ed4b63016c86f3f2226a31ad5": {
-    "describe": {
-      "columns": [
-        {
-          "name": "timestamp",
-          "ordinal": 0,
-          "type_info": "Timestamp"
         },
         {
-          "name": "world_id",
+          "name": "name",
           "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "world_population",
-          "ordinal": 2,
-          "type_info": "Int8"
+          "type_info": "Varchar"
         }
       ],
       "nullable": [
         false,
-        false,
-        null
+        true
       ],
       "parameters": {
         "Left": [
@@ -123,7 +141,7 @@
         ]
       }
     },
-    "query": "\n        SELECT wp.timestamp, wp.world_id, SUM(lp.amount) AS world_population FROM world_population wp\n        JOIN zone_population zp ON wp.population_id = zp.world_population_id\n        JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id\n        JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id\n        AND wp.population_id = (SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id)\n        WHERE wp.world_id = ANY($1)\n        GROUP BY wp.population_id, wp.timestamp, wp.population_id\n        ORDER BY wp.timestamp\n        "
+    "query": "SELECT zone_id, name FROM zone WHERE zone_id = ANY($1)"
   },
   "8b5dedef3329eddfbf7a29892035cbe3cec3d3666ba739d748d496fe41856c7d": {
     "describe": {
@@ -158,6 +176,26 @@
       }
     },
     "query": "INSERT INTO world_population (world_id) VALUES ($1) RETURNING population_id"
+  },
+  "9f929ce6e805538e4655ccd8b8a7d13e6493192598fa84182a5ed971b42560c8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS(SELECT 1 FROM zone WHERE zone_id = $1)"
   },
   "a95ea562f4371727bc4ae881fb31e45ea16a01bdd6009078dea35934724bc957": {
     "describe": {
@@ -263,6 +301,56 @@
     },
     "query": "SELECT world_id, name FROM world WHERE world_id = ANY($1)"
   },
+  "d66cf855be2055a3aa7fe1eb79158eed5a74f2712e0c07ef0afc9e04dac5dc6c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "faction_id",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int2Array"
+        ]
+      }
+    },
+    "query": "SELECT faction_id, name FROM faction WHERE faction_id = ANY($1)"
+  },
+  "d95b2cefb66cf87a7bcd0acec42f823fb61cb6e4f0e08ab3aa879c325e0e6e61": {
+    "describe": {
+      "columns": [
+        {
+          "name": "faction_id",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT faction_id, name FROM faction"
+  },
   "da4ac889bec9b47e38790d04869371f98bb49934abe52aec1efe3baa788b7ca0": {
     "describe": {
       "columns": [
@@ -286,5 +374,25 @@
       }
     },
     "query": "SELECT world_id, name FROM world"
+  },
+  "ea520ad6c642df05bfe7d1dec00794c957103398c65489408ffb1c6f12133354": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS(SELECT 1 FROM faction WHERE faction_id = $1)"
   }
 }
