@@ -1,15 +1,52 @@
 use std::collections::HashMap;
-use auraxis::{Faction, Loadout, WorldID, ZoneID};
+use auraxis::{Faction, Loadout, WorldID};
+use serde::Serialize;
 use sqlx::PgPool;
 use tracing::{error, info};
+use utoipa::ToSchema;
 
-pub type LoadoutBreakdown = HashMap<Loadout, i16>;
+pub type LoadoutBreakdown = HashMap<i16, i16>;
 
-pub type FactionBreakdown = HashMap<Faction, HashMap<Faction, LoadoutBreakdown>>;
+pub type FactionBreakdown = HashMap<i16, HashMap<i16, LoadoutBreakdown>>;
 
-pub type ZoneBreakdown = HashMap<ZoneID, FactionBreakdown>;
+pub type ZoneBreakdown = HashMap<i32, FactionBreakdown>;
 
-pub type WorldBreakdown = HashMap<WorldID, ZoneBreakdown>;
+pub type WorldBreakdown = HashMap<i32, (chrono::NaiveDateTime, ZoneBreakdown)>;
+
+#[derive(Serialize, ToSchema)]
+pub struct PopWorld {
+    pub world_id: i32,
+    pub world_population: i16,
+    pub timestamp: chrono::NaiveDateTime,
+    pub zones: Vec<PopZone>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct PopZone {
+    pub zone_id: i32,
+    pub zone_population: i16,
+    pub factions: Vec<PopFaction>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct PopFaction {
+    pub faction_id: i16,
+    pub faction_population: i16,
+    pub teams: Vec<PopTeam>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct PopTeam {
+    pub team_id: i16,
+    pub team_population: i16,
+    pub loadouts: Vec<PopLoadout>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct PopLoadout {
+    pub loadout_id: i16,
+    pub loadout_population: i16,
+}
 
 // Get the current population from the database as a tree
 //
@@ -33,15 +70,17 @@ pub async fn get_current(
     factions: Option<&[i16]>,
     team_ids: Option<&[i16]>,
     loadouts: Option<&[i16]>,
-) -> Result<WorldBreakdown, sqlx::Error> {
-    // Log all optional parameters using info!()
-    info!("worlds: {:?}", worlds);
-    info!("zones: {:?}", zones);
-    info!("factions: {:?}", factions);
-    info!("team_ids: {:?}", team_ids);
-    info!("loadouts: {:?}", loadouts);
-    let population = sqlx::query!(
-        "SELECT wp.timestamp, wp.world_id, zp.zone_id, fp.faction_id, fp.team_id, lp.loadout_id, lp.amount FROM world_population wp
+) -> Option<WorldBreakdown> {
+    let Ok(population) = sqlx::query!(
+        "SELECT
+            wp.timestamp,
+            wp.world_id,
+            zp.zone_id,
+            fp.faction_id,
+            fp.team_id,
+            lp.loadout_id,
+            lp.amount
+        FROM world_population wp
         JOIN zone_population zp ON wp.population_id = zp.world_population_id
         JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id
         JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id
@@ -60,35 +99,42 @@ pub async fn get_current(
         team_ids,
         loadouts,
     )
-    .fetch_all(db_pool)
-    .await?;
+        .fetch_all(db_pool)
+        .await else {
+            return None;
+        };
 
     let mut world_breakdown: WorldBreakdown = HashMap::new();
 
     for record in population {
         #[allow(clippy::cast_possible_truncation)]
-        let Ok(world_id) = WorldID::try_from(record.world_id as i16) else {
-                error!("Invalid world ID is not defined in auraxis-rs: {}", record.world_id);
-                continue;
-            };
+            let Ok(_) = WorldID::try_from(record.world_id as i16) else {
+            error!("Invalid world ID is not defined in auraxis-rs: {}", record.world_id);
+            continue;
+        };
         #[allow(clippy::cast_sign_loss)]
-        let zone_id = record.zone_id as ZoneID;
-        let Ok(faction_id) = Faction::try_from(record.faction_id) else {
-                error!("Invalid faction ID is not defined in auraxis-rs: {}", record.faction_id);
-                continue;
-            };
-        let Ok(team_id) = Faction::try_from(record.team_id) else {
-                error!("Invalid team ID (Faction enum) is not defined in auraxis-rs: {}", record.team_id);
-                continue;
-            };
-        let Ok(loadout_id) = Loadout::try_from(record.loadout_id) else {
-                error!("Invalid loadout ID is not defined in auraxis-rs: {}", record.loadout_id);
-                continue;
-            };
+            let Ok(_) = Faction::try_from(record.faction_id) else {
+            error!("Invalid faction ID is not defined in auraxis-rs: {}", record.faction_id);
+            continue;
+        };
+        let Ok(_) = Faction::try_from(record.team_id) else {
+            error!("Invalid team ID (Faction enum) is not defined in auraxis-rs: {}", record.team_id);
+            continue;
+        };
+        let Ok(_) = Loadout::try_from(record.loadout_id) else {
+            error!("Invalid loadout ID is not defined in auraxis-rs: {}", record.loadout_id);
+            continue;
+        };
+
+        let world_id = record.world_id;
+        let faction_id = record.faction_id;
+        let team_id = record.team_id;
+        let loadout_id = record.loadout_id;
+        let zone_id = record.zone_id;
         let amount = record.amount;
 
-        let world = world_breakdown.entry(world_id).or_insert_with(HashMap::new);
-        let zone = world.entry(zone_id).or_insert_with(HashMap::new);
+        let world = world_breakdown.entry(world_id).or_insert_with(|| (record.timestamp, HashMap::new()));
+        let zone = world.1.entry(zone_id).or_insert_with(HashMap::new);
         let faction = zone.entry(faction_id).or_insert_with(HashMap::new);
         let team = faction.entry(team_id).or_insert_with(HashMap::new);
         let loadout = team.entry(loadout_id).or_insert(0);
@@ -96,5 +142,95 @@ pub async fn get_current(
         *loadout += amount;
     }
 
-    Ok(world_breakdown)
+    Some(world_breakdown)
+}
+
+/// Get `PopWorld` from `WorldBreakdown`
+///
+/// # Arguments
+///
+/// * `world_breakdown` - The `WorldBreakdown` to convert
+///
+/// # Returns
+///
+/// * `Vec<PopWorld>` - The converted `WorldBreakdown`
+pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<PopWorld> {
+    let mut result = Vec::new();
+    for (world_id, (timestamp, world_population)) in population {
+        let mut zones = Vec::new();
+        for (zone_id, zone_population) in world_population {
+            let mut factions = Vec::new();
+            for (faction_id, faction_population) in zone_population {
+                let mut teams = Vec::new();
+                for (team_id, team_population) in faction_population {
+                    let mut loadouts = Vec::new();
+                    for (loadout_id, loadout_population) in team_population {
+                        loadouts.push(PopLoadout {
+                            loadout_id,
+                            loadout_population,
+                        });
+                    }
+                    teams.push(PopTeam {
+                        team_id,
+                        team_population: loadouts.iter().map(|l| l.loadout_population).sum(),
+                        loadouts,
+                    });
+                }
+                factions.push(PopFaction {
+                    faction_id,
+                    faction_population: teams.iter().map(|t| t.team_population).sum(),
+                    teams,
+                });
+            }
+            zones.push(PopZone {
+                zone_id,
+                zone_population: factions.iter().map(|f| f.faction_population).sum(),
+                factions,
+            });
+        }
+        result.push(PopWorld {
+            world_id,
+            world_population: zones.iter().map(|z| z.zone_population).sum(),
+            timestamp,
+            zones,
+        });
+    }
+    result
+}
+
+/// Get the population from the database as a tree using get_current
+///
+/// # Arguments
+///
+/// * `db_pool` - The database pool to use
+/// * `worlds` - The world IDs to check
+/// * `zones` - The zone IDs to check
+/// * `factions` - The faction IDs to check
+/// * `team_ids` - The team IDs to check
+/// * `loadouts` - The loadout IDs to check
+///
+/// # Returns
+///
+/// * `Ok(PopWorld)` - A hashmap containing the current population
+/// * `Err(sqlx::Error)` - The error returned by sqlx
+pub async fn get_current_tree(
+    db_pool: &PgPool,
+    worlds: Option<&[i32]>,
+    zones: Option<&[i32]>,
+    factions: Option<&[i16]>,
+    teams: Option<&[i16]>,
+    loadouts: Option<&[i16]>
+) -> Option<Vec<PopWorld>> {
+    let population = get_current(
+        db_pool,
+        worlds,
+        zones,
+        factions,
+        teams,
+        loadouts,
+    ).await?;
+
+    let result = get_pop_worlds_from_world_breakdown(population);
+
+    Some(result)
 }

@@ -60,15 +60,15 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
 
     for player in active_players_lock.values() {
         loadout_breakdown
-            .entry(player.world)
+            .entry(player.world as i32)
+            .or_insert_with(|| (Default::default(), HashMap::new()))
+            .1.entry(player.zone as i32)
             .or_insert_with(HashMap::new)
-            .entry(player.zone)
+            .entry(i16::from(player.faction))
             .or_insert_with(HashMap::new)
-            .entry(player.faction)
+            .entry(i16::from(player.team_id))
             .or_insert_with(HashMap::new)
-            .entry(player.team_id)
-            .or_insert_with(HashMap::new)
-            .entry(player.loadout)
+            .entry(i16::from(player.loadout))
             .and_modify(|v| *v += 1)
             .or_insert(1);
 
@@ -204,7 +204,7 @@ pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgr
         })
         .population_id;
 
-        insert_zone(zone_map, world_population_id, db_pool).await;
+        insert_zone(&zone_map.1, world_population_id, db_pool).await;
     }
 
     info!("Stored pop");

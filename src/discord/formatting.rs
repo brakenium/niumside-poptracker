@@ -1,54 +1,43 @@
 use poise::serenity_prelude::{CreateEmbed, Mentionable};
-use auraxis::WorldID;
-use crate::controllers::population::{WorldBreakdown, ZoneBreakdown};
+use auraxis::{Faction, WorldID};
+use crate::controllers::population::{PopWorld, WorldBreakdown, ZoneBreakdown};
 use crate::discord::icons::Icons;
 
 pub fn world_breakdown_message(
-    world_breakdown: &WorldBreakdown,
+    world_breakdown: &Vec<PopWorld>,
 ) -> Vec<CreateEmbed> {
     let mut embeds = Vec::new();
 
     for world in world_breakdown {
-        embeds.push(single_world_breakdown_embed(*world.0, world.1));
+        embeds.push(single_world_breakdown_embed(world));
     }
 
     embeds
 }
 
 pub fn single_world_breakdown_embed(
-    world: WorldID,
-    zone: &ZoneBreakdown,
+    world: &PopWorld,
 ) -> CreateEmbed {
-    let mut world_embed = CreateEmbed::default();
-    let mut world_population = 0;
-    for (zone_id, faction_breakdown) in zone {
-        let mut zone_population = 0;
-        let mut zone_faction_pop = String::new();
-        for (faction_id, team_breakdown) in faction_breakdown.iter() {
-            let mut faction_population = 0;
-            for (_team_id, loadout_breakdown) in team_breakdown.iter() {
-                for (_, loadout_population) in loadout_breakdown.iter() {
-                    world_population += loadout_population;
-                    zone_population += loadout_population;
-                    faction_population += loadout_population;
-                }
-            }
-            let faction_emoji = Icons::try_from(*faction_id)
+    let mut embed = CreateEmbed::default();
+
+    embed.title(format!("{} Population", world.world_id));
+    embed.thumbnail(format!("https://www.planetside2.com/images/ps2-logo.png"));
+    embed.footer(|f| {
+        f.text(format!("Last updated: {}", world.timestamp))
+    });
+
+    for zone in world.zones.iter() {
+        let mut breakdown = "".into();
+        for faction in zone.factions.iter() {
+            let faction_icon = Icons::try_from(
+                Faction::try_from(faction.faction_id)
+                    .unwrap_or(Faction::Unknown)
+            )
                 .unwrap_or(Icons::Ps2White)
-                .to_discord_emoji()
-                .mention();
-            zone_faction_pop.push_str(&format!("{faction_emoji}: {faction_population}\n"));
+                .to_discord_emoji();
+            breakdown = format!("{}{:?}: {}\n", breakdown, faction_icon, faction.faction_population);
         }
-        world_embed.field(
-            format!("Zone: {zone_id}"),
-            format!("Active players:\n{zone_faction_pop}"),
-            true,
-        );
     }
-    world_embed.field(
-        format!("World: {world}"),
-        format!("Active players: {world_population}"),
-        false,
-    );
-    world_embed
+
+    embed
 }

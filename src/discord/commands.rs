@@ -14,14 +14,16 @@ pub async fn population(
     #[autocomplete = "world_id_autocomplete"]
     server: i32,
 ) -> Result<(), Error> {
-    let population = population::get_current(
+    let Some(population) = population::get_current_tree(
         &ctx.data().db_pool.clone(),
         Some(&[server]),
         None,
         None,
         None,
         None,
-    ).await?;
+    ).await else {
+        return Err(Error::from("Failed to get population"));
+    };
 
     let mut response = formatting::world_breakdown_message(&population);
 

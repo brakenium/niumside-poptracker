@@ -5,6 +5,7 @@ use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
 use rocket::fs::{FileServer};
 use utoipa::OpenApi;
+use crate::controllers::population;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -16,7 +17,7 @@ use utoipa::OpenApi;
         schemas(
             api::Response,
             api::PossibleResults,
-            api::PopWorld,
+            population::PopWorld,
             api::Error,
         )
     )

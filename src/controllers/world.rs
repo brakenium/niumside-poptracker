@@ -59,7 +59,7 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<(i32, Option<String>)>, sql
 //
 // * `Ok(Vec<(i32, String)>)` - A vector of tuples containing the world ID and the world name
 // * `Err(sqlx::Error)` - The error returned by sqlx
-pub async fn get_existing(
+pub async fn get_all_existing(
     db_pool: &PgPool,
     worlds: &[i32],
 ) -> Result<Vec<(i32, Option<String>)>, sqlx::Error> {

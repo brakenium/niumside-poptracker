@@ -83,7 +83,7 @@ async fn main() -> anyhow::Result<()> {
 
     let initialised_services = agnostic_init(
         postgres,
-        Path::new("../static/swagger-v4.19.0"),
+        Path::new("static/swagger-v4.19.0"),
         app_config.clone()
     ).await?;
 
