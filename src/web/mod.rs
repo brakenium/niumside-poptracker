@@ -18,6 +18,10 @@ use crate::controllers::population;
             api::Response,
             api::PossibleResults,
             population::PopWorld,
+            population::PopZone,
+            population::PopFaction,
+            population::PopTeam,
+            population::PopLoadout,
             api::Error,
         )
     )
