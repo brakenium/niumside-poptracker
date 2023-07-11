@@ -45,6 +45,9 @@ jobs:
         with:
           submodules: true
 
+      - name: Install dependencies
+        run: sudo apt-get install -y libssl-dev
+
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install stable
 
@@ -65,12 +68,6 @@ jobs:
         with:
           path: target
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
-
-      # List the contents of the target directory
-      - name: List target
-        run: ls -l --color target/${{ matrix.target }}/release
-      - name: List target
-        run: ls -l --color target/
 
       - name: Prepare artifact
         run: mkdir binaries && mv target/niumside-poptracker binaries/niumside-poptracker || mv target/${{ matrix.target }}/release/niumside-poptracker binaries/niumside-poptracker
