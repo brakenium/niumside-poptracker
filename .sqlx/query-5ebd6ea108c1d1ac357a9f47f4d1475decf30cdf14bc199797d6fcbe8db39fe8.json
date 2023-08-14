@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n            wp.timestamp,\n            wp.world_id,\n            zp.zone_id,\n            fp.faction_id,\n            fp.team_id,\n            lp.loadout_id,\n            lp.amount\n        FROM world_population wp\n        JOIN zone_population zp ON wp.population_id = zp.world_population_id\n        JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id\n        JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id\n        WHERE ($1::INTEGER[] IS NULL OR wp.world_id = ANY($1::INTEGER[]))\n            AND ($2::INTEGER[] IS NULL OR zp.zone_id = ANY($2::INTEGER[]))\n            AND ($3::SMALLINT[] IS NULL OR fp.faction_id = ANY($3::SMALLINT[]))\n            AND ($4::SMALLINT[] IS NULL OR fp.team_id = ANY($4::SMALLINT[]))\n            AND ($5::SMALLINT[] IS NULL OR lp.loadout_id = ANY($5::SMALLINT[]))\n            AND wp.population_id = (\n                SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id\n            )\n        ORDER BY wp.timestamp",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "timestamp",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 1,
+        "name": "world_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "zone_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "faction_id",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 4,
+        "name": "team_id",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 5,
+        "name": "loadout_id",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 6,
+        "name": "amount",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4Array",
+        "Int4Array",
+        "Int2Array",
+        "Int2Array",
+        "Int2Array"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "5ebd6ea108c1d1ac357a9f47f4d1475decf30cdf14bc199797d6fcbe8db39fe8"
+}

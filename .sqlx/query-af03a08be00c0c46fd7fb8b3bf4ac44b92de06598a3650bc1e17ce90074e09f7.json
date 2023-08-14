@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "af03a08be00c0c46fd7fb8b3bf4ac44b92de06598a3650bc1e17ce90074e09f7"
+}

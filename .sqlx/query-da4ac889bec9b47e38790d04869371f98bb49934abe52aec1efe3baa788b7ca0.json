@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT world_id, name FROM world",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "world_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "da4ac889bec9b47e38790d04869371f98bb49934abe52aec1efe3baa788b7ca0"
+}

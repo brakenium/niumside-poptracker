@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT zone_id, name FROM zone",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "zone_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "472ca79650de0d4b44726c042be6ff9f8bb5e91fd50ac102607372bfd2441c07"
+}

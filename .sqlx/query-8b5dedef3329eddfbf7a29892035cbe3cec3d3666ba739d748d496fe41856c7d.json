@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO loadout_population (loadout_id, faction_population_id, amount) VALUES ($1, $2, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Int4",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8b5dedef3329eddfbf7a29892035cbe3cec3d3666ba739d748d496fe41856c7d"
+}
