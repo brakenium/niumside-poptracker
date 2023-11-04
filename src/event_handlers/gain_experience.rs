@@ -1,4 +1,4 @@
-use auraxis::realtime::event::GainExperience;
+use census::realtime::event::GainExperience;
 use metrics::increment_counter;
 use tracing::error;
 

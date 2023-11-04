@@ -91,3 +91,7 @@ Possible future modules are:
 - Outfit Tracker
 - Session Tracker
 - Discord Bot
+
+## 3rd party code
+
+- auraxis-rs: [license](auraxis-LICENSE.md)

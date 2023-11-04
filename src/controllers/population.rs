@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use auraxis::{Faction, Loadout, WorldID};
+use census::{Faction, Loadout, WorldID};
 use serde::Serialize;
 use sqlx::PgPool;
 use tracing::{error, info};

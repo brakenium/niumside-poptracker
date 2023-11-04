@@ -15,6 +15,7 @@ mod controllers;
 mod constants;
 mod storage;
 mod startup;
+mod census;
 
 use sqlx::PgPool;
 use std::{

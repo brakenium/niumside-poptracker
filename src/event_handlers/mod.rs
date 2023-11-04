@@ -1,9 +1,9 @@
 pub mod gain_experience;
 use crate::active_players::ActivePlayerDb;
-use auraxis::realtime::event::Event;
+use census::realtime::event::Event;
 use tokio::sync::mpsc::Receiver;
 use tracing::error;
-use auraxis::realtime::client::{RealtimeClient, WsReceive};
+use census::realtime::client::{RealtimeClient, WsReceive};
 
 #[derive(thiserror::Error, Debug)]
 pub enum EventHandlerErrors {

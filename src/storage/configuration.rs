@@ -1,5 +1,5 @@
 use crate::constants;
-use auraxis::{WorldID, ZoneID};
+use census::{WorldID, ZoneID};
 use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
 use tracing::Level;

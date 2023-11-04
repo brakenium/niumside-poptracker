@@ -1,5 +1,5 @@
 #![allow(clippy::cast_lossless)]
-use auraxis::{CharacterID, Faction, Loadout, WorldID, ZoneID};
+use census::{CharacterID, Faction, Loadout, WorldID, ZoneID};
 use chrono::{DateTime, Utc};
 use metrics::{gauge, increment_counter};
 use sqlx::{Pool, Postgres};

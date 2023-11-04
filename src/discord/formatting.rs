@@ -1,5 +1,5 @@
 use poise::serenity_prelude::{CreateEmbed, Mentionable};
-use auraxis::{Faction, WorldID};
+use census::{Faction, WorldID};
 use crate::controllers::population::{PopWorld, WorldBreakdown, ZoneBreakdown};
 use crate::discord::icons::Icons;
 

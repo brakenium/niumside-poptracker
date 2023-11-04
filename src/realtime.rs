@@ -1,4 +1,4 @@
-use auraxis::{
+use census::{
     realtime::{
         client::{RealtimeClient, RealtimeClientConfig},
         event::{Event, EventNames},
