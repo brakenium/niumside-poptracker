@@ -8,10 +8,10 @@ use auraxis::{
     },
     AuraxisError,
 };
-use tokio::sync::mpsc::Receiver;
+
 use crate::storage::configuration;
 
-pub async fn init(census_config: configuration::CensusConfig, worlds: Vec<configuration::WorldConfig>) -> Result<Receiver<Event>, AuraxisError> {
+pub async fn init(census_config: configuration::CensusConfig, worlds: Vec<configuration::WorldConfig>) -> Result<RealtimeClient, AuraxisError> {
     let realtime_config = RealtimeClientConfig {
         service_id: census_config.service_id,
         realtime_url: Some(census_config.realtime_base_url.to_string()),
@@ -32,5 +32,6 @@ pub async fn init(census_config: configuration::CensusConfig, worlds: Vec<config
 
     client.subscribe(subscription);
 
-    client.connect().await
+    client.connect().await?;
+    Ok(client)
 }

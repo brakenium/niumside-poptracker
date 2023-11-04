@@ -149,7 +149,6 @@ checksum = "c59bdb34bc650a32731b31bd8f0829cc15d24a708ee31559e0bb34f2bc320cba"
 [[package]]
 name = "auraxis"
 version = "0.2.0"
-source = "git+https://github.com/brakenium/auraxis-rs.git#5b0f28341ceb611e9a778b03a32c2d3b49727eb3"
 dependencies = [
  "anyhow",
  "async-trait",

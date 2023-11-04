@@ -3,6 +3,7 @@ use crate::active_players::ActivePlayerDb;
 use auraxis::realtime::event::Event;
 use tokio::sync::mpsc::Receiver;
 use tracing::error;
+use auraxis::realtime::client::{RealtimeClient, WsReceive};
 
 #[derive(thiserror::Error, Debug)]
 pub enum EventHandlerErrors {
@@ -11,11 +12,11 @@ pub enum EventHandlerErrors {
 }
 
 pub async fn receive_events(
-    mut events: Receiver<Event>,
+    mut client: RealtimeClient,
     active_players: ActivePlayerDb,
 ) -> Option<()> {
     loop {
-        match events.recv().await {
+        match client.ws_receive.recv().await {
             Some(event) => {
                 let active_players = active_players.clone();
                 tokio::spawn(async move {
