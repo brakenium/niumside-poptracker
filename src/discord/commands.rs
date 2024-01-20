@@ -1,6 +1,7 @@
 use crate::census::constants::WorldID;
 use crate::controllers::population;
 use crate::discord::{formatting, Context, Error};
+use poise::{serenity_prelude, CreateReply};
 use strum::IntoEnumIterator;
 
 /// Displays your or another user's account creation date
@@ -23,13 +24,12 @@ pub async fn population(
         return Err(Error::from("Failed to get population"));
     };
 
-    let mut response = formatting::world_breakdown_message(&population);
+    let response = formatting::world_breakdown_message(&population);
 
-    ctx.send(|m| {
-        m.embeds.append(&mut response);
-        m
-    })
-    .await?;
+    let mut reply = CreateReply::default();
+    reply.embeds.extend(response);
+
+    ctx.send(reply).await?;
 
     Ok(())
 }
@@ -38,9 +38,6 @@ pub async fn population(
 async fn world_id_autocomplete(
     _ctx: Context<'_>,
     _partial: &str,
-) -> impl Iterator<Item = poise::AutocompleteChoice<i16>> {
-    WorldID::iter().map(|v| poise::AutocompleteChoice {
-        name: format!("{v}"),
-        value: v as i16,
-    })
+) -> impl Iterator<Item = serenity_prelude::AutocompleteChoice> {
+    WorldID::iter().map(|v| serenity_prelude::AutocompleteChoice::new(format!("{v}"), v as i16))
 }

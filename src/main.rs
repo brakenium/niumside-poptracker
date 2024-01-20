@@ -15,6 +15,7 @@ mod startup;
 mod storage;
 mod web;
 
+use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
 use poise::FrameworkBuilder;
 use sqlx::PgPool;
@@ -28,21 +29,17 @@ struct Services {
     active_players: active_players::ActivePlayerDb,
     db_pool: PgPool,
     rocket: rocket::Rocket<rocket::Build>,
-    poise: FrameworkBuilder<discord::Data, discord::Error>,
+    poise: FrameworkBuilder<Data, Error>,
 }
 
-async fn agnostic_init(
-    postgres: PgPool,
-    swagger: &Path,
-    app_config: Settings,
-) -> anyhow::Result<Services> {
+async fn agnostic_init(postgres: PgPool, swagger: &Path) -> anyhow::Result<Services> {
     sqlx::migrate!().run(&postgres.clone()).await?;
 
     let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
 
     let rocket = web::init(swagger);
 
-    let poise = discord::init(&app_config.discord.token);
+    let poise = discord::init();
 
     Ok(Services {
         active_players,
@@ -60,12 +57,7 @@ async fn main() -> anyhow::Result<()> {
 
     let postgres = storage::db_pool::create(&app_config.database.connection_string.clone()).await?;
 
-    let initialised_services = agnostic_init(
-        postgres,
-        Path::new("static/swagger-v4.19.0"),
-        app_config.clone(),
-    )
-    .await?;
+    let initialised_services = agnostic_init(postgres, Path::new("static/swagger-v4.19.0")).await?;
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
 

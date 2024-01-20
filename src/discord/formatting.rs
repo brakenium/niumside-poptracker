@@ -1,7 +1,7 @@
 use crate::census::constants::Faction;
 use crate::controllers::population::PopWorld;
 use crate::discord::icons::Icons;
-use poise::serenity_prelude::CreateEmbed;
+use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
 
 pub fn world_breakdown_message(world_breakdown: &Vec<PopWorld>) -> Vec<CreateEmbed> {
     let mut embeds = Vec::new();
@@ -14,11 +14,12 @@ pub fn world_breakdown_message(world_breakdown: &Vec<PopWorld>) -> Vec<CreateEmb
 }
 
 pub fn single_world_breakdown_embed(world: &PopWorld) -> CreateEmbed {
-    let mut embed = CreateEmbed::default();
+    let footer = CreateEmbedFooter::new(format!("Last updated: {}", world.timestamp));
 
-    embed.title(format!("{} Population", world.world_id));
-    embed.thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string());
-    embed.footer(|f| f.text(format!("Last updated: {}", world.timestamp)));
+    let mut embed = CreateEmbed::default()
+        .title(format!("{} Population", world.world_id))
+        .thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string())
+        .footer(footer);
 
     for zone in &world.zones {
         let mut breakdown = String::new();

@@ -1,5 +1,5 @@
 use crate::census::constants::Faction;
-use poise::serenity_prelude::{EmojiId, EmojiIdentifier};
+use poise::serenity_prelude::{parse_emoji, EmojiId, EmojiIdentifier};
 
 #[repr(u64)]
 pub enum Icons {
@@ -24,42 +24,22 @@ impl TryFrom<Faction> for Icons {
     }
 }
 
-impl TryInto<EmojiIdentifier> for Icons {
+impl TryInto<Option<EmojiIdentifier>> for Icons {
     type Error = ();
 
-    fn try_into(self) -> Result<EmojiIdentifier, Self::Error> {
+    fn try_into(self) -> Result<Option<EmojiIdentifier>, Self::Error> {
         Ok(self.to_discord_emoji())
     }
 }
 
 impl Icons {
-    pub fn to_discord_emoji(&self) -> EmojiIdentifier {
+    pub fn to_discord_emoji(&self) -> Option<EmojiIdentifier> {
         match self {
-            Self::VS => EmojiIdentifier {
-                id: EmojiId::from(Self::VS as u64),
-                animated: false,
-                name: "VS".to_string(),
-            },
-            Self::NC => EmojiIdentifier {
-                id: EmojiId::from(Self::NC as u64),
-                animated: false,
-                name: "NC".to_string(),
-            },
-            Self::TR => EmojiIdentifier {
-                id: EmojiId::from(Self::TR as u64),
-                animated: false,
-                name: "TR".to_string(),
-            },
-            Self::NS => EmojiIdentifier {
-                id: EmojiId::from(Self::NS as u64),
-                animated: false,
-                name: "NS".to_string(),
-            },
-            Self::Ps2White => EmojiIdentifier {
-                id: EmojiId::from(Self::Ps2White as u64),
-                animated: false,
-                name: "Ps2White".to_string(),
-            },
+            Self::VS => parse_emoji(format!("<:VS:{}", Self::VS as u64)),
+            Self::NC => parse_emoji(format!("<:NC:{}", Self::NC as u64)),
+            Self::TR => parse_emoji(format!("<:TR:{}", Self::TR as u64)),
+            Self::NS => parse_emoji(format!("<:NS:{}", Self::NS as u64)),
+            Self::Ps2White => parse_emoji(format!("<:Ps2White:{}", Self::Ps2White as u64)),
         }
     }
 }

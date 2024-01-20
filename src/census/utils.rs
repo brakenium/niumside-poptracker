@@ -24,14 +24,14 @@ where
 }
 
 pub fn serialize_char_ids_subscription<S>(
-    value: &Vec<CharacterID>,
+    value: &[CharacterID],
     serializer: S,
 ) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
 {
     let mut ids = Vec::with_capacity(value.len());
-    for id in value.iter() {
+    for id in value {
         ids.push(id.to_string());
     }
 

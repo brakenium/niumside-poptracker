@@ -1,7 +1,10 @@
 use crate::discord;
+use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
 use crate::web::ApiDoc;
 use crate::{active_players, census, logging};
+use poise::serenity_prelude::ClientBuilder;
+use poise::{serenity_prelude, FrameworkBuilder};
 use sqlx::PgPool;
 use std::thread;
 use utoipa::OpenApi;
@@ -14,7 +17,7 @@ pub async fn services(
     rocket: rocket::Rocket<rocket::Build>,
     db_pool: PgPool,
     app_config: Settings,
-    poise: poise::FrameworkBuilder<discord::Data, discord::Error>,
+    poise: FrameworkBuilder<Data, Error>,
     active_players: active_players::ActivePlayerDb,
     addr: std::net::SocketAddr,
 ) -> anyhow::Result<()> {
@@ -42,12 +45,20 @@ pub async fn services(
         .manage(ApiDoc::openapi());
 
     let poise_db = db_pool.clone();
-    let poise = poise.setup(|ctx, _ready, framework| {
-        Box::pin(async move {
-            poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-            Ok(discord::Data { db_pool: poise_db })
+    let poise_framework = poise
+        .setup(|ctx, _ready, framework| {
+            Box::pin(async move {
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                Ok(discord::Data { db_pool: poise_db })
+            })
         })
-    });
+        .build();
+
+    let intents = serenity_prelude::GatewayIntents::non_privileged();
+    let mut poise_client = ClientBuilder::new(app_config.discord.token, intents)
+        .framework(poise_framework)
+        .await
+        .expect("Failed to create Discord client");
 
     let census_realtime_state = census::realtime::State {
         active_players: active_players.clone(),
@@ -62,7 +73,7 @@ pub async fn services(
     thread::spawn(move || census::realtime::client(census_realtime_config, &census_realtime_state));
 
     tokio::select!(
-        _ = poise.run() => {},
+        _ = poise_client.start() => {},
         _ = rocket.launch() => {},
         _ = active_players::process_loop(active_players.clone(), db_pool) => {},
         _ = active_players::clean(active_players.clone()) => {},
