@@ -5,8 +5,20 @@ use strum::{EnumIter, EnumVariantNames, FromRepr};
 
 #[repr(i16)]
 #[derive(
-    Serialize, Deserialize, Copy, Clone, Eq, Debug, PartialEq, Hash, TryFromPrimitive, IntoPrimitive,
-    EnumIter, EnumVariantNames, strum::Display, FromRepr
+    Serialize,
+    Deserialize,
+    Copy,
+    Clone,
+    Eq,
+    Debug,
+    PartialEq,
+    Hash,
+    TryFromPrimitive,
+    IntoPrimitive,
+    EnumIter,
+    EnumVariantNames,
+    strum::Display,
+    FromRepr,
 )]
 pub enum Loadout {
     Unknown = 0,
@@ -81,8 +93,20 @@ impl FromStr for Loadout {
 
 #[repr(i16)]
 #[derive(
-    Serialize, Deserialize, Copy, Clone, Eq, Debug, PartialEq, Hash, TryFromPrimitive, IntoPrimitive,
-EnumIter, EnumVariantNames, strum::Display, FromRepr
+    Serialize,
+    Deserialize,
+    Copy,
+    Clone,
+    Eq,
+    Debug,
+    PartialEq,
+    Hash,
+    TryFromPrimitive,
+    IntoPrimitive,
+    EnumIter,
+    EnumVariantNames,
+    strum::Display,
+    FromRepr,
 )]
 pub enum Faction {
     Unknown = 0,
