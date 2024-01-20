@@ -6,7 +6,6 @@
 mod active_players;
 mod event_handlers;
 mod logging;
-mod realtime;
 #[cfg(not(feature = "standalone"))]
 mod shuttle;
 mod web;

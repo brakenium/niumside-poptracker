@@ -2,10 +2,7 @@ use std::fmt::Display;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-#[cfg(feature = "strum")]
 use strum::{EnumIter, EnumVariantNames, FromRepr};
-#[cfg(not(feature = "strum"))]
-use std::fmt::Formatter;
 
 #[repr(i16)]
 #[derive(
@@ -109,9 +106,10 @@ impl FromStr for Faction {
 
 #[repr(i16)]
 #[derive(
-    Serialize, Deserialize, Copy, Clone, Eq, Debug, PartialEq, Hash, TryFromPrimitive, IntoPrimitive,
+    Serialize, Deserialize, Copy, Clone, Eq, Debug, PartialEq, Hash, TryFromPrimitive, IntoPrimitive, EnumIter,
+    EnumVariantNames, strum::Display, FromRepr
 )]
-#[cfg_attr(feature = "strum", derive(EnumIter, EnumVariantNames, strum::Display, FromRepr), strum(ascii_case_insensitive))]
+#[strum(ascii_case_insensitive)]
 pub enum WorldID {
     Jaeger = 19,
     Briggs = 25,
@@ -133,17 +131,11 @@ impl FromStr for WorldID {
     }
 }
 
-#[cfg(not(feature = "strum"))]
-impl Display for WorldID {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            WorldID::Jaeger => write!(f, "Jaeger"),
-            WorldID::Briggs => write!(f, "Briggs"),
-            WorldID::Miller => write!(f, "Miller"),
-            WorldID::Cobalt => write!(f, "Cobalt"),
-            WorldID::Connery => write!(f, "Connery"),
-            WorldID::Emerald => write!(f, "Emerald"),
-            WorldID::Soltech => write!(f, "Soltech"),
-        }
-    }
-}
+pub type CharacterID = u64;
+pub type OutfitID = u64;
+pub type ZoneID = u32;
+pub type FacilityID = u32;
+pub type ExperienceID = u16;
+pub type VehicleID = u16;
+pub type WeaponID = u32;
+pub type FiremodeID = u32;

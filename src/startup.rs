@@ -1,10 +1,10 @@
-
-use sqlx::PgPool;
-use utoipa::OpenApi;
-use crate::{active_players, event_handlers, logging, realtime};
+use crate::discord;
 use crate::storage::configuration::Settings;
 use crate::web::ApiDoc;
-use crate::discord;
+use crate::{active_players, census, logging};
+use sqlx::PgPool;
+use std::thread;
+use utoipa::OpenApi;
 
 pub struct DbState {
     pub(crate) pool: PgPool,
@@ -16,7 +16,7 @@ pub async fn services(
     app_config: Settings,
     poise: poise::FrameworkBuilder<discord::Data, discord::Error>,
     active_players: active_players::ActivePlayerDb,
-    addr: std::net::SocketAddr
+    addr: std::net::SocketAddr,
 ) -> anyhow::Result<()> {
     let shutdown = rocket::config::Shutdown {
         ctrlc: false,
@@ -45,26 +45,28 @@ pub async fn services(
     let poise = poise.setup(|ctx, _ready, framework| {
         Box::pin(async move {
             poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-            Ok(discord::Data {
-                db_pool: poise_db,
-            })
+            Ok(discord::Data { db_pool: poise_db })
         })
     });
 
-    let events = match realtime::init(app_config.census, app_config.worlds).await {
-        Ok(events) => events,
-        Err(e) => {
-            panic!("Unable to connect to realtime API: {e}");
-        }
+    let census_realtime_state = census::realtime::State {
+        active_players: active_players.clone(),
     };
 
+    let census_realtime_config = census::realtime::RealtimeClientConfig {
+        environment: "ps2".to_owned(),
+        service_id: app_config.census.service_id,
+        realtime_url: Some(app_config.census.realtime_base_url),
+    };
+
+    thread::spawn(|| census::realtime::client(census_realtime_config, census_realtime_state));
+
     tokio::select!(
-            _ = poise.run() => {},
-            _ = rocket.launch() => {},
-            _ = active_players::process_loop(active_players.clone(), db_pool) => {},
-            _ = event_handlers::receive_events(events, active_players.clone()) => {},
-            _ = active_players::clean(active_players.clone()) => {},
-        );
+        _ = poise.run() => {},
+        _ = rocket.launch() => {},
+        _ = active_players::process_loop(active_players.clone(), db_pool) => {},
+        _ = active_players::clean(active_players.clone()) => {},
+    );
 
     Ok(())
 }

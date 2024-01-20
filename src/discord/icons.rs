@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::Display;
 use poise::serenity_prelude::{EmojiId, EmojiIdentifier};
-use census::Faction;
+use crate::census::constants::{Loadout, WorldID, ZoneID, Faction, CharacterID};
 use serde_json::ser::Formatter;
 
 #[repr(u64)]

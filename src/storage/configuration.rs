@@ -1,11 +1,11 @@
 use crate::constants;
-use census::{WorldID, ZoneID};
 use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
 use tracing::Level;
 use std::env;
 use std::path::Path;
 use url::Url;
+use crate::census::constants::{WorldID, ZoneID};
 
 pub trait DeserializeWith: Sized {
     fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error>

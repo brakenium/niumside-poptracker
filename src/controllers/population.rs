@@ -1,13 +1,13 @@
 use std::collections::HashMap;
-use census::{Faction, Loadout, WorldID};
 use serde::Serialize;
 use sqlx::PgPool;
 use tracing::{error, info};
 use utoipa::ToSchema;
+use crate::census::constants::{Faction, Loadout, WorldID};
 
 pub type LoadoutBreakdown = HashMap<i16, i16>;
 
-pub type FactionBreakdown = HashMap<i16, HashMap<i16, LoadoutBreakdown>>;
+pub type FactionBreakdown = HashMap<i16, LoadoutBreakdown>;
 
 pub type ZoneBreakdown = HashMap<i32, FactionBreakdown>;
 
@@ -25,13 +25,6 @@ pub struct PopWorld {
 pub struct PopZone {
     pub zone_id: i32,
     pub zone_population: i16,
-    pub factions: Vec<PopFaction>,
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct PopFaction {
-    pub faction_id: i16,
-    pub faction_population: i16,
     pub teams: Vec<PopTeam>,
 }
 
@@ -73,29 +66,27 @@ pub async fn get_current(
 ) -> Option<WorldBreakdown> {
     let Ok(population) = sqlx::query!(
         "SELECT
-            wp.timestamp,
+            p.timestamp,
             wp.world_id,
             zp.zone_id,
-            fp.faction_id,
-            fp.team_id,
+            tp.team_id,
             lp.loadout_id,
             lp.amount
-        FROM world_population wp
-        JOIN zone_population zp ON wp.population_id = zp.world_population_id
-        JOIN faction_population fp ON zp.zone_population_id = fp.zone_population_id
-        JOIN loadout_population lp ON fp.faction_population_id = lp.faction_population_id
+        FROM population p
+        JOIN world_population wp ON p.population_id = wp.population_id
+        JOIN zone_population zp ON wp.world_population_id = zp.world_population_id
+        JOIN team_population tp ON zp.zone_population_id = tp.zone_population_id
+        JOIN loadout_population lp ON tp.team_population_id = lp.team_population_id
         WHERE ($1::INTEGER[] IS NULL OR wp.world_id = ANY($1::INTEGER[]))
             AND ($2::INTEGER[] IS NULL OR zp.zone_id = ANY($2::INTEGER[]))
-            AND ($3::SMALLINT[] IS NULL OR fp.faction_id = ANY($3::SMALLINT[]))
-            AND ($4::SMALLINT[] IS NULL OR fp.team_id = ANY($4::SMALLINT[]))
-            AND ($5::SMALLINT[] IS NULL OR lp.loadout_id = ANY($5::SMALLINT[]))
+            AND ($3::SMALLINT[] IS NULL OR tp.team_id = ANY($3::SMALLINT[]))
+            AND ($4::SMALLINT[] IS NULL OR lp.loadout_id = ANY($4::SMALLINT[]))
             AND wp.population_id = (
                 SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id
             )
-        ORDER BY wp.timestamp",
+        ORDER BY p.timestamp",
         worlds,
         zones,
-        factions,
         team_ids,
         loadouts,
     )
@@ -112,11 +103,6 @@ pub async fn get_current(
             error!("Invalid world ID is not defined in auraxis-rs: {}", record.world_id);
             continue;
         };
-        #[allow(clippy::cast_sign_loss)]
-            let Ok(_) = Faction::try_from(record.faction_id) else {
-            error!("Invalid faction ID is not defined in auraxis-rs: {}", record.faction_id);
-            continue;
-        };
         let Ok(_) = Faction::try_from(record.team_id) else {
             error!("Invalid team ID (Faction enum) is not defined in auraxis-rs: {}", record.team_id);
             continue;
@@ -127,7 +113,6 @@ pub async fn get_current(
         };
 
         let world_id = record.world_id;
-        let faction_id = record.faction_id;
         let team_id = record.team_id;
         let loadout_id = record.loadout_id;
         let zone_id = record.zone_id;
@@ -135,8 +120,7 @@ pub async fn get_current(
 
         let world = world_breakdown.entry(world_id).or_insert_with(|| (record.timestamp, HashMap::new()));
         let zone = world.1.entry(zone_id).or_insert_with(HashMap::new);
-        let faction = zone.entry(faction_id).or_insert_with(HashMap::new);
-        let team = faction.entry(team_id).or_insert_with(HashMap::new);
+        let team = zone.entry(team_id).or_insert_with(HashMap::new);
         let loadout = team.entry(loadout_id).or_insert(0);
 
         *loadout += amount;
@@ -159,10 +143,8 @@ pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<Po
     for (world_id, (timestamp, world_population)) in population {
         let mut zones = Vec::new();
         for (zone_id, zone_population) in world_population {
-            let mut factions = Vec::new();
-            for (faction_id, faction_population) in zone_population {
                 let mut teams = Vec::new();
-                for (team_id, team_population) in faction_population {
+                for (team_id, team_population) in zone_population {
                     let mut loadouts = Vec::new();
                     for (loadout_id, loadout_population) in team_population {
                         loadouts.push(PopLoadout {
@@ -176,16 +158,10 @@ pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<Po
                         loadouts,
                     });
                 }
-                factions.push(PopFaction {
-                    faction_id,
-                    faction_population: teams.iter().map(|t| t.team_population).sum(),
-                    teams,
-                });
-            }
             zones.push(PopZone {
                 zone_id,
-                zone_population: factions.iter().map(|f| f.faction_population).sum(),
-                factions,
+                zone_population: teams.iter().map(|t| t.team_population).sum(),
+                teams,
             });
         }
         result.push(PopWorld {

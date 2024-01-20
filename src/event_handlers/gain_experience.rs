@@ -1,8 +1,8 @@
-use census::realtime::event::GainExperience;
 use metrics::increment_counter;
 use tracing::error;
 
 use crate::active_players::{ActivePlayer, ActivePlayerDb};
+use crate::census::event::GainExperience;
 
 pub fn handle(event: &GainExperience, active_players: &ActivePlayerDb) {
     active_players.lock().map_or_else(
@@ -18,7 +18,6 @@ pub fn handle(event: &GainExperience, active_players: &ActivePlayerDb) {
                     loadout: event.loadout_id,
                     world: event.world_id,
                     last_change: event.timestamp,
-                    faction: event.loadout_id.get_faction(),
                     team_id: event.team_id,
                 },
             );

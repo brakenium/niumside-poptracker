@@ -1,5 +1,5 @@
 use poise::serenity_prelude::{CreateEmbed, Mentionable};
-use census::{Faction, WorldID};
+use crate::census::constants::{Loadout, WorldID, ZoneID, Faction, CharacterID};
 use crate::controllers::population::{PopWorld, WorldBreakdown, ZoneBreakdown};
 use crate::discord::icons::Icons;
 
@@ -28,14 +28,14 @@ pub fn single_world_breakdown_embed(
 
     for zone in world.zones.iter() {
         let mut breakdown = "".into();
-        for faction in zone.factions.iter() {
-            let faction_icon = Icons::try_from(
-                Faction::try_from(faction.faction_id)
+        for team in zone.teams.iter() {
+            let team_icon = Icons::try_from(
+                Faction::try_from(team.team_id)
                     .unwrap_or(Faction::Unknown)
             )
                 .unwrap_or(Icons::Ps2White)
                 .to_discord_emoji();
-            breakdown = format!("{}{:?}: {}\n", breakdown, faction_icon, faction.faction_population);
+            breakdown = format!("{}{:?}: {}\n", breakdown, team_icon, team.team_population);
         }
     }
 

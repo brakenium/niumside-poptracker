@@ -1,9 +1,7 @@
-use census::WorldID;
-
-
+use crate::census::constants::WorldID;
+use strum::IntoEnumIterator;
 use crate::controllers::population;
 use crate::discord::{Context, Error, formatting};
-use strum::IntoEnumIterator;
 
 
 /// Displays your or another user's account creation date
