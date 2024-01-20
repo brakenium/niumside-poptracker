@@ -2,8 +2,8 @@ mod commands;
 mod formatting;
 mod icons;
 
-use poise::serenity_prelude as serenity;
-use poise::serenity_prelude::ClientBuilder;
+
+
 use poise::FrameworkBuilder;
 use sqlx::PgPool;
 

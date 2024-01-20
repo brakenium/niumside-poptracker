@@ -16,7 +16,7 @@ pub fn world_breakdown_message(world_breakdown: &Vec<PopWorld>) -> Vec<CreateEmb
 pub fn single_world_breakdown_embed(world: &PopWorld) -> CreateEmbed {
     let footer = CreateEmbedFooter::new(format!("Last updated: {}", world.timestamp));
 
-    let mut embed = CreateEmbed::default()
+    let embed = CreateEmbed::default()
         .title(format!("{} Population", world.world_id))
         .thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string())
         .footer(footer);

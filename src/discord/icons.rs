@@ -1,5 +1,5 @@
 use crate::census::constants::Faction;
-use poise::serenity_prelude::{parse_emoji, EmojiId, EmojiIdentifier};
+use poise::serenity_prelude::{parse_emoji, EmojiIdentifier};
 
 #[repr(u64)]
 pub enum Icons {
