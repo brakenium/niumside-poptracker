@@ -1,7 +1,7 @@
 #![allow(clippy::cast_lossless)]
 use crate::census::constants::{CharacterID, Faction, Loadout, WorldID, ZoneID};
 use crate::controllers::population::{
-    FactionBreakdown, LoadoutBreakdown, WorldBreakdown, ZoneBreakdown,
+    LoadoutBreakdown, TeamBreakdown, WorldBreakdown, ZoneBreakdown,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
 use metrics::{gauge, increment_counter};
@@ -65,9 +65,9 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
             .or_insert_with(|| (NaiveDateTime::default(), HashMap::new()))
             .1
             .entry(player.zone)
-            .or_insert_with(HashMap::new)
+            .or_default()
             .entry(player.team_id as u16)
-            .or_insert_with(HashMap::new)
+            .or_default()
             .entry(player.loadout as u16)
             .and_modify(|v| *v += 1)
             .or_insert(1);
@@ -85,7 +85,7 @@ async fn insert_loadout(
     faction_population_id: i32,
     db_pool: &Pool<Postgres>,
 ) {
-    for (loadout_id, amount) in loadout_map.iter() {
+    for (loadout_id, amount) in loadout_map {
         sqlx::query!(
             "INSERT INTO loadout (loadout_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *loadout_id as i32
@@ -111,7 +111,7 @@ async fn insert_loadout(
 }
 
 async fn insert_zone(zone_map: &ZoneBreakdown, world_population_id: i32, db_pool: &Pool<Postgres>) {
-    for (zone_id, faction_map) in zone_map.iter() {
+    for (zone_id, faction_map) in zone_map {
         sqlx::query!(
             "INSERT INTO zone (zone_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *zone_id as i64
@@ -137,12 +137,8 @@ async fn insert_zone(zone_map: &ZoneBreakdown, world_population_id: i32, db_pool
     }
 }
 
-async fn insert_team(
-    team_map: &FactionBreakdown,
-    zone_population_id: i32,
-    db_pool: &Pool<Postgres>,
-) {
-    for (team_id, loadout_map) in team_map.iter() {
+async fn insert_team(team_map: &TeamBreakdown, zone_population_id: i32, db_pool: &Pool<Postgres>) {
+    for (team_id, loadout_map) in team_map {
         sqlx::query!(
             "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *team_id as i32
@@ -179,7 +175,7 @@ pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgr
             })
             .population_id;
 
-    for (world_id, zone_map) in loadout_breakdown.iter() {
+    for (world_id, zone_map) in loadout_breakdown {
         sqlx::query!(
             "INSERT INTO world (world_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *world_id as i32

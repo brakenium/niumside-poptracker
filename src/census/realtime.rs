@@ -208,7 +208,7 @@ pub fn client(realtime_client_config: RealtimeClientConfig, state: &State) {
         };
 
         match handle_ws_msg(&mut socket, state.clone(), get_subscription_settings(), msg) {
-            Ok(_) => {}
+            Ok(()) => {}
             Err(err) => {
                 increment_counter!("realtime_messages_received_total_errored");
                 error!("{:?}", err);

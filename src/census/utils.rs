@@ -46,7 +46,7 @@ where
     S: serde::Serializer,
 {
     let mut ids = Vec::with_capacity(value.len());
-    for id in value.iter() {
+    for id in value {
         ids.push((*id as u8).to_string());
     }
 

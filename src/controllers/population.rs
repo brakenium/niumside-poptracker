@@ -7,9 +7,9 @@ use utoipa::ToSchema;
 
 pub type LoadoutBreakdown = HashMap<u16, u16>;
 
-pub type FactionBreakdown = HashMap<u16, LoadoutBreakdown>;
+pub type TeamBreakdown = HashMap<u16, LoadoutBreakdown>;
 
-pub type ZoneBreakdown = HashMap<u32, FactionBreakdown>;
+pub type ZoneBreakdown = HashMap<u32, TeamBreakdown>;
 
 pub type WorldBreakdown = HashMap<u32, (chrono::NaiveDateTime, ZoneBreakdown)>;
 
@@ -48,8 +48,7 @@ pub struct PopLoadout {
 // * `db_pool` - The database pool to use
 // * `worlds` - The world IDs to check
 // * `zones` - The zone IDs to check
-// * `factions` - The faction IDs to check
-// * `team_ids` - The team IDs to check
+// * `teams` - The team IDs to check
 // * `loadouts` - The loadout IDs to check
 //
 // # Returns
@@ -60,8 +59,7 @@ pub async fn get_current(
     db_pool: &PgPool,
     worlds: Option<&[i32]>,
     zones: Option<&[i32]>,
-    _factions: Option<&[i16]>,
-    team_ids: Option<&[i16]>,
+    teams: Option<&[i16]>,
     loadouts: Option<&[i16]>,
 ) -> Option<WorldBreakdown> {
     let Ok(population) = sqlx::query!(
@@ -87,7 +85,7 @@ pub async fn get_current(
         ORDER BY p.timestamp",
         worlds,
         zones,
-        team_ids,
+        teams,
         loadouts,
     )
         .fetch_all(db_pool)
@@ -99,16 +97,25 @@ pub async fn get_current(
 
     for record in population {
         #[allow(clippy::cast_possible_truncation)]
-            let Ok(_) = WorldID::try_from(record.world_id as u16) else {
-            error!("Invalid world ID is not defined in auraxis-rs: {}", record.world_id);
+        let Ok(_) = WorldID::try_from(record.world_id as u16) else {
+            error!(
+                "Invalid world ID is not defined in auraxis-rs: {}",
+                record.world_id
+            );
             continue;
         };
         let Ok(_) = Faction::try_from(record.team_id as u16) else {
-            error!("Invalid team ID (Faction enum) is not defined in auraxis-rs: {}", record.team_id);
+            error!(
+                "Invalid team ID (Faction enum) is not defined in auraxis-rs: {}",
+                record.team_id
+            );
             continue;
         };
         let Ok(_) = Loadout::try_from(record.loadout_id as u16) else {
-            error!("Invalid loadout ID is not defined in auraxis-rs: {}", record.loadout_id);
+            error!(
+                "Invalid loadout ID is not defined in auraxis-rs: {}",
+                record.loadout_id
+            );
             continue;
         };
 
@@ -121,8 +128,8 @@ pub async fn get_current(
         let world = world_breakdown
             .entry(world_id as u32)
             .or_insert_with(|| (record.timestamp, HashMap::new()));
-        let zone = world.1.entry(zone_id as u32).or_insert_with(HashMap::new);
-        let team = zone.entry(team_id as u16).or_insert_with(HashMap::new);
+        let zone = world.1.entry(zone_id as u32).or_default();
+        let team = zone.entry(team_id as u16).or_default();
         let loadout = team.entry(loadout_id as u16).or_insert(0);
 
         *loadout += amount as u16;
@@ -183,7 +190,6 @@ pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<Po
 /// * `db_pool` - The database pool to use
 /// * `worlds` - The world IDs to check
 /// * `zones` - The zone IDs to check
-/// * `factions` - The faction IDs to check
 /// * `team_ids` - The team IDs to check
 /// * `loadouts` - The loadout IDs to check
 ///
@@ -195,11 +201,10 @@ pub async fn get_current_tree(
     db_pool: &PgPool,
     worlds: Option<&[i32]>,
     zones: Option<&[i32]>,
-    factions: Option<&[i16]>,
     teams: Option<&[i16]>,
     loadouts: Option<&[i16]>,
 ) -> Option<Vec<PopWorld>> {
-    let population = get_current(db_pool, worlds, zones, factions, teams, loadouts).await?;
+    let population = get_current(db_pool, worlds, zones, teams, loadouts).await?;
 
     let result = get_pop_worlds_from_world_breakdown(population);
 

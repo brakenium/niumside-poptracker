@@ -17,8 +17,9 @@ pub async fn population(
         None,
         None,
         None,
-        None,
-    ).await else {
+    )
+    .await
+    else {
         return Err(Error::from("Failed to get population"));
     };
 

@@ -81,6 +81,7 @@ impl serde::Serialize for EventNames {
 
 #[derive(Deserialize, PartialEq, Debug, Clone)]
 #[serde(tag = "event_name")]
+#[allow(clippy::enum_variant_names)]
 pub enum Event {
     PlayerLogin(PlayerLogin),
     PlayerLogout(PlayerLogout),
@@ -374,6 +375,7 @@ pub struct ContinentUnlock {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[allow(clippy::struct_field_names)]
 pub struct MetagameEvent {
     #[serde(
         deserialize_with = "TimestampSeconds::<String>::deserialize_as",

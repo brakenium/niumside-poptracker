@@ -11,8 +11,6 @@ mod controllers;
 mod discord;
 mod event_handlers;
 mod logging;
-#[cfg(not(feature = "standalone"))]
-mod shuttle;
 mod startup;
 mod storage;
 mod web;
@@ -21,8 +19,6 @@ use crate::storage::configuration::Settings;
 use poise::FrameworkBuilder;
 use sqlx::PgPool;
 use std::path::Path;
-#[cfg(not(feature = "standalone"))]
-use std::path::PathBuf;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -56,31 +52,6 @@ async fn agnostic_init(
     })
 }
 
-#[cfg(not(feature = "standalone"))]
-#[shuttle_runtime::main]
-async fn init(
-    #[shuttle_shared_db::Postgres] postgres: PgPool,
-    #[shuttle_static_folder::StaticFolder] static_folder: PathBuf,
-) -> Result<shuttle::NiumsideService, shuttle_runtime::Error> {
-    let app_config = Settings::new(&static_folder.join("config")).map_err(anyhow::Error::new)?;
-
-    let initialised_services = agnostic_init(
-        postgres,
-        &static_folder.join("swagger-v4.19.0"),
-        app_config.clone(),
-    )
-    .await?;
-
-    Ok(shuttle::NiumsideService {
-        active_players: initialised_services.active_players,
-        db_pool: initialised_services.db_pool,
-        app_config,
-        rocket: initialised_services.rocket,
-        poise: initialised_services.poise,
-    })
-}
-
-#[cfg(feature = "standalone")]
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let app_config = Settings::new(Path::new("config"))?;

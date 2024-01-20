@@ -40,11 +40,10 @@ responses(
 (status = 400, description = "Bad request", body = Error, example = json ! (Error::NoDataAvailable)),
 )
 )]
-#[get("/population?<world>&<zone>&<faction>&<team>&<loadout>")]
+#[get("/population?<world>&<zone>&<team>&<loadout>")]
 pub async fn population(
     world: Option<Vec<i32>>,
     zone: Option<Vec<i32>>,
-    faction: Option<Vec<i16>>,
     team: Option<Vec<i16>>,
     loadout: Option<Vec<i16>>,
     db_pool_state: &State<DbState>,
@@ -53,15 +52,16 @@ pub async fn population(
         &db_pool_state.pool,
         world.as_deref(),
         zone.as_deref(),
-        faction.as_deref(),
         team.as_deref(),
         loadout.as_deref(),
-    ).await else {
+    )
+    .await
+    else {
         let response = Response {
             result: PossibleResults::Error(Error::NoDataAvailable),
         };
 
-        return Err(BadRequest(Some(Json(response))));
+        return Err(BadRequest(Json(response)));
     };
 
     let response = Response {

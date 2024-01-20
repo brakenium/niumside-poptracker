@@ -32,7 +32,6 @@ fn describe_metrics() {
     );
 }
 
-#[cfg(feature = "standalone")]
 pub fn tracing(log_level: tracing::Level) {
     tracing_subscriber::fmt()
         .with_max_level(log_level)

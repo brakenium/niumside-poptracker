@@ -6,35 +6,27 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-shuttle-runtime = { version = "0.24.0", optional = true }
-shuttle-shared-db = { version = "0.24.0", features = ["postgres"], optional = true }
-shuttle-static-folder = { version = "0.24.0", optional = true }
-
-tokio = { version = "1.25.0", features = ["full"] }
-tracing-subscriber = "0.3"
-tracing = "0.1.36"
-config = "0.13.2"
-url = { version = "2.3.1", features = ["serde"] }
-serde = { version = "1.0.147", features = ["derive"] }
-chrono = "0.4.23"
-futures = "0.3.25"
-sqlx = { version = "0.7.1", features = ["runtime-tokio-native-tls", "postgres", "chrono"] }
-thiserror = "1.0.37"
-metrics-exporter-prometheus = "0.12.0"
-metrics = "0.21.0"
-rocket = { version = "0.5.0-rc.3", features = ["json"] }
-utoipa = { version = "3.3.0", features = ["rocket_extras", "chrono"] }
-serde_json = "1.0.96"
-poise = "0.5.5"
+tokio = { version = "1.35.1", features = ["full"] }
+tracing-subscriber = "0.3.18"
+tracing = "0.1.40"
+config = "0.13.4"
+url = { version = "2.5.0", features = ["serde"] }
+serde = { version = "1.0.195", features = ["derive"] }
+chrono = "0.4.31"
+futures = "0.3.30"
+sqlx = { version = "0.7.3", features = ["runtime-tokio-native-tls", "postgres", "chrono"] }
+thiserror = "1.0.56"
+metrics-exporter-prometheus = "0.13.0"
+metrics = "0.21.1"
+rocket = { version = "0.5.0", features = ["json"] }
+utoipa = { version = "4.2.0", features = ["rocket_extras", "chrono"] }
+serde_json = "1.0.111"
+poise = "0.5.7"
 strum = { version = "0.25.0", features = ["derive"] }
-anyhow = "1.0.71"
+anyhow = "1.0.79"
 tungstenite = { version = "0.21.0", features = ["native-tls"] }
 num_enum = "0.7.2"
 serde_with = { version = "3.4.0", features = ["chrono"] }
-
-[features]
-default = ["dep:shuttle-runtime", "dep:shuttle-shared-db", "dep:shuttle-static-folder"]
-standalone = []
 
 # The profile that 'cargo swagger-v4.19.0' will build with
 [profile.dist]
