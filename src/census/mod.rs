@@ -17,6 +17,18 @@ use utils::{deserialize_from_str, serialize_optional_bool};
 
 pub const REALTIME_URL: &str = "wss://push.planetside2.com/streaming";
 
+#[cfg(test)]
+mod tests {
+    use crate::census::REALTIME_URL;
+    use url::Url;
+
+    #[test]
+    fn test_realtime_url_parsing() {
+        let parsed_url = Url::parse(REALTIME_URL);
+        assert!(parsed_url.is_ok(), "Failed to parse REALTIME_URL");
+    }
+}
+
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum Service {
@@ -25,6 +37,7 @@ pub enum Service {
 
 #[derive(Serialize)]
 #[serde(tag = "action", rename_all = "camelCase")]
+#[allow(dead_code)]
 pub enum Action {
     Echo {
         payload: serde_json::Value,
@@ -66,7 +79,6 @@ pub struct Subscription {
 
 #[derive(Deserialize, PartialEq, Debug)]
 #[serde(tag = "type", rename_all = "camelCase")]
-#[allow(clippy::module_name_repetitions)]
 pub enum CensusMessage {
     ConnectionStateChanged {
         #[serde(deserialize_with = "deserialize_from_str")]

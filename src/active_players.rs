@@ -3,7 +3,7 @@ use crate::census::constants::{CharacterID, Faction, Loadout, WorldID, ZoneID};
 use crate::controllers::population::{
     FactionBreakdown, LoadoutBreakdown, WorldBreakdown, ZoneBreakdown,
 };
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use metrics::{gauge, increment_counter};
 use sqlx::{Pool, Postgres};
 use std::{
@@ -61,14 +61,14 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
 
     for player in active_players_lock.values() {
         loadout_breakdown
-            .entry(player.world as i32)
-            .or_insert_with(|| (Default::default(), HashMap::new()))
+            .entry(player.world as u32)
+            .or_insert_with(|| (NaiveDateTime::default(), HashMap::new()))
             .1
-            .entry(player.zone as i32)
+            .entry(player.zone)
             .or_insert_with(HashMap::new)
-            .entry(i16::from(player.team_id))
+            .entry(player.team_id as u16)
             .or_insert_with(HashMap::new)
-            .entry(i16::from(player.loadout))
+            .entry(player.loadout as u16)
             .and_modify(|v| *v += 1)
             .or_insert(1);
 

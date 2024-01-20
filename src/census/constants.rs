@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use strum::{EnumIter, EnumVariantNames, FromRepr};
 
-#[repr(i16)]
+#[repr(u16)]
 #[derive(
     Serialize,
     Deserialize,
@@ -20,6 +20,7 @@ use strum::{EnumIter, EnumVariantNames, FromRepr};
     strum::Display,
     FromRepr,
 )]
+#[allow(clippy::upper_case_acronyms)]
 pub enum Loadout {
     Unknown = 0,
     NCInfiltrator = 1,
@@ -49,33 +50,33 @@ pub enum Loadout {
 }
 
 impl Loadout {
-    pub fn get_faction(&self) -> Faction {
+    pub const fn get_faction(self) -> Faction {
         match self {
             Self::Unknown => Faction::Unknown,
-            Self::NCInfiltrator => Faction::NC,
-            Self::NCLightAssault => Faction::NC,
-            Self::NCMedic => Faction::NC,
-            Self::NCEngineer => Faction::NC,
-            Self::NCHeavyAssault => Faction::NC,
-            Self::NCMAX => Faction::NC,
-            Self::TRInfiltrator => Faction::TR,
-            Self::TRLightAssault => Faction::TR,
-            Self::TRMedic => Faction::TR,
-            Self::TREngineer => Faction::TR,
-            Self::TRHeavyAssault => Faction::TR,
-            Self::TRMAX => Faction::TR,
-            Self::VSInfiltrator => Faction::VS,
-            Self::VSLightAssault => Faction::VS,
-            Self::VSMedic => Faction::VS,
-            Self::VSEngineer => Faction::VS,
-            Self::VSHeavyAssault => Faction::VS,
-            Self::VSMAX => Faction::VS,
-            Self::NSInfiltrator => Faction::NS,
-            Self::NSLightAssault => Faction::NS,
-            Self::NSMedic => Faction::NS,
-            Self::NSEngineer => Faction::NS,
-            Self::NSHeavyAssault => Faction::NS,
-            Self::NSMAX => Faction::NS,
+            Self::NCInfiltrator
+            | Self::NCLightAssault
+            | Self::NCMedic
+            | Self::NCEngineer
+            | Self::NCHeavyAssault
+            | Self::NCMAX => Faction::NC,
+            Self::TRInfiltrator
+            | Self::TRLightAssault
+            | Self::TRMedic
+            | Self::TREngineer
+            | Self::TRHeavyAssault
+            | Self::TRMAX => Faction::TR,
+            Self::VSInfiltrator
+            | Self::VSLightAssault
+            | Self::VSMedic
+            | Self::VSEngineer
+            | Self::VSHeavyAssault
+            | Self::VSMAX => Faction::VS,
+            Self::NSInfiltrator
+            | Self::NSLightAssault
+            | Self::NSMedic
+            | Self::NSEngineer
+            | Self::NSHeavyAssault
+            | Self::NSMAX => Faction::NS,
         }
     }
 }
@@ -84,14 +85,14 @@ impl FromStr for Loadout {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = i16::from_str(s)?;
+        let id = u16::from_str(s)?;
         let loadout = Self::try_from(id)?;
 
         Ok(loadout)
     }
 }
 
-#[repr(i16)]
+#[repr(u16)]
 #[derive(
     Serialize,
     Deserialize,
@@ -120,14 +121,14 @@ impl FromStr for Faction {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = i16::from_str(s)?;
+        let id = u16::from_str(s)?;
         let faction = Self::try_from(id)?;
 
         Ok(faction)
     }
 }
 
-#[repr(i16)]
+#[repr(u16)]
 #[derive(
     Serialize,
     Deserialize,
@@ -159,7 +160,7 @@ impl FromStr for WorldID {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = i16::from_str(s)?;
+        let id = u16::from_str(s)?;
         let world = Self::try_from(id)?;
 
         Ok(world)

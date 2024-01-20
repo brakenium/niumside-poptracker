@@ -9,6 +9,7 @@ use serde::Serialize;
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(untagged)]
+#[allow(dead_code)]
 pub enum CharacterSubscription {
     #[serde(serialize_with = "serialize_all_subscription")]
     All,
@@ -18,6 +19,7 @@ pub enum CharacterSubscription {
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(untagged)]
+#[allow(dead_code)]
 pub enum WorldSubscription {
     #[serde(serialize_with = "serialize_all_subscription")]
     All,
@@ -28,6 +30,7 @@ pub enum WorldSubscription {
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(untagged)]
+#[allow(dead_code)]
 pub enum EventSubscription {
     #[serde(serialize_with = "serialize_all_subscription")]
     All,
@@ -36,6 +39,7 @@ pub enum EventSubscription {
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 pub struct SubscriptionSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub event_names: Option<EventSubscription>,

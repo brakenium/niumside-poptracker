@@ -10,10 +10,10 @@ pub enum EventHandlerErrors {
     SqlxError(#[from] sqlx::Error),
 }
 
-pub fn receive_events(event: Event, active_players: ActivePlayerDb) {
+pub fn receive_events(event: Event, active_players: &ActivePlayerDb) {
     match event {
         Event::GainExperience(event) => {
-            gain_experience::handle(&event, &active_players);
+            gain_experience::handle(&event, active_players);
         }
         Event::PlayerLogin(_) => todo!(),
         Event::PlayerLogout(_) => todo!(),

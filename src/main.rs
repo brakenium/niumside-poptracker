@@ -2,6 +2,7 @@
 #![warn(clippy::nursery)]
 #![warn(clippy::unwrap_used)]
 #![warn(clippy::expect_used)]
+#![allow(clippy::module_name_repetitions)]
 
 mod active_players;
 mod census;

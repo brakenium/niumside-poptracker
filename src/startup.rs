@@ -59,7 +59,7 @@ pub async fn services(
         realtime_url: Some(app_config.census.realtime_base_url),
     };
 
-    thread::spawn(|| census::realtime::client(census_realtime_config, census_realtime_state));
+    thread::spawn(move || census::realtime::client(census_realtime_config, &census_realtime_state));
 
     tokio::select!(
         _ = poise.run() => {},

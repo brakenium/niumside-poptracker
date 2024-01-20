@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeAs, SerializeAs, TimestampMilliSeconds, TimestampSeconds};
 
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
+#[allow(dead_code)]
 pub enum EventNames {
     AchievementEarned,
     BattleRankUp,
