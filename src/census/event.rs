@@ -1,4 +1,4 @@
-use crate::census::utils::*;
+use crate::census::utils::{de_bool_from_str_int, deserialize_duration_from_str, deserialize_from_str, serialize_duration};
 use crate::census::constants::{
     CharacterID, ExperienceID, FacilityID, Faction, FiremodeID, Loadout, OutfitID, VehicleID,
     WeaponID, WorldID, ZoneID,
@@ -34,7 +34,7 @@ impl serde::Serialize for EventNames {
     where
         S: serde::Serializer,
     {
-        use self::EventNames::*;
+        use self::EventNames::{AchievementEarned, BattleRankUp, ContinentLock, ContinentUnlock, Death, FacilityControl, GainExperience, GainExperienceId, ItemAdded, MetagameEvent, PlayerFacilityCapture, PlayerFacilityDefend, PlayerLogin, PlayerLogout, SkillAdded, VehicleDestroy};
 
         match *self {
             AchievementEarned => {
@@ -47,7 +47,7 @@ impl serde::Serialize for EventNames {
             VehicleDestroy => serializer.serialize_unit_variant("EventNames", 5, "VehicleDestroy"),
             GainExperience => serializer.serialize_unit_variant("EventNames", 6, "GainExperience"),
             GainExperienceId(value) => {
-                let event_name = format!("GainExperience_experience_id_{}", value);
+                let event_name = format!("GainExperience_experience_id_{value}");
 
                 serializer.serialize_str(&event_name)
             }
@@ -94,49 +94,49 @@ pub enum Event {
 impl Display for Event {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Event::PlayerLogin(_) => {
+            Self::PlayerLogin(_) => {
                 write!(f, "PlayerLogin")
             }
-            Event::PlayerLogout(_) => {
+            Self::PlayerLogout(_) => {
                 write!(f, "PlayerLogout")
             }
-            Event::Death(_) => {
+            Self::Death(_) => {
                 write!(f, "Death")
             }
-            Event::VehicleDestroy(_) => {
+            Self::VehicleDestroy(_) => {
                 write!(f, "VehicleDestroy")
             }
-            Event::GainExperience(_) => {
+            Self::GainExperience(_) => {
                 write!(f, "GainExperience")
             }
-            Event::PlayerFacilityCapture(_) => {
+            Self::PlayerFacilityCapture(_) => {
                 write!(f, "PlayerFacilityCapture")
             }
-            Event::PlayerFacilityDefend(_) => {
+            Self::PlayerFacilityDefend(_) => {
                 write!(f, "PlayerFacilityDefend")
             }
-            Event::ContinentLock(_) => {
+            Self::ContinentLock(_) => {
                 write!(f, "ContinentLock")
             }
-            Event::ContinentUnlock(_) => {
+            Self::ContinentUnlock(_) => {
                 write!(f, "ContinentUnlock")
             }
-            Event::FacilityControl(_) => {
+            Self::FacilityControl(_) => {
                 write!(f, "FacilityControl")
             }
-            Event::MetagameEvent(_) => {
+            Self::MetagameEvent(_) => {
                 write!(f, "MetagameEvent")
             }
-            Event::ItemAdded => {
+            Self::ItemAdded => {
                 write!(f, "ItemAdded")
             }
-            Event::AchievementEarned => {
+            Self::AchievementEarned => {
                 write!(f, "AchievementEarned")
             }
-            Event::SkillAdded => {
+            Self::SkillAdded => {
                 write!(f, "SkillAdded")
             }
-            Event::BattleRankUp => {
+            Self::BattleRankUp => {
                 write!(f, "BattleRankUp")
             }
         }

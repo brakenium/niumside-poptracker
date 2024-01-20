@@ -1,4 +1,4 @@
-use std::fmt::Display;
+
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -40,31 +40,31 @@ pub enum Loadout {
 impl Loadout {
     pub fn get_faction(&self) -> Faction {
         match self {
-            Loadout::Unknown => Faction::Unknown,
-            Loadout::NCInfiltrator => Faction::NC,
-            Loadout::NCLightAssault => Faction::NC,
-            Loadout::NCMedic => Faction::NC,
-            Loadout::NCEngineer => Faction::NC,
-            Loadout::NCHeavyAssault => Faction::NC,
-            Loadout::NCMAX => Faction::NC,
-            Loadout::TRInfiltrator => Faction::TR,
-            Loadout::TRLightAssault => Faction::TR,
-            Loadout::TRMedic => Faction::TR,
-            Loadout::TREngineer => Faction::TR,
-            Loadout::TRHeavyAssault => Faction::TR,
-            Loadout::TRMAX => Faction::TR,
-            Loadout::VSInfiltrator => Faction::VS,
-            Loadout::VSLightAssault => Faction::VS,
-            Loadout::VSMedic => Faction::VS,
-            Loadout::VSEngineer => Faction::VS,
-            Loadout::VSHeavyAssault => Faction::VS,
-            Loadout::VSMAX => Faction::VS,
-            Loadout::NSInfiltrator => Faction::NS,
-            Loadout::NSLightAssault => Faction::NS,
-            Loadout::NSMedic => Faction::NS,
-            Loadout::NSEngineer => Faction::NS,
-            Loadout::NSHeavyAssault => Faction::NS,
-            Loadout::NSMAX => Faction::NS,
+            Self::Unknown => Faction::Unknown,
+            Self::NCInfiltrator => Faction::NC,
+            Self::NCLightAssault => Faction::NC,
+            Self::NCMedic => Faction::NC,
+            Self::NCEngineer => Faction::NC,
+            Self::NCHeavyAssault => Faction::NC,
+            Self::NCMAX => Faction::NC,
+            Self::TRInfiltrator => Faction::TR,
+            Self::TRLightAssault => Faction::TR,
+            Self::TRMedic => Faction::TR,
+            Self::TREngineer => Faction::TR,
+            Self::TRHeavyAssault => Faction::TR,
+            Self::TRMAX => Faction::TR,
+            Self::VSInfiltrator => Faction::VS,
+            Self::VSLightAssault => Faction::VS,
+            Self::VSMedic => Faction::VS,
+            Self::VSEngineer => Faction::VS,
+            Self::VSHeavyAssault => Faction::VS,
+            Self::VSMAX => Faction::VS,
+            Self::NSInfiltrator => Faction::NS,
+            Self::NSLightAssault => Faction::NS,
+            Self::NSMedic => Faction::NS,
+            Self::NSEngineer => Faction::NS,
+            Self::NSHeavyAssault => Faction::NS,
+            Self::NSMAX => Faction::NS,
         }
     }
 }

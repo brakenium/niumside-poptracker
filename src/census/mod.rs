@@ -55,7 +55,7 @@ pub enum Action {
     },
 }
 
-#[derive(Deserialize, PartialEq, Debug)]
+#[derive(Deserialize, PartialEq, Eq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Subscription {
     pub character_count: u64,
@@ -66,6 +66,7 @@ pub struct Subscription {
 
 #[derive(Deserialize, PartialEq, Debug)]
 #[serde(tag = "type", rename_all = "camelCase")]
+#[allow(clippy::module_name_repetitions)]
 pub enum CensusMessage {
     ConnectionStateChanged {
         #[serde(deserialize_with = "deserialize_from_str")]

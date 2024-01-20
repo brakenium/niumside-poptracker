@@ -6,7 +6,7 @@ use rocket::{
 };
 
 use thiserror::Error;
-use tracing::info;
+
 use utoipa::openapi::OpenApi;
 use utoipa::ToSchema;
 use crate::controllers::population::{get_current_tree, PopWorld};

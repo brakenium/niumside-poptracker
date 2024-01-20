@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use serde::Serialize;
 use sqlx::PgPool;
-use tracing::{error, info};
+use tracing::{error};
 use utoipa::ToSchema;
 use crate::census::constants::{Faction, Loadout, WorldID};
 
@@ -60,7 +60,7 @@ pub async fn get_current(
     db_pool: &PgPool,
     worlds: Option<&[i32]>,
     zones: Option<&[i32]>,
-    factions: Option<&[i16]>,
+    _factions: Option<&[i16]>,
     team_ids: Option<&[i16]>,
     loadouts: Option<&[i16]>,
 ) -> Option<WorldBreakdown> {
@@ -174,7 +174,7 @@ pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<Po
     result
 }
 
-/// Get the population from the database as a tree using get_current
+/// Get the population from the database as a tree using `get_current`
 ///
 /// # Arguments
 ///

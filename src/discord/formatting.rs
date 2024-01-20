@@ -1,6 +1,6 @@
-use poise::serenity_prelude::{CreateEmbed, Mentionable};
-use crate::census::constants::{Loadout, WorldID, ZoneID, Faction, CharacterID};
-use crate::controllers::population::{PopWorld, WorldBreakdown, ZoneBreakdown};
+use poise::serenity_prelude::{CreateEmbed};
+use crate::census::constants::{Faction};
+use crate::controllers::population::{PopWorld};
 use crate::discord::icons::Icons;
 
 pub fn world_breakdown_message(
@@ -21,14 +21,14 @@ pub fn single_world_breakdown_embed(
     let mut embed = CreateEmbed::default();
 
     embed.title(format!("{} Population", world.world_id));
-    embed.thumbnail(format!("https://www.planetside2.com/images/ps2-logo.png"));
+    embed.thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string());
     embed.footer(|f| {
         f.text(format!("Last updated: {}", world.timestamp))
     });
 
-    for zone in world.zones.iter() {
-        let mut breakdown = "".into();
-        for team in zone.teams.iter() {
+    for zone in &world.zones {
+        let mut breakdown = String::new();
+        for team in &zone.teams {
             let team_icon = Icons::try_from(
                 Faction::try_from(team.team_id)
                     .unwrap_or(Faction::Unknown)

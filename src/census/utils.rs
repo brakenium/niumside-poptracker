@@ -95,7 +95,7 @@ where
         0 => Ok(false),
         1 => Ok(true),
         other => Err(serde::de::Error::invalid_value(
-            serde::de::Unexpected::Unsigned(other as u64),
+            serde::de::Unexpected::Unsigned(u64::from(other)),
             &"zero or one",
         )),
     }
