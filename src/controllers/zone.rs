@@ -40,11 +40,8 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<(i32, Option<String>)>, sql
         .fetch_all(db_pool)
         .await
         .map(|zones| {
-        //     take the zones record and return a vector of tuples containing the zone ID and the zone name
-            zones
-                .into_iter()
-                .map(|z| (z.zone_id, z.name))
-                .collect()
+            //     take the zones record and return a vector of tuples containing the zone ID and the zone name
+            zones.into_iter().map(|z| (z.zone_id, z.name)).collect()
         })
 }
 
@@ -71,9 +68,6 @@ pub async fn get_all_existing(
     .await
     .map(|zones| {
         // take the zones record and return a vector of tuples containing the zone ID and the zone name
-        zones
-            .into_iter()
-            .map(|z| (z.zone_id, z.name))
-            .collect()
+        zones.into_iter().map(|z| (z.zone_id, z.name)).collect()
     })
 }

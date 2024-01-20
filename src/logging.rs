@@ -1,6 +1,6 @@
 use metrics::{describe_counter, describe_gauge};
 use metrics_exporter_prometheus::{PrometheusBuilder, PrometheusHandle};
-use tracing::{info};
+use tracing::info;
 
 pub fn metrics() -> PrometheusHandle {
     #[allow(clippy::expect_used)]

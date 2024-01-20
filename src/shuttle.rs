@@ -1,7 +1,7 @@
-use crate::{active_players, startup};
-use sqlx::PgPool;
 use crate::discord::{Data, Error};
 use crate::storage::configuration;
+use crate::{active_players, startup};
+use sqlx::PgPool;
 
 pub struct NiumsideService {
     pub(crate) active_players: active_players::ActivePlayerDb,
@@ -20,8 +20,9 @@ impl shuttle_runtime::Service for NiumsideService {
             self.app_config,
             self.poise,
             self.active_players,
-            addr
-        )).await?;
+            addr,
+        ))
+        .await?;
 
         Ok(())
     }

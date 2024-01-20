@@ -65,10 +65,9 @@ fn handle_ws_msg(
                             ))?
                         );
 
-                        socket
-                            .send(Message::Text(serde_json::to_string(&Action::Subscribe(
-                                subscription_config,
-                            ))?))?;
+                        socket.send(Message::Text(serde_json::to_string(&Action::Subscribe(
+                            subscription_config,
+                        ))?))?;
                     }
                 }
                 CensusMessage::Heartbeat { .. } => {
@@ -85,8 +84,7 @@ fn handle_ws_msg(
         }
         Message::Binary(_) | Message::Pong(_) | Message::Frame(_) => {}
         Message::Ping(ping) => {
-            socket
-                .send(Message::Pong(ping))?;
+            socket.send(Message::Pong(ping))?;
         }
         Message::Close(close) => {
             increment_counter!("realtime.total_closed_connections");
@@ -107,15 +105,17 @@ pub fn client(realtime_client_config: RealtimeClientConfig, state: State) {
         "{}?environment={}&service-id=s:{}",
         realtime_client_config
             .realtime_url
-            .unwrap_or_else(|| Result::expect(Url::parse(REALTIME_URL), "Failed to parse constant realtime url")),
+            .unwrap_or_else(|| Result::expect(
+                Url::parse(REALTIME_URL),
+                "Failed to parse constant realtime url"
+            )),
         realtime_client_config.environment,
         realtime_client_config.service_id
     );
 
     info!("Connecting to realtime at {}", census_addr);
 
-    let mut socket = match connect(&census_addr)
-    {
+    let mut socket = match connect(&census_addr) {
         Ok((socket, _)) => socket,
         Err(err) => {
             error!("Failed to connect to realtime: {:?}", err);
@@ -178,8 +178,6 @@ pub fn client(realtime_client_config: RealtimeClientConfig, state: State) {
         }
     }
 }
-
-use crate::storage::configuration;
 
 // pub async fn init(
 //     census_config: configuration::CensusConfig,

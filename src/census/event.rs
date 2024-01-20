@@ -1,7 +1,9 @@
-use crate::census::utils::{de_bool_from_str_int, deserialize_duration_from_str, deserialize_from_str, serialize_duration};
 use crate::census::constants::{
     CharacterID, ExperienceID, FacilityID, Faction, FiremodeID, Loadout, OutfitID, VehicleID,
     WeaponID, WorldID, ZoneID,
+};
+use crate::census::utils::{
+    de_bool_from_str_int, deserialize_duration_from_str, deserialize_from_str, serialize_duration,
 };
 use std::fmt::{Display, Formatter};
 
@@ -34,7 +36,12 @@ impl serde::Serialize for EventNames {
     where
         S: serde::Serializer,
     {
-        use self::EventNames::{AchievementEarned, BattleRankUp, ContinentLock, ContinentUnlock, Death, FacilityControl, GainExperience, GainExperienceId, ItemAdded, MetagameEvent, PlayerFacilityCapture, PlayerFacilityDefend, PlayerLogin, PlayerLogout, SkillAdded, VehicleDestroy};
+        use self::EventNames::{
+            AchievementEarned, BattleRankUp, ContinentLock, ContinentUnlock, Death,
+            FacilityControl, GainExperience, GainExperienceId, ItemAdded, MetagameEvent,
+            PlayerFacilityCapture, PlayerFacilityDefend, PlayerLogin, PlayerLogout, SkillAdded,
+            VehicleDestroy,
+        };
 
         match *self {
             AchievementEarned => {

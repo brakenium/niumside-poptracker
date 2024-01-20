@@ -1,9 +1,8 @@
 pub mod gain_experience;
 
-
 use crate::active_players::ActivePlayerDb;
-use tracing::error;
 use crate::census::event::Event;
+use tracing::error;
 
 #[derive(thiserror::Error, Debug)]
 pub enum EventHandlerErrors {
@@ -11,10 +10,7 @@ pub enum EventHandlerErrors {
     SqlxError(#[from] sqlx::Error),
 }
 
-pub fn receive_events(
-    event: Event,
-    active_players: ActivePlayerDb,
-) {
+pub fn receive_events(event: Event, active_players: ActivePlayerDb) {
     match event {
         Event::GainExperience(event) => {
             gain_experience::handle(&event, &active_players);

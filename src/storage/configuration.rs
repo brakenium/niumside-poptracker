@@ -1,19 +1,23 @@
+use crate::census::constants::{WorldID, ZoneID};
 use crate::constants;
 use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
-use tracing::Level;
 use std::env;
 use std::path::Path;
+use tracing::Level;
 use url::Url;
-use crate::census::constants::{WorldID, ZoneID};
 
 pub trait DeserializeWith: Sized {
     fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>;
+    where
+        D: Deserializer<'de>;
 }
 
 impl DeserializeWith for Level {
-    fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+    fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let s = String::deserialize(de)?;
 
         match s.as_ref() {
@@ -22,7 +26,9 @@ impl DeserializeWith for Level {
             "Info" => Ok(Self::INFO),
             "Debug" => Ok(Self::DEBUG),
             "Trace" => Ok(Self::TRACE),
-            _ => Err(serde::de::Error::custom("error trying to deserialize log level"))
+            _ => Err(serde::de::Error::custom(
+                "error trying to deserialize log level",
+            )),
         }
     }
 }
@@ -50,7 +56,7 @@ pub struct DatabaseConfig {
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
 pub struct AppConfig {
-    #[serde(deserialize_with="Level::deserialize_with")]
+    #[serde(deserialize_with = "Level::deserialize_with")]
     pub log_level: Level,
 }
 
@@ -90,18 +96,16 @@ impl Settings {
             // Add in settings from the environment (with a prefix of APP)
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
             .add_source(
-                Environment::with_prefix(
-                    &constants::PROJECT_NAME.to_uppercase().replace(' ', "")
-                )
+                Environment::with_prefix(&constants::PROJECT_NAME.to_uppercase().replace(' ', ""))
                     .separator("_")
                     .list_separator(","),
             )
             .add_source(
                 Environment::with_prefix(
-                    &constants::APPLICATION_NAME.to_uppercase().replace(' ', "")
+                    &constants::APPLICATION_NAME.to_uppercase().replace(' ', ""),
                 )
-                    .separator("_")
-                    .list_separator(","),
+                .separator("_")
+                .list_separator(","),
             )
             .build()?;
 

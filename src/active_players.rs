@@ -1,4 +1,8 @@
 #![allow(clippy::cast_lossless)]
+use crate::census::constants::{CharacterID, Faction, Loadout, WorldID, ZoneID};
+use crate::controllers::population::{
+    FactionBreakdown, LoadoutBreakdown, WorldBreakdown, ZoneBreakdown,
+};
 use chrono::{DateTime, Utc};
 use metrics::{gauge, increment_counter};
 use sqlx::{Pool, Postgres};
@@ -8,8 +12,6 @@ use std::{
     time::Duration,
 };
 use tracing::info;
-use crate::census::constants::{Loadout, WorldID, ZoneID, Faction, CharacterID};
-use crate::controllers::population::{FactionBreakdown, LoadoutBreakdown, WorldBreakdown, ZoneBreakdown};
 
 #[derive(Debug, Clone)]
 pub struct ActivePlayer {
@@ -61,7 +63,8 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
         loadout_breakdown
             .entry(player.world as i32)
             .or_insert_with(|| (Default::default(), HashMap::new()))
-            .1.entry(player.zone as i32)
+            .1
+            .entry(player.zone as i32)
             .or_insert_with(HashMap::new)
             .entry(i16::from(player.team_id))
             .or_insert_with(HashMap::new)
@@ -139,18 +142,18 @@ async fn insert_team(
     zone_population_id: i32,
     db_pool: &Pool<Postgres>,
 ) {
-        for (team_id, loadout_map) in team_map.iter() {
-            sqlx::query!(
-                "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
-                *team_id as i32
-            )
-            .execute(db_pool)
-            .await
-            .unwrap_or_else(|error| {
-                panic!("Failed database insert: {error}");
-            });
+    for (team_id, loadout_map) in team_map.iter() {
+        sqlx::query!(
+            "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
+            *team_id as i32
+        )
+        .execute(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
 
-            let faction_population_id = sqlx::query!(
+        let faction_population_id = sqlx::query!(
                 "INSERT INTO team_population (team_id, zone_population_id) VALUES ($1, $2) RETURNING team_population_id",
                 *team_id as i32,
                 zone_population_id
@@ -162,20 +165,19 @@ async fn insert_team(
             })
             .team_population_id;
 
-            insert_loadout(loadout_map, faction_population_id, db_pool).await;
-        }
+        insert_loadout(loadout_map, faction_population_id, db_pool).await;
+    }
 }
 
 pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgres>) {
-    let population_id = sqlx::query!(
-        "INSERT INTO population (timestamp) VALUES (default) RETURNING population_id"
-    )
-    .fetch_one(db_pool)
-    .await
-    .unwrap_or_else(|error| {
-        panic!("Failed database insert: {error}");
-    })
-    .population_id;
+    let population_id =
+        sqlx::query!("INSERT INTO population (timestamp) VALUES (default) RETURNING population_id")
+            .fetch_one(db_pool)
+            .await
+            .unwrap_or_else(|error| {
+                panic!("Failed database insert: {error}");
+            })
+            .population_id;
 
     for (world_id, zone_map) in loadout_breakdown.iter() {
         sqlx::query!(

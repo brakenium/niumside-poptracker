@@ -2,10 +2,10 @@ use crate::census::utils::{
     serialize_all_subscription, serialize_char_ids_subscription, serialize_world_ids_subscription,
 };
 
+use crate::census::constants::{CharacterID, WorldID};
 use crate::census::event::EventNames;
 use crate::census::Service;
 use serde::Serialize;
-use crate::census::constants::{CharacterID, WorldID};
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(untagged)]

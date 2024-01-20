@@ -1,4 +1,3 @@
-
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -7,8 +6,8 @@ use strum::{EnumIter, EnumVariantNames, FromRepr};
 #[repr(i16)]
 #[derive(
     Serialize, Deserialize, Copy, Clone, Eq, Debug, PartialEq, Hash, TryFromPrimitive, IntoPrimitive,
+    EnumIter, EnumVariantNames, strum::Display, FromRepr
 )]
-#[cfg_attr(feature = "strum", derive(EnumIter, EnumVariantNames, strum::Display, FromRepr))]
 pub enum Loadout {
     Unknown = 0,
     NCInfiltrator = 1,
@@ -83,8 +82,8 @@ impl FromStr for Loadout {
 #[repr(i16)]
 #[derive(
     Serialize, Deserialize, Copy, Clone, Eq, Debug, PartialEq, Hash, TryFromPrimitive, IntoPrimitive,
+EnumIter, EnumVariantNames, strum::Display, FromRepr
 )]
-#[cfg_attr(feature = "strum", derive(EnumIter, EnumVariantNames, strum::Display, FromRepr))]
 pub enum Faction {
     Unknown = 0,
     VS = 1,
@@ -106,8 +105,20 @@ impl FromStr for Faction {
 
 #[repr(i16)]
 #[derive(
-    Serialize, Deserialize, Copy, Clone, Eq, Debug, PartialEq, Hash, TryFromPrimitive, IntoPrimitive, EnumIter,
-    EnumVariantNames, strum::Display, FromRepr
+    Serialize,
+    Deserialize,
+    Copy,
+    Clone,
+    Eq,
+    Debug,
+    PartialEq,
+    Hash,
+    TryFromPrimitive,
+    IntoPrimitive,
+    EnumIter,
+    EnumVariantNames,
+    strum::Display,
+    FromRepr,
 )]
 #[strum(ascii_case_insensitive)]
 pub enum WorldID {

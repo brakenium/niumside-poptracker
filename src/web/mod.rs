@@ -1,29 +1,24 @@
 mod api;
 
-use std::path::Path;
-use metrics_exporter_prometheus::PrometheusHandle;
-use rocket::{get, routes, Build, Rocket, State};
-use rocket::fs::{FileServer};
-use utoipa::OpenApi;
 use crate::controllers::population;
+use metrics_exporter_prometheus::PrometheusHandle;
+use rocket::fs::FileServer;
+use rocket::{get, routes, Build, Rocket, State};
+use std::path::Path;
+use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        api::population,
-        prom_metrics
-    ),
-    components(
-        schemas(
-            api::Response,
-            api::PossibleResults,
-            population::PopWorld,
-            population::PopZone,
-            population::PopTeam,
-            population::PopLoadout,
-            api::Error,
-        )
-    )
+    paths(api::population, prom_metrics),
+    components(schemas(
+        api::Response,
+        api::PossibleResults,
+        population::PopWorld,
+        population::PopZone,
+        population::PopTeam,
+        population::PopLoadout,
+        api::Error,
+    ))
 )]
 pub struct ApiDoc;
 

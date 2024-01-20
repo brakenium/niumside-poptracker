@@ -1,8 +1,7 @@
 use crate::census::constants::WorldID;
-use strum::IntoEnumIterator;
 use crate::controllers::population;
-use crate::discord::{Context, Error, formatting};
-
+use crate::discord::{formatting, Context, Error};
+use strum::IntoEnumIterator;
 
 /// Displays your or another user's account creation date
 #[poise::command(slash_command, track_edits)]
@@ -28,7 +27,8 @@ pub async fn population(
     ctx.send(|m| {
         m.embeds.append(&mut response);
         m
-    }).await?;
+    })
+    .await?;
 
     Ok(())
 }
@@ -38,9 +38,8 @@ async fn world_id_autocomplete(
     _ctx: Context<'_>,
     _partial: &str,
 ) -> impl Iterator<Item = poise::AutocompleteChoice<i16>> {
-    WorldID::iter()
-        .map(|v| poise::AutocompleteChoice {
-            name: format!("{v}"),
-            value: v as i16,
-        })
+    WorldID::iter().map(|v| poise::AutocompleteChoice {
+        name: format!("{v}"),
+        value: v as i16,
+    })
 }

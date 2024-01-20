@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use crate::census::constants::{Faction, Loadout, WorldID};
 use serde::Serialize;
 use sqlx::PgPool;
-use tracing::{error};
+use std::collections::HashMap;
+use tracing::error;
 use utoipa::ToSchema;
-use crate::census::constants::{Faction, Loadout, WorldID};
 
 pub type LoadoutBreakdown = HashMap<i16, i16>;
 
@@ -118,7 +118,9 @@ pub async fn get_current(
         let zone_id = record.zone_id;
         let amount = record.amount;
 
-        let world = world_breakdown.entry(world_id).or_insert_with(|| (record.timestamp, HashMap::new()));
+        let world = world_breakdown
+            .entry(world_id)
+            .or_insert_with(|| (record.timestamp, HashMap::new()));
         let zone = world.1.entry(zone_id).or_insert_with(HashMap::new);
         let team = zone.entry(team_id).or_insert_with(HashMap::new);
         let loadout = team.entry(loadout_id).or_insert(0);
@@ -143,21 +145,21 @@ pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<Po
     for (world_id, (timestamp, world_population)) in population {
         let mut zones = Vec::new();
         for (zone_id, zone_population) in world_population {
-                let mut teams = Vec::new();
-                for (team_id, team_population) in zone_population {
-                    let mut loadouts = Vec::new();
-                    for (loadout_id, loadout_population) in team_population {
-                        loadouts.push(PopLoadout {
-                            loadout_id,
-                            loadout_population,
-                        });
-                    }
-                    teams.push(PopTeam {
-                        team_id,
-                        team_population: loadouts.iter().map(|l| l.loadout_population).sum(),
-                        loadouts,
+            let mut teams = Vec::new();
+            for (team_id, team_population) in zone_population {
+                let mut loadouts = Vec::new();
+                for (loadout_id, loadout_population) in team_population {
+                    loadouts.push(PopLoadout {
+                        loadout_id,
+                        loadout_population,
                     });
                 }
+                teams.push(PopTeam {
+                    team_id,
+                    team_population: loadouts.iter().map(|l| l.loadout_population).sum(),
+                    loadouts,
+                });
+            }
             zones.push(PopZone {
                 zone_id,
                 zone_population: teams.iter().map(|t| t.team_population).sum(),
@@ -195,16 +197,9 @@ pub async fn get_current_tree(
     zones: Option<&[i32]>,
     factions: Option<&[i16]>,
     teams: Option<&[i16]>,
-    loadouts: Option<&[i16]>
+    loadouts: Option<&[i16]>,
 ) -> Option<Vec<PopWorld>> {
-    let population = get_current(
-        db_pool,
-        worlds,
-        zones,
-        factions,
-        teams,
-        loadouts,
-    ).await?;
+    let population = get_current(db_pool, worlds, zones, factions, teams, loadouts).await?;
 
     let result = get_pop_worlds_from_world_breakdown(population);
 

@@ -1,7 +1,7 @@
+use crate::census::constants::{CharacterID, WorldID};
 use chrono::Duration;
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::json;
-use crate::census::constants::{CharacterID, WorldID};
 
 pub fn serialize_optional_bool<S>(value: &Option<bool>, serializer: S) -> Result<S::Ok, S::Error>
 where

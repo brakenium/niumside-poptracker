@@ -1,18 +1,18 @@
-pub mod realtime;
-pub mod event;
-mod utils;
-mod subscription;
 pub mod constants;
+pub mod event;
+pub mod realtime;
+mod subscription;
+mod utils;
 
 use event::Event;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::net::TcpStream;
-use thiserror::Error;
-use tungstenite::ClientHandshake;
-use tungstenite::stream::MaybeTlsStream;
 use subscription::SubscriptionSettings;
 use subscription::{CharacterSubscription, EventSubscription, WorldSubscription};
+use thiserror::Error;
+use tungstenite::stream::MaybeTlsStream;
+use tungstenite::ClientHandshake;
 use utils::{deserialize_from_str, serialize_optional_bool};
 
 pub const REALTIME_URL: &str = "wss://push.planetside2.com/streaming";
@@ -35,8 +35,8 @@ pub enum Action {
     #[serde(rename_all = "camelCase")]
     ClearSubscribe {
         #[serde(
-        skip_serializing_if = "Option::is_none",
-        serialize_with = "serialize_optional_bool"
+            skip_serializing_if = "Option::is_none",
+            serialize_with = "serialize_optional_bool"
         )]
         all: Option<bool>,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -95,14 +95,13 @@ pub enum AuraxisError {
     #[error("Websocket error")]
     WebSocketError(#[from] tungstenite::Error),
     #[error("Websocket handshake error")]
-    WebSocketHandshakeError(#[from] tungstenite::handshake::HandshakeError<ClientHandshake<MaybeTlsStream<TcpStream>>>),
+    WebSocketHandshakeError(
+        #[from] tungstenite::handshake::HandshakeError<ClientHandshake<MaybeTlsStream<TcpStream>>>,
+    ),
     #[error("Tokio message channel error")]
     TokioChannnelError(#[from] tokio::sync::mpsc::error::SendError<tungstenite::Message>),
     #[error("Ser(de) error")]
     SerdeError(#[from] serde_json::Error),
-    #[error("Http error")]
-    #[cfg(feature = "api")]
-    HttpError(#[from] reqwest::Error),
     #[error(transparent)]
     Unknown(#[from] anyhow::Error),
 }

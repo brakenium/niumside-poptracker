@@ -2,8 +2,8 @@ mod commands;
 mod formatting;
 mod icons;
 
-use poise::FrameworkBuilder;
 use poise::serenity_prelude as serenity;
+use poise::FrameworkBuilder;
 use sqlx::PgPool;
 
 pub struct Data {

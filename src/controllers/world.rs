@@ -40,11 +40,8 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<(i32, Option<String>)>, sql
         .fetch_all(db_pool)
         .await
         .map(|worlds| {
-        //     take the worlds record and return a vector of tuples containing the world ID and the world name
-            worlds
-                .into_iter()
-                .map(|w| (w.world_id, w.name))
-                .collect()
+            //     take the worlds record and return a vector of tuples containing the world ID and the world name
+            worlds.into_iter().map(|w| (w.world_id, w.name)).collect()
         })
 }
 
@@ -71,9 +68,6 @@ pub async fn get_all_existing(
     .await
     .map(|worlds| {
         // take the worlds record and return a vector of tuples containing the world ID and the world name
-        worlds
-            .into_iter()
-            .map(|w| (w.world_id, w.name))
-            .collect()
+        worlds.into_iter().map(|w| (w.world_id, w.name)).collect()
     })
 }
