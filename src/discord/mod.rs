@@ -2,8 +2,6 @@ mod commands;
 mod formatting;
 mod icons;
 
-
-
 use poise::FrameworkBuilder;
 use sqlx::PgPool;
 

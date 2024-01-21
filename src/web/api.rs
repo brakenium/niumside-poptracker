@@ -71,12 +71,7 @@ pub async fn population(
     Ok(Json(response))
 }
 
-#[get("/openapi.json")]
-fn serve_api_doc(openapi: &State<OpenApi>) -> Json<OpenApi> {
-    Json(openapi.inner().clone())
-}
-
 #[allow(clippy::no_effect_underscore_binding)]
 pub fn routes() -> Vec<rocket::Route> {
-    routes![population, serve_api_doc]
+    routes![population]
 }

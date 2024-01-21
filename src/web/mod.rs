@@ -2,10 +2,9 @@ mod api;
 
 use crate::controllers::population;
 use metrics_exporter_prometheus::PrometheusHandle;
-use rocket::fs::FileServer;
 use rocket::{get, routes, Build, Rocket, State};
-use std::path::Path;
 use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -78,12 +77,15 @@ pub fn prom_metrics(prometheus: &State<PrometheusHandle>) -> String {
     prometheus.render()
 }
 
-pub fn init(swagger: &Path) -> Rocket<Build> {
+pub fn init() -> Rocket<Build> {
     #[allow(clippy::no_effect_underscore_binding)]
     let rocket: Rocket<Build> = rocket::build()
         .mount("/metrics", routes![prom_metrics])
         .mount("/api", api::routes())
-        .mount("/api", FileServer::from(swagger));
+        .mount(
+            "/",
+            SwaggerUi::new("/api/<_..>").url("/api/openapi.json", ApiDoc::openapi()),
+        );
 
     rocket
 }
