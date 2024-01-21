@@ -5,13 +5,11 @@ use rocket::{
     serde::{json::Json, Serialize},
     State,
 };
-
 use thiserror::Error;
+use utoipa::ToSchema;
 
 use crate::controllers::population::{get_current_tree, PopWorld};
 use crate::startup::DbState;
-use utoipa::openapi::OpenApi;
-use utoipa::ToSchema;
 
 #[derive(Error, Debug, Serialize, ToSchema)]
 pub enum Error {
