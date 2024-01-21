@@ -12,12 +12,12 @@ on:
       - .github/workflows/builds.yaml
       - migrations/**
       - src/**
+      - .sqlx/**
       - Cargo.toml
       - Cargo.lock
       - build.rs
       - Dockerfile
       - .dockerignore
-      - sqlx-data.json
       - rust-toolchain.toml
 
   workflow_dispatch:
