@@ -5,6 +5,8 @@ LABEL org.opencontainers.image.url=https://github.com/brakenium/niumside-poptrac
 LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-poptracker
 # LABEL org.opencontainers.image.licenses=
 
+EXPOSE 8000
+
 WORKDIR /etc/niumside-poptracker/
 
 COPY config/ config/
