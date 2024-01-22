@@ -1,10 +1,9 @@
 use crate::census::constants::Faction;
-use crate::controllers::population::{Pop, PopWorld, WorldBreakdown};
+use crate::controllers::population::{PopWorld, PopulationApiResponse};
 use crate::discord::icons::Icons;
-use chrono::Utc;
 use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
 
-pub fn world_breakdown_message(population_breakdown: &Pop) -> Vec<CreateEmbed> {
+pub fn world_breakdown_message(population_breakdown: &PopulationApiResponse) -> Vec<CreateEmbed> {
     let mut embeds = Vec::new();
 
     for world in &population_breakdown.worlds {

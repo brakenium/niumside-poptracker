@@ -16,6 +16,5 @@ where
     D: serde::Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    NaiveDateTime::parse_from_str(&s, ISO8601T0_FORMAT)
-        .map_err(serde::de::Error::custom)
+    NaiveDateTime::parse_from_str(&s, ISO8601T0_FORMAT).map_err(serde::de::Error::custom)
 }

@@ -11,10 +11,10 @@ mod controllers;
 mod discord;
 mod event_handlers;
 mod logging;
+mod serde;
 mod startup;
 mod storage;
 mod web;
-mod serde;
 
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;

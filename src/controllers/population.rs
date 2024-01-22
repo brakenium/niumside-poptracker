@@ -20,7 +20,7 @@ pub struct PopBreakdown {
 }
 
 #[derive(Serialize, ToSchema)]
-pub struct Pop {
+pub struct PopulationApiResponse {
     #[serde(with = "naivedatetime")]
     pub timestamp: chrono::NaiveDateTime,
     pub worlds: Vec<PopWorld>,
@@ -141,7 +141,7 @@ pub async fn get_current(
 
         let world = world_breakdown
             .entry(world_id as u32)
-            .or_insert_with(|| HashMap::new());
+            .or_default();
         let zone = world.entry(zone_id as u32).or_default();
         let team = zone.entry(team_id as u16).or_default();
         let loadout = team.entry(loadout_id as u16).or_insert(0);
@@ -164,7 +164,7 @@ pub async fn get_current(
 /// # Returns
 ///
 /// * `Vec<PopWorld>` - The converted `WorldBreakdown`
-pub fn get_pop_worlds_from_world_breakdown(population: PopBreakdown) -> Pop {
+pub fn get_pop_worlds_from_world_breakdown(population: PopBreakdown) -> PopulationApiResponse {
     let mut result = Vec::new();
     for (world_id, world_population) in population.worlds {
         let mut zones = Vec::new();
@@ -196,7 +196,7 @@ pub fn get_pop_worlds_from_world_breakdown(population: PopBreakdown) -> Pop {
             zones,
         });
     }
-    Pop {
+    PopulationApiResponse {
         timestamp: population.timestamp,
         worlds: result,
     }
@@ -222,7 +222,7 @@ pub async fn get_current_tree(
     zones: Option<&[i32]>,
     teams: Option<&[i16]>,
     loadouts: Option<&[i16]>,
-) -> Option<Pop> {
+) -> Option<PopulationApiResponse> {
     let population = get_current(db_pool, worlds, zones, teams, loadouts).await?;
 
     let result = get_pop_worlds_from_world_breakdown(population);

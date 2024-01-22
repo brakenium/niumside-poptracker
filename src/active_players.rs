@@ -3,7 +3,7 @@ use crate::census::constants::{CharacterID, Faction, Loadout, WorldID, ZoneID};
 use crate::controllers::population::{
     LoadoutBreakdown, TeamBreakdown, WorldBreakdown, ZoneBreakdown,
 };
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use metrics::{gauge, increment_counter};
 use sqlx::{Pool, Postgres};
 use std::{
@@ -62,7 +62,7 @@ pub fn loadout_breakdown(active_players: &ActivePlayerDb) -> WorldBreakdown {
     for player in active_players_lock.values() {
         loadout_breakdown
             .entry(player.world as u32)
-            .or_insert_with(|| HashMap::new())
+            .or_default()
             .entry(player.zone)
             .or_default()
             .entry(player.team_id as u16)
@@ -197,7 +197,7 @@ pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgr
         })
         .world_population_id;
 
-        insert_zone(&zone_map, world_population_id, db_pool).await;
+        insert_zone(zone_map, world_population_id, db_pool).await;
     }
 
     info!("Stored pop");

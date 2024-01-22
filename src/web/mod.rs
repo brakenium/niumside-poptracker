@@ -12,11 +12,12 @@ use utoipa_swagger_ui::SwaggerUi;
     components(schemas(
         api::Response,
         api::PossibleResults,
+        api::Error,
+        population::PopulationApiResponse,
         population::PopWorld,
         population::PopZone,
         population::PopTeam,
         population::PopLoadout,
-        api::Error,
     ))
 )]
 pub struct ApiDoc;

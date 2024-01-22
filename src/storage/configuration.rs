@@ -1,4 +1,3 @@
-use crate::census::constants::{WorldID, ZoneID};
 use crate::constants;
 use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
@@ -42,13 +41,6 @@ pub struct CensusConfig {
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
-pub struct WorldConfig {
-    pub id: WorldID,
-    pub zones: Option<Vec<ZoneID>>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-#[allow(unused)]
 pub struct DatabaseConfig {
     pub connection_string: String,
 }
@@ -70,7 +62,6 @@ pub struct DiscordConfig {
 #[allow(unused)]
 pub struct Settings {
     pub census: CensusConfig,
-    pub worlds: Vec<WorldConfig>,
     pub database: DatabaseConfig,
     pub app: AppConfig,
     pub discord: DiscordConfig,
