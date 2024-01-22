@@ -1,4 +1,5 @@
 use crate::census::constants::{Faction, Loadout, WorldID};
+use crate::serde::naivedatetime;
 use serde::Serialize;
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -11,13 +12,24 @@ pub type TeamBreakdown = HashMap<u16, LoadoutBreakdown>;
 
 pub type ZoneBreakdown = HashMap<u32, TeamBreakdown>;
 
-pub type WorldBreakdown = HashMap<u32, (chrono::NaiveDateTime, ZoneBreakdown)>;
+pub type WorldBreakdown = HashMap<u32, ZoneBreakdown>;
+
+pub struct PopBreakdown {
+    pub timestamp: chrono::NaiveDateTime,
+    pub worlds: WorldBreakdown,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct Pop {
+    #[serde(with = "naivedatetime")]
+    pub timestamp: chrono::NaiveDateTime,
+    pub worlds: Vec<PopWorld>,
+}
 
 #[derive(Serialize, ToSchema)]
 pub struct PopWorld {
     pub world_id: u32,
     pub world_population: u16,
-    pub timestamp: chrono::NaiveDateTime,
     pub zones: Vec<PopZone>,
 }
 
@@ -61,7 +73,7 @@ pub async fn get_current(
     zones: Option<&[i32]>,
     teams: Option<&[i16]>,
     loadouts: Option<&[i16]>,
-) -> Option<WorldBreakdown> {
+) -> Option<PopBreakdown> {
     let Ok(population) = sqlx::query!(
         "SELECT
             p.timestamp,
@@ -95,6 +107,8 @@ pub async fn get_current(
 
     let mut world_breakdown: WorldBreakdown = HashMap::new();
 
+    let timestamp = population[0].timestamp;
+
     for record in population {
         #[allow(clippy::cast_possible_truncation)]
         let Ok(_) = WorldID::try_from(record.world_id as u16) else {
@@ -127,15 +141,18 @@ pub async fn get_current(
 
         let world = world_breakdown
             .entry(world_id as u32)
-            .or_insert_with(|| (record.timestamp, HashMap::new()));
-        let zone = world.1.entry(zone_id as u32).or_default();
+            .or_insert_with(|| HashMap::new());
+        let zone = world.entry(zone_id as u32).or_default();
         let team = zone.entry(team_id as u16).or_default();
         let loadout = team.entry(loadout_id as u16).or_insert(0);
 
         *loadout += amount as u16;
     }
 
-    Some(world_breakdown)
+    Some(PopBreakdown {
+        timestamp,
+        worlds: world_breakdown,
+    })
 }
 
 /// Get `PopWorld` from `WorldBreakdown`
@@ -147,9 +164,9 @@ pub async fn get_current(
 /// # Returns
 ///
 /// * `Vec<PopWorld>` - The converted `WorldBreakdown`
-pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<PopWorld> {
+pub fn get_pop_worlds_from_world_breakdown(population: PopBreakdown) -> Pop {
     let mut result = Vec::new();
-    for (world_id, (timestamp, world_population)) in population {
+    for (world_id, world_population) in population.worlds {
         let mut zones = Vec::new();
         for (zone_id, zone_population) in world_population {
             let mut teams = Vec::new();
@@ -176,11 +193,13 @@ pub fn get_pop_worlds_from_world_breakdown(population: WorldBreakdown) -> Vec<Po
         result.push(PopWorld {
             world_id,
             world_population: zones.iter().map(|z| z.zone_population).sum(),
-            timestamp,
             zones,
         });
     }
-    result
+    Pop {
+        timestamp: population.timestamp,
+        worlds: result,
+    }
 }
 
 /// Get the population from the database as a tree using `get_current`
@@ -203,7 +222,7 @@ pub async fn get_current_tree(
     zones: Option<&[i32]>,
     teams: Option<&[i16]>,
     loadouts: Option<&[i16]>,
-) -> Option<Vec<PopWorld>> {
+) -> Option<Pop> {
     let population = get_current(db_pool, worlds, zones, teams, loadouts).await?;
 
     let result = get_pop_worlds_from_world_breakdown(population);

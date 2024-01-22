@@ -14,6 +14,7 @@ mod logging;
 mod startup;
 mod storage;
 mod web;
+mod serde;
 
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;

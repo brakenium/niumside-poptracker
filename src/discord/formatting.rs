@@ -1,20 +1,27 @@
 use crate::census::constants::Faction;
-use crate::controllers::population::PopWorld;
+use crate::controllers::population::{Pop, PopWorld, WorldBreakdown};
 use crate::discord::icons::Icons;
+use chrono::Utc;
 use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
 
-pub fn world_breakdown_message(world_breakdown: &Vec<PopWorld>) -> Vec<CreateEmbed> {
+pub fn world_breakdown_message(population_breakdown: &Pop) -> Vec<CreateEmbed> {
     let mut embeds = Vec::new();
 
-    for world in world_breakdown {
-        embeds.push(single_world_breakdown_embed(world));
+    for world in &population_breakdown.worlds {
+        embeds.push(single_world_breakdown_embed(
+            world,
+            population_breakdown.timestamp,
+        ));
     }
 
     embeds
 }
 
-pub fn single_world_breakdown_embed(world: &PopWorld) -> CreateEmbed {
-    let footer = CreateEmbedFooter::new(format!("Last updated: {}", world.timestamp));
+pub fn single_world_breakdown_embed(
+    world: &PopWorld,
+    timestamp: chrono::NaiveDateTime,
+) -> CreateEmbed {
+    let footer = CreateEmbedFooter::new(format!("Last updated: {timestamp}"));
 
     let embed = CreateEmbed::default()
         .title(format!("{} Population", world.world_id))

@@ -8,7 +8,7 @@ use rocket::{
 use thiserror::Error;
 use utoipa::ToSchema;
 
-use crate::controllers::population::{get_current_tree, PopWorld};
+use crate::controllers::population::{get_current_tree, Pop, PopWorld};
 use crate::startup::DbState;
 
 #[derive(Error, Debug, Serialize, ToSchema)]
@@ -26,7 +26,7 @@ pub struct Response {
 #[derive(Serialize, ToSchema)]
 pub enum PossibleResults {
     #[serde(rename = "pop")]
-    PopResult(Vec<PopWorld>),
+    PopResult(Pop),
     #[serde(rename = "error")]
     Error(Error),
 }
