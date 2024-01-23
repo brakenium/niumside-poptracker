@@ -19,6 +19,7 @@ on:
       - Dockerfile
       - .dockerignore
       - rust-toolchain.toml
+      - check-niumside-health.sh
 
   workflow_dispatch:
 
