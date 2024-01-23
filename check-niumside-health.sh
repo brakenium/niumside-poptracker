@@ -7,13 +7,9 @@ currentMillis=$(date +%s%3N)
 # shellcheck disable=SC2004
 difference=$(($currentMillis - $timestampMillis))
 
-echo "timestamp: ${timestamp}"
-echo "timestampMillis: ${timestampMillis}"
-echo "currentMillis: ${currentMillis}"
-echo "difference: ${difference}"
-
 if [ $difference -lt 60000 ]; then
   echo "true"
 else
   echo "false"
+  exit 1
 fi
