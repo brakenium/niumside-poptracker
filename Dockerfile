@@ -14,7 +14,7 @@ WORKDIR /etc/niumside-poptracker/
 
 COPY . .
 
-RUN apk add --no-cache curl jq
+RUN apk add --no-cache curl jq coreutils
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \
