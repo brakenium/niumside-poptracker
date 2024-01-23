@@ -7,10 +7,12 @@ LABEL org.opencontainers.image.source=https://github.com/brakenium/niumside-popt
 
 EXPOSE 8000
 
+HEALTHCHECK --interval=2m --timeout=1m --start-period=45s \
+               CMD /etc/niumside-poptracker/check-niumside-health.sh || bash -c 'kill -s 15 -1 && (sleep 10; kill -s 9 -1)'
+
 WORKDIR /etc/niumside-poptracker/
 
-COPY config/ config/
-COPY binaries/ binaries/
+COPY . .
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \

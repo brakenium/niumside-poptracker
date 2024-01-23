@@ -7,3 +7,4 @@
 !Cargo.*
 !rust-toolchain.toml
 !sqlx-data.json
+!check-niumside-health.sh

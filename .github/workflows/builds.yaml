@@ -40,7 +40,7 @@ jobs:
           - armv7-unknown-linux-musleabi
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -51,7 +51,7 @@ jobs:
         run: rustup update && rustup toolchain install stable
 
       - name: Restore target directory cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: target
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
@@ -63,7 +63,7 @@ jobs:
         run: cross build --release --target ${{ matrix.target }} || (cargo clean && cross build --release --target ${{ matrix.target }})
 
       - name: Save target directory cache
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: target
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
@@ -76,7 +76,7 @@ jobs:
         run: ls -l --color binaries
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}-niumside-poptracker
           path: binaries/niumside-poptracker
@@ -92,18 +92,18 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to ghcr.io
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -111,13 +111,13 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       # restore artifacts from rust-binary-builds
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: binaries/
 
@@ -127,7 +127,7 @@ jobs:
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/arm/v7
