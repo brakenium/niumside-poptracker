@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-NIUMSIDE_BASE_URL="https://niumside.brakenium.xyz"
+NIUMSIDE_BASE_URL="http://localhost:8000"
 
 timestamp=$(curl -s -X GET "${NIUMSIDE_BASE_URL}/api/population" | jq -r '.pop.timestamp')
 timestampMillis=$(date -d "${timestamp}" -u +%s%3N)
