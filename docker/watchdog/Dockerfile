@@ -12,7 +12,7 @@ ENV CONTAINER_TO_WATCH=niumside-poptracker
 
 WORKDIR /etc/niumside-watchdog/
 
-COPY . .
+ADD --chmod=755 watchdog.sh .
 
 RUN apk add --no-cache curl jq coreutils docker-cli
 
