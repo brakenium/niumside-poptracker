@@ -10,9 +10,9 @@ ENV MILISECONDS_THRESHOLD=60000
 ENV INTERVAL_SECONDS=10
 ENV CONTAINER_TO_WATCH=niumside-poptracker
 
-COPY . .
-
 WORKDIR /etc/niumside-watchdog/
+
+COPY . .
 
 RUN apk add --no-cache curl jq coreutils docker-cli
 
