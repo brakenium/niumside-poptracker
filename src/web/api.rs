@@ -8,7 +8,8 @@ use rocket::{
 use thiserror::Error;
 use utoipa::ToSchema;
 
-use crate::controllers::population::{get_current_tree, PopulationApiResponse};
+#[cfg(feature = "census")]
+use crate::controllers::population::{get_current_tree, PopulationApiResponse, ZoneBreakdown};
 use crate::startup::DbState;
 
 #[derive(Error, Debug, Serialize, ToSchema)]
@@ -26,7 +27,11 @@ pub struct Response {
 #[derive(Serialize, ToSchema)]
 pub enum PossibleResults {
     #[serde(rename = "pop")]
+    #[cfg(feature = "census")]
     PopResult(PopulationApiResponse),
+    #[serde(rename = "zone")]
+    #[cfg(feature = "census")]
+    ZoneResult(ZoneBreakdown),
     #[serde(rename = "error")]
     Error(Error),
 }
@@ -39,6 +44,7 @@ responses(
 )
 )]
 #[get("/population?<world>&<zone>&<team>&<loadout>")]
+#[cfg(feature = "census")]
 pub async fn population(
     world: Option<Vec<i32>>,
     zone: Option<Vec<i32>>,
@@ -70,6 +76,9 @@ pub async fn population(
 }
 
 #[allow(clippy::no_effect_underscore_binding)]
+#[cfg(feature = "census")]
 pub fn routes() -> Vec<rocket::Route> {
-    routes![population]
+    routes![
+        population
+    ]
 }

@@ -1,42 +1,29 @@
-use crate::census::constants::Faction;
-use crate::controllers::population::{PopWorld, PopulationApiResponse};
-use crate::discord::icons::Icons;
-use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
+use poise::serenity_prelude::{Colour, CreateEmbed, CreateEmbedFooter, FormattedTimestamp};
+use calendar3::api::Event;
+use chrono::Utc;
+use crate::google_calendar::formatting::html_to_md;
 
-pub fn world_breakdown_message(population_breakdown: &PopulationApiResponse) -> Vec<CreateEmbed> {
-    let mut embeds = Vec::new();
-
-    for world in &population_breakdown.worlds {
-        embeds.push(single_world_breakdown_embed(
-            world,
-            population_breakdown.timestamp,
-        ));
-    }
-
-    embeds
-}
-
-pub fn single_world_breakdown_embed(
-    world: &PopWorld,
-    timestamp: chrono::NaiveDateTime,
+pub fn calendar_event(
+    event: &Event,
+    color: Colour,
+    timestamp: chrono::DateTime<Utc>,
 ) -> CreateEmbed {
-    let footer = CreateEmbedFooter::new(format!("Last updated: {timestamp}"));
+    let start = event.start.as_ref().unwrap().date_time.unwrap_or_default();
+    let formatted_start = FormattedTimestamp::new(start.into(), None);
+
+    let end = event.end.as_ref().unwrap().date_time.unwrap_or_default();
+    let formatted_end = FormattedTimestamp::new(end.into(), None);
+    
+    let description = html_to_md(&event.description.clone().unwrap_or("No description".to_string()));
 
     let embed = CreateEmbed::default()
-        .title(format!("{} Population", world.world_id))
-        .thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string())
-        .footer(footer);
-
-    for zone in &world.zones {
-        let mut breakdown = String::new();
-        for team in &zone.teams {
-            let team_icon =
-                Icons::try_from(Faction::try_from(team.team_id).unwrap_or(Faction::Unknown))
-                    .unwrap_or(Icons::Ps2White)
-                    .to_discord_emoji();
-            breakdown = format!("{}{:?}: {}\n", breakdown, team_icon, team.team_population);
-        }
-    }
+        .title(event.summary.clone().unwrap_or("No title".to_string()))
+        .description(description)
+        .field("Start", format!("{}", formatted_start), true)
+        .field("End", format!("{}", formatted_end), true)
+        .color(color)
+        // .thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string())
+        .timestamp(timestamp);
 
     embed
 }

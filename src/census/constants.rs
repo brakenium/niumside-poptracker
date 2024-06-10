@@ -170,6 +170,7 @@ impl FromStr for WorldID {
 pub type CharacterID = u64;
 pub type OutfitID = u64;
 pub type ZoneID = u32;
+pub type InstanceID = u32;
 pub type FacilityID = u32;
 pub type ExperienceID = u16;
 pub type VehicleID = u16;

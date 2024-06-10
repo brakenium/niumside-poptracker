@@ -1,5 +1,6 @@
 mod api;
 
+#[cfg(feature = "census")]
 use crate::controllers::population;
 use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
@@ -8,16 +9,24 @@ use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(api::population, prom_metrics),
+    paths(
+        // #[cfg(feature = "census")]
+        // api::population,
+        prom_metrics),
     components(schemas(
         api::Response,
         api::PossibleResults,
         api::Error,
-        population::PopulationApiResponse,
-        population::PopWorld,
-        population::PopZone,
-        population::PopTeam,
-        population::PopLoadout,
+        // #[cfg(feature = "census")]
+        // population::PopulationApiResponse,
+        // #[cfg(feature = "census")]
+        // population::PopWorld,
+        // #[cfg(feature = "census")]
+        // population::PopZone,
+        // #[cfg(feature = "census")]
+        // population::PopTeam,
+        // #[cfg(feature = "census")]
+        // population::PopLoadout,
     ))
 )]
 pub struct ApiDoc;
@@ -81,7 +90,9 @@ pub fn prom_metrics(prometheus: &State<PrometheusHandle>) -> String {
 pub fn init() -> Rocket<Build> {
     #[allow(clippy::no_effect_underscore_binding)]
     let rocket: Rocket<Build> = rocket::build()
-        .mount("/metrics", routes![prom_metrics])
+        .mount("/metrics", routes![prom_metrics]);
+    #[cfg(feature = "census")]
+    let rocket = rocket
         .mount("/api", api::routes())
         .mount(
             "/",

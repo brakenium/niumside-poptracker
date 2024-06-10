@@ -3,6 +3,8 @@ use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
 use std::env;
 use std::path::Path;
+use calendar3::oauth2::{ApplicationSecret, ServiceAccountKey};
+use poise::serenity_prelude::{ChannelId, GuildId, MessageId};
 use tracing::Level;
 use url::Url;
 
@@ -34,6 +36,7 @@ impl DeserializeWith for Level {
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
+#[cfg(feature = "census")]
 pub struct CensusConfig {
     pub realtime_base_url: Url,
     pub service_id: String,
@@ -54,17 +57,35 @@ pub struct AppConfig {
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
+pub struct DiscordCalendarConfig {
+    pub google_calendar_id: String,
+    pub channel_id: ChannelId,
+    pub guild_id: GuildId,
+    pub message_id: Option<MessageId>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+#[allow(unused)]
 pub struct DiscordConfig {
     pub token: String,
+    pub calendar: DiscordCalendarConfig,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+#[allow(unused)]
+pub struct GoogleConfig {
+    pub auth: ServiceAccountKey,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
 pub struct Settings {
+    #[cfg(feature = "census")]
     pub census: CensusConfig,
     pub database: DatabaseConfig,
     pub app: AppConfig,
     pub discord: DiscordConfig,
+    pub google: GoogleConfig,
 }
 
 // TODO: Check system config directories for config files

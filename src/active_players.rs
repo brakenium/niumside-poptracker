@@ -1,5 +1,5 @@
 #![allow(clippy::cast_lossless)]
-use crate::census::constants::{CharacterID, Faction, Loadout, WorldID, ZoneID};
+use crate::census::constants::{CharacterID, Faction, InstanceID, Loadout, WorldID, ZoneID};
 use crate::controllers::population::{
     LoadoutBreakdown, TeamBreakdown, WorldBreakdown, ZoneBreakdown,
 };
@@ -14,9 +14,11 @@ use std::{
 use tracing::info;
 
 #[derive(Debug, Clone)]
+// TODO: Parse zone ID into zone ID and instance ID
 pub struct ActivePlayer {
     pub world: WorldID,
     pub zone: ZoneID,
+    pub instance_id: InstanceID,
     pub loadout: Loadout,
     pub team_id: Faction,
     pub last_change: DateTime<Utc>,

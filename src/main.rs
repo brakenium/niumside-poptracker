@@ -4,17 +4,25 @@
 #![warn(clippy::expect_used)]
 #![allow(clippy::module_name_repetitions)]
 
+extern crate google_calendar3 as calendar3;
+
+#[cfg(feature = "census")]
 mod active_players;
+#[cfg(feature = "census")]
 mod census;
 mod constants;
+#[cfg(feature = "census")]
 mod controllers;
 mod discord;
+#[cfg(feature = "census")]
 mod event_handlers;
 mod logging;
+#[cfg(feature = "census")]
 mod serde;
 mod startup;
 mod storage;
 mod web;
+mod google_calendar;
 
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
@@ -27,6 +35,7 @@ use std::{
 };
 
 struct Services {
+    #[cfg(feature = "census")]
     active_players: active_players::ActivePlayerDb,
     db_pool: PgPool,
     rocket: rocket::Rocket<rocket::Build>,
@@ -36,6 +45,7 @@ struct Services {
 async fn agnostic_init(postgres: PgPool) -> anyhow::Result<Services> {
     sqlx::migrate!().run(&postgres.clone()).await?;
 
+    #[cfg(feature = "census")]
     let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
 
     let rocket = web::init();
@@ -43,6 +53,7 @@ async fn agnostic_init(postgres: PgPool) -> anyhow::Result<Services> {
     let poise = discord::init();
 
     Ok(Services {
+        #[cfg(feature = "census")]
         active_players,
         db_pool: postgres,
         rocket,
@@ -67,6 +78,7 @@ async fn main() -> anyhow::Result<()> {
         initialised_services.db_pool,
         app_config,
         initialised_services.poise,
+        #[cfg(feature = "census")]
         initialised_services.active_players,
         addr,
     ))

@@ -1,8 +1,10 @@
-use crate::discord;
+
 use crate::discord::{Data, Error};
-use crate::storage::configuration::Settings;
+use crate::storage::configuration::{GoogleConfig, Settings};
 use crate::web::ApiDoc;
-use crate::{active_players, census, logging};
+#[cfg(feature = "census")]
+use crate::{active_players, census};
+use crate::logging;
 use poise::serenity_prelude::ClientBuilder;
 use poise::{serenity_prelude, FrameworkBuilder};
 use sqlx::PgPool;
@@ -18,6 +20,7 @@ pub async fn services(
     db_pool: PgPool,
     app_config: Settings,
     poise: FrameworkBuilder<Data, Error>,
+    #[cfg(feature = "census")]
     active_players: active_players::ActivePlayerDb,
     addr: std::net::SocketAddr,
 ) -> anyhow::Result<()> {
@@ -49,7 +52,11 @@ pub async fn services(
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(discord::Data { db_pool: poise_db })
+                Ok(Data {
+                    db_pool: poise_db,
+                    google: app_config.google,
+                    calendar: app_config.discord.calendar
+                })
             })
         })
         .build();
@@ -60,24 +67,58 @@ pub async fn services(
         .await
         .expect("Failed to create Discord client");
 
-    let census_realtime_state = census::realtime::State {
-        active_players: active_players.clone(),
-    };
+    #[cfg(feature = "census")]
+    {
+        let census_realtime_state = census::realtime::State {
+            active_players: active_players.clone(),
+        };
 
-    let census_realtime_config = census::realtime::RealtimeClientConfig {
-        environment: "ps2".to_owned(),
-        service_id: app_config.census.service_id,
-        realtime_url: Some(app_config.census.realtime_base_url),
-    };
+        let census_realtime_config = census::realtime::RealtimeClientConfig {
+            environment: "ps2".to_owned(),
+            service_id: app_config.census.service_id,
+            realtime_url: Some(app_config.census.realtime_base_url),
+        };
 
-    thread::spawn(move || census::realtime::client(census_realtime_config, &census_realtime_state));
+        thread::spawn(move || census::realtime::client(census_realtime_config, &census_realtime_state));
+    }
 
-    tokio::select!(
-        _ = poise_client.start() => {},
-        _ = rocket.launch() => {},
-        _ = active_players::process_loop(active_players.clone(), db_pool) => {},
-        _ = active_players::clean(active_players.clone()) => {},
-    );
+    let update_data_pool = db_pool.clone();
+
+    let poise_client_future = tokio::spawn(async move {
+        poise_client.start().await.unwrap();
+    });
+
+    let rocket_future = tokio::spawn(async move {
+        rocket.launch().await.unwrap();
+    });
+
+    #[cfg(feature = "census")]
+    {
+        let census_update_data_future = tokio::spawn(async move {
+            census::update_data::run(&update_data_pool).await.unwrap();
+        });
+
+        let active_players_process_loop_future = tokio::spawn(async move {
+            active_players::process_loop(active_players.clone(), db_pool).await.unwrap();
+        });
+
+        let active_players_clean_future = tokio::spawn(async move {
+            active_players::clean(active_players.clone()).await.unwrap();
+        });
+
+        let _ = tokio::try_join!(
+            census_update_data_future,
+            active_players_process_loop_future,
+            active_players_clean_future
+        );
+    }
+
+    {
+        let _ = tokio::try_join!(
+            poise_client_future,
+            rocket_future
+        );
+    }
 
     Ok(())
 }

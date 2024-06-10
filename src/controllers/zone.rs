@@ -1,4 +1,14 @@
+use serde::{Serialize, Deserialize};
 use sqlx::PgPool;
+use utoipa::ToSchema;
+use crate::controllers::Languages;
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct Zone {
+    pub zone_id: i32,
+    pub name: Option<Languages>,
+    pub description: Option<Languages>,
+}
 
 /// Check if a zone exists in the database
 ///
@@ -35,13 +45,21 @@ pub async fn exists(db_pool: &PgPool, zones: &i32) -> Result<bool, sqlx::Error> 
 ///
 /// * `Ok(Vec<(i32, String)>)` - A vector of tuples containing the zone ID and the zone name
 /// * `Err(sqlx::Error)` - The error returned by sqlx
-pub async fn get_all(db_pool: &PgPool) -> Result<Vec<(i32, Option<String>)>, sqlx::Error> {
-    sqlx::query!("SELECT zone_id, name FROM zone")
+pub async fn get_all(db_pool: &PgPool) -> Result<Vec<Zone>, sqlx::Error> {
+    sqlx::query!("SELECT zone_id, name, description FROM zone")
         .fetch_all(db_pool)
         .await
         .map(|zones| {
             //     take the zones record and return a vector of tuples containing the zone ID and the zone name
-            zones.into_iter().map(|z| (z.zone_id, z.name)).collect()
+            zones.into_iter().map(|z| Zone {
+                zone_id: z.zone_id,
+                name: Some(Languages {
+                    en: z.name,
+                }),
+                description: Some(Languages {
+                    en: z.description,
+                })
+            }).collect()
         })
 }
 
