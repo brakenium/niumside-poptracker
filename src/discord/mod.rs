@@ -15,6 +15,7 @@ use poise::serenity_prelude as serenity;
 use poise::serenity_prelude::{FullEvent};
 use crate::discord::updaters::Updater;
 
+#[derive(Clone)]
 pub struct Data {
     #[cfg(feature = "census")]
     pub(crate) db_pool: PgPool,
@@ -30,7 +31,7 @@ fn event_handler(
     ctx: &serenity::Context,
     event: &FullEvent,
     _framework: poise::FrameworkContext<'_, Data, Error>,
-    _data: &Data,
+    data: &Data,
 ) -> Result<(), Error> {
     let ctx = Arc::new(ctx.clone());
 
@@ -38,10 +39,11 @@ fn event_handler(
     match event {
         FullEvent::CacheReady {..} => {
             let ctx1 = Arc::clone(&ctx);
+            let data = data.clone();
 
             tokio::spawn(async move {
                 loop {
-                    let _ = updaters::update_calendar::UpdateCalendar::update(&ctx1).await;
+                    let _ = updaters::update_calendar::UpdateCalendar::update(&ctx1, &data).await;
 
                     tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
                 }
