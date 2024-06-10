@@ -3,10 +3,9 @@ use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
 use std::env;
 use std::path::Path;
-use calendar3::oauth2::{ApplicationSecret, ServiceAccountKey};
+use calendar3::oauth2::{ServiceAccountKey};
 use poise::serenity_prelude::{ChannelId, GuildId, MessageId};
 use tracing::Level;
-use url::Url;
 
 pub trait DeserializeWith: Sized {
     fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error>
@@ -56,7 +55,7 @@ pub struct AppConfig {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-#[allow(unused)]
+#[allow(unused, clippy::struct_field_names)]
 pub struct DiscordCalendarConfig {
     pub google_calendar_id: String,
     pub channel_id: ChannelId,

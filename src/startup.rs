@@ -1,34 +1,37 @@
 
 use crate::discord::{Data, Error};
-use crate::storage::configuration::{GoogleConfig, Settings};
+use crate::storage::configuration::{Settings};
 use crate::web::ApiDoc;
 #[cfg(feature = "census")]
 use crate::{active_players, census};
 use crate::logging;
 use poise::serenity_prelude::ClientBuilder;
 use poise::{serenity_prelude, FrameworkBuilder};
+#[cfg(feature = "census")]
 use sqlx::PgPool;
-use std::thread;
 use utoipa::OpenApi;
 
+#[cfg(feature = "census")]
 pub struct DbState {
     pub(crate) pool: PgPool,
 }
 
 pub async fn services(
     rocket: rocket::Rocket<rocket::Build>,
+    #[cfg(feature = "census")]
     db_pool: PgPool,
     app_config: Settings,
     poise: FrameworkBuilder<Data, Error>,
     #[cfg(feature = "census")]
     active_players: active_players::ActivePlayerDb,
     addr: std::net::SocketAddr,
-) -> anyhow::Result<()> {
+) -> Result<(), Box<dyn std::error::Error>> {
     let shutdown = rocket::config::Shutdown {
         ctrlc: false,
         ..rocket::config::Shutdown::default()
     };
 
+    #[cfg(feature = "census")]
     let db_state = DbState {
         pool: db_pool.clone(),
     };
@@ -44,15 +47,19 @@ pub async fn services(
     let rocket = rocket
         .configure(config)
         .manage(logging::metrics())
-        .manage(db_state)
         .manage(ApiDoc::openapi());
 
+    #[cfg(feature = "census")]
+    let rocket = rocket.manage(db_state);
+
+    #[cfg(feature = "census")]
     let poise_db = db_pool.clone();
     let poise_framework = poise
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
                 Ok(Data {
+                    #[cfg(feature = "census")]
                     db_pool: poise_db,
                     google: app_config.google,
                     calendar: app_config.discord.calendar
@@ -65,7 +72,7 @@ pub async fn services(
     let mut poise_client = ClientBuilder::new(app_config.discord.token, intents)
         .framework(poise_framework)
         .await
-        .expect("Failed to create Discord client");
+        .ok().ok_or("Failed to create Discord client")?;
 
     #[cfg(feature = "census")]
     {
@@ -81,44 +88,41 @@ pub async fn services(
 
         thread::spawn(move || census::realtime::client(census_realtime_config, &census_realtime_state));
     }
-
-    let update_data_pool = db_pool.clone();
-
+    
     let poise_client_future = tokio::spawn(async move {
-        poise_client.start().await.unwrap();
+        poise_client.start().await
     });
 
     let rocket_future = tokio::spawn(async move {
-        rocket.launch().await.unwrap();
+        rocket.launch().await
     });
 
     #[cfg(feature = "census")]
     {
+        let update_data_pool = db_pool.clone();
         let census_update_data_future = tokio::spawn(async move {
-            census::update_data::run(&update_data_pool).await.unwrap();
+            census::update_data::run(&update_data_pool).await
         });
 
         let active_players_process_loop_future = tokio::spawn(async move {
-            active_players::process_loop(active_players.clone(), db_pool).await.unwrap();
+            active_players::process_loop(active_players.clone(), db_pool).await
         });
 
         let active_players_clean_future = tokio::spawn(async move {
-            active_players::clean(active_players.clone()).await.unwrap();
+            active_players::clean(active_players.clone()).await
         });
 
-        let _ = tokio::try_join!(
+        tokio::try_join!(
             census_update_data_future,
             active_players_process_loop_future,
             active_players_clean_future
-        );
+        )?;
     }
 
-    {
-        let _ = tokio::try_join!(
-            poise_client_future,
-            rocket_future
-        );
-    }
+    tokio::try_join!(
+        poise_client_future,
+        rocket_future
+    ).ok();
 
     Ok(())
 }

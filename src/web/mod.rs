@@ -5,7 +5,6 @@ use crate::controllers::population;
 use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -13,21 +12,22 @@ use utoipa_swagger_ui::SwaggerUi;
         // #[cfg(feature = "census")]
         // api::population,
         prom_metrics),
-    components(schemas(
-        api::Response,
-        api::PossibleResults,
-        api::Error,
-        // #[cfg(feature = "census")]
-        // population::PopulationApiResponse,
-        // #[cfg(feature = "census")]
-        // population::PopWorld,
-        // #[cfg(feature = "census")]
-        // population::PopZone,
-        // #[cfg(feature = "census")]
-        // population::PopTeam,
-        // #[cfg(feature = "census")]
-        // population::PopLoadout,
-    ))
+    // #[cfg(feature = "census")]
+    // components(schemas(
+    //     api::Response,
+    //     api::PossibleResults,
+    //     api::Error,
+    //     // #[cfg(feature = "census")]
+    //     // population::PopulationApiResponse,
+    //     // #[cfg(feature = "census")]
+    //     // population::PopWorld,
+    //     // #[cfg(feature = "census")]
+    //     // population::PopZone,
+    //     // #[cfg(feature = "census")]
+    //     // population::PopTeam,
+    //     // #[cfg(feature = "census")]
+    //     // population::PopLoadout,
+    // ))
 )]
 pub struct ApiDoc;
 

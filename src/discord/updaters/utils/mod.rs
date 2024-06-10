@@ -1,5 +1,5 @@
-use poise::{serenity_prelude as serenity, serenity_prelude};
-use poise::serenity_prelude::{ChannelId, CreateMessage, GetMessages, GuildChannel, Message, MessageId};
+use poise::{serenity_prelude as serenity};
+use poise::serenity_prelude::{ChannelId, CreateMessage, GetMessages, Message, MessageId};
 use crate::discord;
 
 pub async fn get_message_or_create_new(

@@ -1,36 +1,35 @@
+#[cfg(feature = "census")]
 use rocket::{
-    get,
-    response::status::BadRequest,
-    routes,
-    serde::{json::Json, Serialize},
-    State,
+    serde::{Serialize},
 };
+#[cfg(feature = "census")]
 use thiserror::Error;
+#[cfg(feature = "census")]
 use utoipa::ToSchema;
 
 #[cfg(feature = "census")]
 use crate::controllers::population::{get_current_tree, PopulationApiResponse, ZoneBreakdown};
-use crate::startup::DbState;
 
 #[derive(Error, Debug, Serialize, ToSchema)]
+#[cfg(feature = "census")]
 pub enum Error {
     #[error("No data available")]
     NoDataAvailable,
 }
 
 #[derive(Serialize, ToSchema)]
+#[cfg(feature = "census")]
 pub struct Response {
     #[serde(flatten)]
     pub result: PossibleResults,
 }
 
 #[derive(Serialize, ToSchema)]
+#[cfg(feature = "census")]
 pub enum PossibleResults {
     #[serde(rename = "pop")]
-    #[cfg(feature = "census")]
     PopResult(PopulationApiResponse),
     #[serde(rename = "zone")]
-    #[cfg(feature = "census")]
     ZoneResult(ZoneBreakdown),
     #[serde(rename = "error")]
     Error(Error),

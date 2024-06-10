@@ -27,22 +27,25 @@ mod google_calendar;
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
 use poise::FrameworkBuilder;
+#[cfg(feature = "census")]
 use sqlx::PgPool;
 use std::path::Path;
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
 
 struct Services {
     #[cfg(feature = "census")]
     active_players: active_players::ActivePlayerDb,
+    #[cfg(feature = "census")]
     db_pool: PgPool,
     rocket: rocket::Rocket<rocket::Build>,
     poise: FrameworkBuilder<Data, Error>,
 }
 
-async fn agnostic_init(postgres: PgPool) -> anyhow::Result<Services> {
+#[allow(clippy::unused_async)]
+async fn agnostic_init(
+    #[cfg(feature = "census")]
+    postgres: PgPool
+) -> anyhow::Result<Services> {
+    #[cfg(feature = "census")]
     sqlx::migrate!().run(&postgres.clone()).await?;
 
     #[cfg(feature = "census")]
@@ -55,6 +58,7 @@ async fn agnostic_init(postgres: PgPool) -> anyhow::Result<Services> {
     Ok(Services {
         #[cfg(feature = "census")]
         active_players,
+        #[cfg(feature = "census")]
         db_pool: postgres,
         rocket,
         poise,
@@ -62,19 +66,24 @@ async fn agnostic_init(postgres: PgPool) -> anyhow::Result<Services> {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_config = Settings::new(Path::new("config"))?;
 
     logging::tracing(app_config.app.log_level);
 
+    #[cfg(feature = "census")]
     let postgres = storage::db_pool::create(&app_config.database.connection_string.clone()).await?;
 
-    let initialised_services = agnostic_init(postgres).await?;
+    let initialised_services = agnostic_init(
+        #[cfg(feature = "census")]
+        postgres
+    ).await?;
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
 
     Box::pin(startup::services(
         initialised_services.rocket,
+        #[cfg(feature = "census")]
         initialised_services.db_pool,
         app_config,
         initialised_services.poise,
