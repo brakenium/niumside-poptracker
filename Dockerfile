@@ -1,4 +1,4 @@
-FROM docker.io/alpine as runtime
+FROM docker.io/debian as runtime
 LABEL org.opencontainers.image.title=niumside-poptracker
 # LABEL org.opencontainers.image.description=
 LABEL org.opencontainers.image.url=https://github.com/brakenium/niumside-poptracker
