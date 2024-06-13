@@ -1,4 +1,3 @@
-use calendar3::api::Events;
 use chrono::Utc;
 use crate::{discord, google_calendar};
 use crate::discord::updaters::Updater;
