@@ -32,7 +32,7 @@ pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector
     let tls_connector = match hyper_rustls::HttpsConnectorBuilder::new()
         .with_native_roots() {
         Ok(connector) => connector
-            .https_or_http()
+            .https_only()
             .enable_http1()
             .build(),
         Err(err) => {
