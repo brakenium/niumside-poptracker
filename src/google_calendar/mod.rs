@@ -12,10 +12,16 @@ use google_calendar3::{hyper, hyper_rustls, chrono};
 use tracing::info;
 
 async fn creds(google: &GoogleConfig) -> Option<Authenticator<HttpsConnector<HttpConnector>>> {
-    let creds = oauth2::ServiceAccountAuthenticator::builder(
+    let creds = match oauth2::ServiceAccountAuthenticator::builder(
         google.auth.clone(),
     )
-        .build().await.ok()?;
+        .build().await {
+        Ok(creds) => creds,
+        Err(err) => {
+            info!("Failed to get creds for Google calendar: {:?}", err);
+            return None;
+        }
+    };
     
     Some(creds)
 }
@@ -23,11 +29,17 @@ async fn creds(google: &GoogleConfig) -> Option<Authenticator<HttpsConnector<Htt
 pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector<HttpConnector>>> {
     let auth = creds(google).await?;
 
-    let tls_connector = hyper_rustls::HttpsConnectorBuilder::new()
-        .with_native_roots().ok()?
-        .https_or_http()
-        .enable_http1()
-        .build();
+    let tls_connector = match hyper_rustls::HttpsConnectorBuilder::new()
+        .with_native_roots() {
+        Ok(connector) => connector
+            .https_or_http()
+            .enable_http1()
+            .build(),
+        Err(err) => {
+            info!("Failed to build TLS connector for Google calendar: {:?}", err);
+            return None;
+        }
+    };
 
     let http_client = hyper::Client::builder().build(tls_connector);
 
@@ -42,11 +54,17 @@ pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<E
 
     let hub = get_hub(google).await?;
 
-    let events = hub.events().list(calendar_id)
+    let events = match hub.events().list(calendar_id)
         .time_zone("Europe/Amsterdam")
         .time_min(from_date)
         .time_max(to_date)
-        .doit().await.ok()?;
+        .doit().await {
+        Ok(events) => events,
+        Err(err) => {
+            info!("Failed to get events for Google calendar: {:?}", err);
+            return None;
+        }
+    };
 
     Some(events.1)
 }
@@ -54,7 +72,13 @@ pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<E
 pub async fn get_colors(google: &GoogleConfig) -> Option<Colors> {
     let hub = get_hub(google).await?;
 
-    let req = hub.colors().get().doit().await.ok()?;
+    let req = match hub.colors().get().doit().await {
+        Ok(req) => req,
+        Err(err) => {
+            info!("Failed to get colors for Google calendar: {:?}", err);
+            return None;
+        }
+    };
 
     Some(req.1)
 }
@@ -97,30 +121,20 @@ pub async fn get_calendar_color(google: &GoogleConfig, calendar_id: &str) -> Opt
 
     let calendar_result = hub.calendar_list().get(calendar_id).doit().await;
 
-    // let calendar = match calendar_result {
-    //     Ok(cal) => cal,
-    //     Err(_) => {
-    //         if add_cal_to_list(google, calendar_id.to_string()).await.is_err() {
-    //             return None;
-    //         }
-    //         match hub.calendar_list().get(calendar_id).doit().await {
-    //             Ok(cal) => cal,
-    //             Err(_) => {
-    //                 return None;
-    //             }
-    //         }
-    //     }
-    // };
-
     let calendar = if let Ok(cal) = calendar_result {
         cal
     } else {
-        if add_cal_to_list(google, calendar_id.to_string()).await.is_err() {
-            return None;
+        match add_cal_to_list(google, calendar_id.to_string()).await {
+            Ok(()) => {},
+            Err(err) => {
+                info!("Failed to add calendar to list: {:?}", err);
+                return None;
+            }
         }
         match hub.calendar_list().get(calendar_id).doit().await {
             Ok(cal) => cal,
-            Err(_) => {
+            Err(err) => {
+                info!("Failed to get calendar: {:?}", err);
                 return None;
             }
         }
