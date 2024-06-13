@@ -13,6 +13,8 @@ COPY config/ config/
 
 COPY migrations/ migrations/
 
+COPY binaries/ binaries/
+
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \
     ARCH=$(uname -m); \
