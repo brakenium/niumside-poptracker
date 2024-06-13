@@ -45,9 +45,9 @@ fn event_handler(
             tokio::spawn(async move {
                 loop {
                     match updaters::update_calendar::UpdateCalendar::update(&ctx1, &data).await {
-                        Ok(_) => {},
+                        Ok(()) => {},
                         Err(e) => {
-                            error!("Failed to update calendar: {:?}", e)
+                            error!("Failed to update calendar: {:?}", e);
                         }
                     };
 
