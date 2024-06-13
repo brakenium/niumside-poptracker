@@ -1,8 +1,10 @@
+use calendar3::api::Events;
 use chrono::Utc;
 use crate::{discord, google_calendar};
 use crate::discord::updaters::Updater;
 use poise::serenity_prelude as serenity;
 use poise::serenity_prelude::{Colour, CreateEmbed, EditMessage};
+use tracing::error;
 use crate::discord::{Data, formatting};
 use crate::discord::updaters::utils::get_message_or_create_new;
 use crate::google_calendar::get_calendar_color;
@@ -12,10 +14,17 @@ pub struct UpdateCalendar;
 impl Updater for UpdateCalendar {
     async fn update(ctx: &serenity::Context, data: &Data) -> Result<(), discord::Error> {
 
-        let events = google_calendar::get_next_week(
+        let events = match google_calendar::get_next_week(
             &data.google,
             &data.calendar.google_calendar_id
-        ).await.ok_or("Failed to get google calendar events")?;
+        ).await {
+            None => {
+                let error = Err(discord::Error::from("Failed to get events"));
+                error!("Failed to get events: {:?}", error);
+                return error;
+            }
+            Some(events) => events
+        };
 
         let mut embeds: Vec<CreateEmbed> = Vec::new();
 

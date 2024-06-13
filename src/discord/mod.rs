@@ -13,6 +13,7 @@ use sqlx::PgPool;
 use crate::storage::configuration::{DiscordCalendarConfig, GoogleConfig};
 use poise::serenity_prelude as serenity;
 use poise::serenity_prelude::{FullEvent};
+use tracing::error;
 use crate::discord::updaters::Updater;
 
 #[derive(Clone)]
@@ -43,7 +44,12 @@ fn event_handler(
 
             tokio::spawn(async move {
                 loop {
-                    let _ = updaters::update_calendar::UpdateCalendar::update(&ctx1, &data).await;
+                    match updaters::update_calendar::UpdateCalendar::update(&ctx1, &data).await {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error!("Failed to update calendar: {:?}", e)
+                        }
+                    };
 
                     tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
                 }
