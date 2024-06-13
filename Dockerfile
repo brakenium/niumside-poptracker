@@ -9,7 +9,9 @@ EXPOSE 8000
 
 WORKDIR /etc/niumside-poptracker/
 
-COPY . .
+COPY config/ config/
+
+COPY migrations/ migrations/
 
 # Determine the Docker container's architecture and whether it uses musl or glibc
 RUN set -eux; \
