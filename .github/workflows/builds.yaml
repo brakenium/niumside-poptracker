@@ -14,14 +14,13 @@ on:
       - src/**
       - .sqlx/**
       - .cargo/**
+      - '!.cargo/audit.toml'
       - Cargo.toml
       - Cargo.lock
       - build.rs
       - Dockerfile
       - .dockerignore
       - rust-toolchain.toml
-    paths-ignore:
-      - .cargo/audit.toml
 
   workflow_dispatch:
 
