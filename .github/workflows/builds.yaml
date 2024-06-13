@@ -45,13 +45,16 @@ jobs:
           submodules: true
 
       - name: Install dependencies
-        run: sudo apt-get install -y libssl-dev
+        run: sudo apt-get install -y libssl-dev build-essential
 
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install stable
 
       - name: Install Rust target
         run: rustup target add ${{ matrix.target }}
+
+      - name: Install bindgen
+        run: cargo install bindgen-cli
 
       - name: Restore target directory cache
         uses: actions/cache/restore@v4
