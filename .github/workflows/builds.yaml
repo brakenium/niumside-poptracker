@@ -45,7 +45,10 @@ jobs:
           submodules: true
 
       - name: Install dependencies
-        run: sudo apt-get install -y libssl-dev build-essential
+        run: |
+          sudo apt update && \
+          sudo apt upgrade && \
+          sudo apt-get install -y libssl-dev build-essential gcc-arm-linux-gnueabihf
 
       - name: Install Rust toolchain
         run: rustup update && rustup toolchain install stable
