@@ -9,6 +9,8 @@ EXPOSE 8000
 
 WORKDIR /etc/niumside-poptracker/
 
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 COPY config/ config/
 
 COPY migrations/ migrations/
