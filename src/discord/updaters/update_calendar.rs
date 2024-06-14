@@ -52,10 +52,6 @@ impl Updater for UpdateCalendar {
 
         message.edit(ctx, message_content).await?;
 
-        for scheduled_event in scheduled_events {
-            data.calendar.guild_id.create_scheduled_event(ctx, scheduled_event).await?;
-        }
-
         Ok(())
     }
 }
