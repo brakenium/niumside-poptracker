@@ -5,10 +5,10 @@ use calendar3::CalendarHub;
 use calendar3::hyper::client::HttpConnector;
 use calendar3::hyper_rustls::HttpsConnector;
 use calendar3::oauth2::authenticator::Authenticator;
-use chrono::{Utc};
+use calendar3::client::chrono::Utc;
 use crate::storage::configuration::GoogleConfig;
 use google_calendar3::oauth2;
-use google_calendar3::{hyper, hyper_rustls, chrono};
+use google_calendar3::{hyper, hyper_rustls};
 use tracing::info;
 
 async fn creds(google: &GoogleConfig) -> Option<Authenticator<HttpsConnector<HttpConnector>>> {
@@ -49,8 +49,11 @@ pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector
 }
 
 pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<Events> {
-    let from_date = Utc::now();
+    let from_date = Utc::now() + chrono::Duration::days(7);
     let to_date = from_date + chrono::Duration::days(7);
+    
+    info!("From date: {}", from_date);
+    info!("To date: {}", to_date);
 
     let hub = get_hub(google).await?;
 
@@ -58,6 +61,7 @@ pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<E
         .time_zone("Europe/Amsterdam")
         .time_min(from_date)
         .time_max(to_date)
+        .single_events(true)
         .doit().await {
         Ok(events) => events,
         Err(err) => {
