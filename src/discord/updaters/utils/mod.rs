@@ -1,5 +1,6 @@
 use poise::{serenity_prelude as serenity};
 use poise::serenity_prelude::{ChannelId, CreateMessage, GetMessages, Message, MessageId};
+use tracing::log::error;
 use crate::discord;
 
 pub async fn get_message_or_create_new(
@@ -15,19 +16,11 @@ pub async fn get_message_or_create_new(
                 .around(message_id)
                 .limit(1);
 
-            match guild_channel.messages(ctx, get_messages).await {
-                Ok(messages) => {
-                    let messages = messages.clone();
-                    if let Some(message) = messages.first() {
-                        message.clone()
-                    } else {
-                        guild_channel.send_message(ctx, empty_message).await?
-                    }
-                }
-                Err(_) => {
-                    guild_channel.send_message(ctx, empty_message).await?
-                }
-            }
+            let messages = guild_channel.messages(ctx, get_messages).await?;
+            messages.first().ok_or_else(|| {
+                error!("Failed to get message ({:?}) in channel ({:?})", message_id, guild_channel);
+                discord::Error::from("Failed to get message")
+            })?.clone()
         }
         None => {
             guild_channel.send_message(ctx, empty_message).await?
