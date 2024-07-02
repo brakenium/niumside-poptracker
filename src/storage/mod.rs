@@ -1,4 +1,4 @@
 pub mod configuration;
 
-#[cfg(feature = "census")]
+#[cfg(feature = "database")]
 pub mod db_pool;

@@ -27,14 +27,14 @@ mod google_calendar;
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
 use poise::FrameworkBuilder;
-#[cfg(feature = "census")]
+#[cfg(feature = "database")]
 use sqlx::PgPool;
 use std::path::Path;
 
 struct Services {
     #[cfg(feature = "census")]
     active_players: active_players::ActivePlayerDb,
-    #[cfg(feature = "census")]
+    #[cfg(feature = "database")]
     db_pool: PgPool,
     rocket: rocket::Rocket<rocket::Build>,
     poise: FrameworkBuilder<Data, Error>,
@@ -42,12 +42,9 @@ struct Services {
 
 #[allow(clippy::unused_async)]
 async fn agnostic_init(
-    #[cfg(feature = "census")]
+    #[cfg(feature = "database")]
     postgres: PgPool
 ) -> anyhow::Result<Services> {
-    #[cfg(feature = "census")]
-    sqlx::migrate!().run(&postgres.clone()).await?;
-
     #[cfg(feature = "census")]
     let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
 
@@ -58,7 +55,7 @@ async fn agnostic_init(
     Ok(Services {
         #[cfg(feature = "census")]
         active_players,
-        #[cfg(feature = "census")]
+        #[cfg(feature = "database")]
         db_pool: postgres,
         rocket,
         poise,
@@ -71,11 +68,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     logging::tracing(app_config.app.log_level);
 
-    #[cfg(feature = "census")]
+    #[cfg(feature = "database")]
     let postgres = storage::db_pool::create(&app_config.database.connection_string.clone()).await?;
 
     let initialised_services = agnostic_init(
-        #[cfg(feature = "census")]
+        #[cfg(feature = "database")]
         postgres
     ).await?;
 
@@ -83,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Box::pin(startup::services(
         initialised_services.rocket,
-        #[cfg(feature = "census")]
+        #[cfg(feature = "database")]
         initialised_services.db_pool,
         app_config,
         initialised_services.poise,

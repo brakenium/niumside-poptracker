@@ -149,20 +149,20 @@ impl Updater for UpdateCalendar {
             creator.id == ctx.cache.current_user().id
         }).collect::<Vec<_>>();
 
-        // for event in scheduled_events {
-        //     let Some(image_hash) = event.image.as_ref() else {
-        //         continue;
-        //     };
-        //     
-        //     let event_id = event.id;
-        //     
-        //     let url = format!("https://cdn.discordapp.com/guild-events/{event_id}/{image_hash}");
-        //     
-        //     let image = reqwest::get(url).await?;
-        // }
-
         for single_to_schedule in to_schedule_events {
             data.calendar.guild_id.create_scheduled_event(ctx, single_to_schedule.event).await?;
+
+            let database_record = sqlx::query!(
+                "SELECT discord_id FROM calendar_events AS CE
+                LEFT JOIN discord_events AS DE ON DE.calendar_events_id = CE.calendar_events_id
+                WHERE
+                    CE.calendar_id = $1 AND
+                    CE.calendar_event_id = $2 AND
+                    DE.guild_id = $3",
+                data.calendar.google_calendar_id,
+                single_to_schedule.google_event_id,
+                data.calendar.guild_id.get()
+            ).fetch_optional(&data.db_pool).await?;
         }
 
         Ok(())
