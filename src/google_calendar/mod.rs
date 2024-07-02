@@ -49,7 +49,7 @@ pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector
 }
 
 pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<Events> {
-    let from_date = Utc::now() + chrono::Duration::days(7);
+    let from_date = Utc::now();
     let to_date = from_date + chrono::Duration::days(7);
     
     info!("From date: {}", from_date);
