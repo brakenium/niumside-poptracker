@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO discord_events (\n                        calendar_events_id,\n                        guild_id,\n                        discord_id\n                    )\n                    VALUES ($1, $2, $3)\n                    ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "62983c6bac0bcd863e177257fb7ecaea22e5f5afd620dd6263eb20300ed6d4f9"
+}

@@ -61,14 +61,13 @@ pub struct DiscordCalendarConfig {
     pub channel_id: ChannelId,
     pub guild_id: GuildId,
     pub message_id: Option<MessageId>,
-    pub image_path: PathBuf,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
 pub struct DiscordConfig {
     pub token: String,
-    pub calendar: DiscordCalendarConfig,
+    pub calendar: Vec<DiscordCalendarConfig>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

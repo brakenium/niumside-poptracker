@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT calendar_events_id FROM calendar_events\n                        WHERE\n                            calendar_id = $1 AND\n                            calendar_event_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "calendar_events_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "81392db4020fbfd0e33a17e96063cf581a359420574b2205cb43ec7ce073bd89"
+}

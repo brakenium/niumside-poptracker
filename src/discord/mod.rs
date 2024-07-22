@@ -21,7 +21,7 @@ pub struct Data {
     #[cfg(feature = "database")]
     pub(crate) db_pool: PgPool,
     pub(crate) google: GoogleConfig,
-    pub(crate) calendar: DiscordCalendarConfig
+    pub(crate) calendar: Vec<DiscordCalendarConfig>
 } // User data, which is stored and accessible in all command invocations
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
