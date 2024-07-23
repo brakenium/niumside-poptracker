@@ -213,7 +213,7 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
                         discord_id
                     )
                     VALUES ($1, $2, $3)
-                    ON CONFLICT DO NOTHING",
+                    ON CONFLICT (calendar_events_id, guild_id) DO UPDATE SET discord_id = $3",
                     database_record.calendar_events_id,
                     guild_id as i64,
                     discord_event.id.get() as i64,
@@ -238,7 +238,7 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
                         discord_id
                     )
                     VALUES ($1, $2, $3)
-                    ON CONFLICT DO NOTHING",
+                    ON CONFLICT (calendar_events_id, guild_id) DO UPDATE SET discord_id = $3",
                     single_to_schedule.calendar_events_id,
                     guild_id as i64,
                     discord_event.id.get() as i64,
