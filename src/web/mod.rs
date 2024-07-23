@@ -5,6 +5,7 @@ use crate::controllers::population;
 use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
 use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -90,14 +91,14 @@ pub fn prom_metrics(prometheus: &State<PrometheusHandle>) -> String {
 pub fn init() -> Rocket<Build> {
     #[allow(clippy::no_effect_underscore_binding)]
     let rocket: Rocket<Build> = rocket::build()
-        .mount("/metrics", routes![prom_metrics]);
-    #[cfg(feature = "census")]
-    let rocket = rocket
-        .mount("/api", api::routes())
+        .mount("/metrics", routes![prom_metrics])
         .mount(
             "/",
             SwaggerUi::new("/api/<_..>").url("/api/openapi.json", ApiDoc::openapi()),
         );
+
+    #[cfg(feature = "census")]
+    let rocket = rocket.mount("/api", api::routes());
 
     rocket
 }
