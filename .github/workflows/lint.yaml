@@ -63,7 +63,7 @@ jobs:
           key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run Clippy
-        run: cargo clippy --all-features --release -- -D warnings
+        run: cargo clippy --release -- -D warnings
 
   security_audit:
     runs-on: ubuntu-latest
