@@ -7,6 +7,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION public.is_i64(value NUMERIC(19, 0)) RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN value >= -9223372036854775808 AND value <= 9223372036854775807;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE public.calendar_events (
     calendar_events_id SERIAL,
     calendar_id TEXT NOT NULL,
@@ -17,8 +23,8 @@ CREATE TABLE public.calendar_events (
 
 CREATE TABLE public.discord_events (
     calendar_events_id SERIAL NOT NULL,
-    guild_id BIGINT NOT NULL CONSTRAINT "CH_discord_events_guild_id" CHECK (is_u64(guild_id)),
-    discord_id BIGINT NOT NULL CONSTRAINT "CH_discord_events_discord_id" CHECK (is_u64(discord_id)),
+    guild_id BIGINT NOT NULL CONSTRAINT "CH_discord_events_guild_id" CHECK (is_i64(guild_id) AND is_u64(guild_id)),
+    discord_id BIGINT NOT NULL CONSTRAINT "CH_discord_events_discord_id" CHECK (is_i64(guild_id) AND is_u64(discord_id)),
     CONSTRAINT "PK_discord_events" PRIMARY KEY (discord_id),
     CONSTRAINT "FK_discord_events_calendar_events" FOREIGN KEY (calendar_events_id)
         REFERENCES public.calendar_events (calendar_events_id),

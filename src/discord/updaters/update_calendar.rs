@@ -1,17 +1,16 @@
-use calendar3::api::{Event, EventDateTime};
-use chrono::{DateTime, Utc};
+use calendar3::api::{Event, Events};
+use chrono::{Utc};
 use crate::{discord, google_calendar};
 use crate::discord::updaters::Updater;
 use poise::serenity_prelude as serenity;
-use poise::serenity_prelude::{Colour, CreateAttachment, CreateEmbed, CreateScheduledEvent, EditMessage, EditScheduledEvent, Error, ModelError, ScheduledEventId, Timestamp, User};
-use poise::serenity_prelude::ScheduledEventType::External;
-use sqlx::types::BigDecimal;
-use tracing::{debug, error, info, trace};
+use poise::serenity_prelude::{Colour, CreateEmbed, EditMessage, User};
+use sqlx::PgPool;
+use tracing::{error};
 use crate::discord::{Data, formatting};
 use crate::discord::updaters::utils::{create_or_edit_event, get_message_or_create_new, ToScheduleEventFields};
 use crate::google_calendar::formatting::html_to_md;
 use crate::google_calendar::get_calendar_color;
-use crate::storage::configuration::DiscordCalendarConfig;
+use crate::storage::configuration::{DiscordCalendarConfig, GoogleConfig};
 
 pub struct UpdateCalendar;
 
@@ -20,35 +19,29 @@ struct ToScheduleEvent {
     calendar_events_id: i32,
 }
 
-async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: &DiscordCalendarConfig) -> Result<(), discord::Error> {
-    let events = match google_calendar::get_next_week(
-        &data.google,
-        &calendar.google_calendar_id
-    ).await {
+async fn get_color_from_event(google: &GoogleConfig, google_calendar_id: &str, event: &Event) -> Colour {
+    let color_string = match google_calendar::get_event_color(google, event).await {
+        Some(color) => color,
         None => {
-            let error = Err(discord::Error::from("Failed to get events"));
-            error!("Failed to get events: {:?}", error);
-            return error;
+            get_calendar_color(google, google_calendar_id).await.unwrap_or_else(|| "000000".to_string())
         }
-        Some(events) => events
     };
 
+    let mut color = Colour::default();
+    if let Ok(color_int) = u32::from_str_radix(&color_string[1..], 16) {
+        color.0 = color_int;
+    };
+
+    color
+}
+
+async fn get_to_schedule_events(events: Events, google_calendar_id: &String, google: &GoogleConfig, db_pool: &PgPool) -> (Vec<ToScheduleEvent>, Vec<CreateEmbed>) {
     let mut embeds: Vec<CreateEmbed> = Vec::new();
 
     let mut to_schedule_events: Vec<ToScheduleEvent> = Vec::new();
 
     for event in events.items.unwrap_or_default() {
-        let color_string = match google_calendar::get_event_color(&data.google, &event).await {
-            Some(color) => color,
-            None => {
-                get_calendar_color(&data.google, &calendar.google_calendar_id).await.unwrap_or_else(|| "000000".to_string())
-            }
-        };
-
-        let mut color = Colour::default();
-        if let Ok(color_int) = u32::from_str_radix(&color_string[1..], 16) {
-            color.0 = color_int;
-        };
+        let color = get_color_from_event(google, google_calendar_id, &event).await;
 
         embeds.push(formatting::calendar_event(&event, color, Utc::now()));
 
@@ -82,18 +75,12 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
             }
         };
 
-        let title = match event.summary.as_ref() {
-            None => {
-                error!("Failed to get event summary for event, using fallback title: {:?}", event);
-                String::from("Couldn't get title from calendar event")
-            }
-            Some(summary) => summary.clone()
-        };
+        let title = event.summary.as_ref().map_or_else(|| {
+            error!("Failed to get event summary for event, using fallback title: {:?}", event);
+            String::from("Couldn't get title from calendar event")
+        }, Clone::clone);
 
-        let description = match event.description.as_ref() {
-            None => None,
-            Some(desc) => Some(html_to_md(desc))
-        };
+        let description = event.description.as_ref().map(|desc| html_to_md(desc));
 
         let Some(event_id) = event.id.as_ref() else {
             error!("Failed to get event ID for event: {:?}", event);
@@ -115,25 +102,32 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
                 )
                 VALUES ($1, $2)
                 ON CONFLICT DO NOTHING",
-                calendar.google_calendar_id,
+                google_calendar_id,
                 event_id,
             )
-            .execute(&data.db_pool)
+            .execute(db_pool)
             .await;
 
         match calendar_event_insert {
             Ok(_) => {
-                let calendar_events_id = sqlx::query!(
+                let calendar_events = sqlx::query!(
                         "SELECT calendar_events_id FROM calendar_events
                         WHERE
                             calendar_id = $1 AND
                             calendar_event_id = $2",
-                        calendar.google_calendar_id,
+                        google_calendar_id,
                         event_id,
                     )
-                    .fetch_one(&data.db_pool)
-                    .await?
-                    .calendar_events_id;
+                    .fetch_one(db_pool)
+                    .await;
+
+                let calendar_events_id = match calendar_events {
+                    Ok(calendar_events) => calendar_events.calendar_events_id,
+                    Err(error) => {
+                        error!("Failed to get calendar event ID from database: {:?}", error);
+                        continue;
+                    }
+                };
 
                 to_schedule_events.push(ToScheduleEvent {
                     event_fields,
@@ -145,6 +139,23 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
             }
         }
     }
+    (to_schedule_events, embeds)
+}
+
+async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: &DiscordCalendarConfig) -> Result<(), discord::Error> {
+    let events = match google_calendar::get_next_week(
+        &data.google,
+        &calendar.google_calendar_id
+    ).await {
+        None => {
+            let error = Err(discord::Error::from("Failed to get events"));
+            error!("Failed to get events: {:?}", error);
+            return error;
+        }
+        Some(events) => events
+    };
+
+    let (to_schedule_events, embeds) = get_to_schedule_events(events, &calendar.google_calendar_id, &data.google, &data.db_pool).await;
 
     let mut message = get_message_or_create_new(ctx, calendar.channel_id, calendar.message_id).await?;
 
@@ -158,14 +169,16 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
 
     let events_scheduled_by_bot = scheduled_events.iter().filter(|event| {
         let default_user = User::default();
-        let creator = event.creator.as_ref().unwrap_or_else(|| &default_user);
+        let creator = event.creator.as_ref().unwrap_or(&default_user);
 
         creator.id == ctx.cache.current_user().id
     }).collect::<Vec<_>>();
 
+
     for single_to_schedule in to_schedule_events {
         let guild_id = calendar.guild_id.get();
 
+        #[allow(clippy::cast_possible_wrap)]
         let database_record = sqlx::query!(
                 "SELECT discord_id, CE.calendar_events_id FROM calendar_events AS CE
                 LEFT JOIN discord_events AS DE ON DE.calendar_events_id = CE.calendar_events_id
@@ -181,6 +194,7 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
         if let Some(database_record) = database_record {
             let discord_id = database_record.discord_id;
 
+            #[allow(clippy::cast_sign_loss)]
             let event = events_scheduled_by_bot.iter().find(|event| event.id == discord_id as u64);
 
             let discord_event = match create_or_edit_event(ctx, calendar, event.copied(), &single_to_schedule.event_fields).await {
@@ -191,6 +205,7 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
                 }
             };
 
+            #[allow(clippy::cast_possible_wrap)]
             sqlx::query!(
                     "INSERT INTO discord_events (
                         calendar_events_id,
@@ -215,6 +230,7 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
                 }
             };
 
+            #[allow(clippy::cast_possible_wrap)]
             sqlx::query!(
                     "INSERT INTO discord_events (
                         calendar_events_id,

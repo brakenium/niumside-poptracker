@@ -1,11 +1,9 @@
 use chrono::{DateTime, Utc};
 use poise::{serenity_prelude as serenity};
-use poise::serenity_prelude::{ChannelId, CreateMessage, CreateScheduledEvent, EditScheduledEvent, GetMessages, Message, MessageId, ScheduledEvent, ScheduledEventId};
+use poise::serenity_prelude::{ChannelId, CreateMessage, CreateScheduledEvent, EditScheduledEvent, GetMessages, Message, MessageId, ScheduledEvent};
 use poise::serenity_prelude::ScheduledEventType::External;
-use tracing::debug;
 use tracing::log::error;
 use crate::discord;
-use crate::discord::Data;
 use crate::storage::configuration::DiscordCalendarConfig;
 
 pub async fn get_message_or_create_new(
