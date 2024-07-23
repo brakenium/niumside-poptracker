@@ -8,7 +8,7 @@ mod formatting;
 
 use std::sync::{Arc};
 use poise::{FrameworkBuilder};
-#[cfg(feature = "census")]
+#[cfg(feature = "database")]
 use sqlx::PgPool;
 use crate::storage::configuration::{DiscordCalendarConfig, GoogleConfig};
 use poise::serenity_prelude as serenity;
@@ -18,10 +18,10 @@ use crate::discord::updaters::Updater;
 
 #[derive(Clone)]
 pub struct Data {
-    #[cfg(feature = "census")]
+    #[cfg(feature = "database")]
     pub(crate) db_pool: PgPool,
     pub(crate) google: GoogleConfig,
-    pub(crate) calendar: DiscordCalendarConfig
+    pub(crate) calendar: Vec<DiscordCalendarConfig>
 } // User data, which is stored and accessible in all command invocations
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;

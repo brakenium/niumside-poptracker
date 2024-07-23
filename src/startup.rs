@@ -7,7 +7,7 @@ use crate::{active_players, census};
 use crate::logging;
 use poise::serenity_prelude::ClientBuilder;
 use poise::{serenity_prelude, FrameworkBuilder};
-#[cfg(feature = "census")]
+#[cfg(feature = "database")]
 use sqlx::PgPool;
 use utoipa::OpenApi;
 
@@ -18,7 +18,7 @@ pub struct DbState {
 
 pub async fn services(
     rocket: rocket::Rocket<rocket::Build>,
-    #[cfg(feature = "census")]
+    #[cfg(feature = "database")]
     db_pool: PgPool,
     app_config: Settings,
     poise: FrameworkBuilder<Data, Error>,
@@ -52,14 +52,14 @@ pub async fn services(
     #[cfg(feature = "census")]
     let rocket = rocket.manage(db_state);
 
-    #[cfg(feature = "census")]
+    #[cfg(feature = "database")]
     let poise_db = db_pool.clone();
     let poise_framework = poise
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
                 Ok(Data {
-                    #[cfg(feature = "census")]
+                    #[cfg(feature = "database")]
                     db_pool: poise_db,
                     google: app_config.google,
                     calendar: app_config.discord.calendar

@@ -2,7 +2,7 @@ use crate::constants;
 use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Deserializer};
 use std::env;
-use std::path::Path;
+use std::path::{Path};
 use calendar3::oauth2::{ServiceAccountKey};
 use poise::serenity_prelude::{ChannelId, GuildId, MessageId};
 use tracing::Level;
@@ -67,7 +67,7 @@ pub struct DiscordCalendarConfig {
 #[allow(unused)]
 pub struct DiscordConfig {
     pub token: String,
-    pub calendar: DiscordCalendarConfig,
+    pub calendar: Vec<DiscordCalendarConfig>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

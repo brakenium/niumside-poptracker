@@ -1,7 +1,10 @@
+use chrono::{DateTime, Utc};
 use poise::{serenity_prelude as serenity};
-use poise::serenity_prelude::{ChannelId, CreateMessage, GetMessages, Message, MessageId};
+use poise::serenity_prelude::{ChannelId, CreateMessage, CreateScheduledEvent, EditScheduledEvent, GetMessages, Message, MessageId, ScheduledEvent};
+use poise::serenity_prelude::ScheduledEventType::External;
 use tracing::log::error;
 use crate::discord;
+use crate::storage::configuration::DiscordCalendarConfig;
 
 pub async fn get_message_or_create_new(
     ctx: &serenity::Context,
@@ -28,4 +31,49 @@ pub async fn get_message_or_create_new(
     };
 
     Ok(message)
+}
+
+pub struct ToScheduleEventFields {
+    pub title: String,
+    pub start_date_time: DateTime<Utc>,
+    pub end_date_time: DateTime<Utc>,
+    pub location: Option<String>,
+    pub description: Option<String>,
+}
+
+pub async fn create_or_edit_event(ctx: &serenity::Context, calendar: &DiscordCalendarConfig, event: Option<&ScheduledEvent>, event_fields: &ToScheduleEventFields) -> Result<ScheduledEvent, discord::Error> {
+    let location = event_fields.location.as_deref().unwrap_or("Unable to get location");
+
+    if let Some(event) = event {
+        let event_id = event.id;
+
+
+        let mut edit_event = EditScheduledEvent::new()
+            .name(&event_fields.title)
+            .start_time(event_fields.start_date_time)
+            .end_time(event_fields.end_date_time)
+            .location(location);
+
+
+        if let Some(description) = &event_fields.description {
+            edit_event = edit_event.description(description);
+        }
+
+        Ok(calendar.guild_id.edit_scheduled_event(ctx, event_id, edit_event).await?)
+    }
+    else {
+        let mut create_event = CreateScheduledEvent::new(
+            External,
+            &event_fields.title,
+            event_fields.start_date_time,
+        )
+            .end_time(event_fields.end_date_time)
+            .location(location);
+
+        if let Some(description) = &event_fields.description {
+            create_event = create_event.description(description);
+        }
+
+        Ok(calendar.guild_id.create_scheduled_event(ctx, create_event).await?)
+    }
 }
