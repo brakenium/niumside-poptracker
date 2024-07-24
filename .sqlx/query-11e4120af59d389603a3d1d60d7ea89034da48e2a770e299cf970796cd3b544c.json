@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT discord_id, CE.calendar_events_id FROM calendar_events AS CE\n                    LEFT JOIN discord_events AS DE ON DE.calendar_events_id = CE.calendar_events_id\n                    WHERE\n                        CE.calendar_id = $1 AND\n                        CE.calendar_events_id = $2 AND\n                        DE.guild_id = $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "discord_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "calendar_events_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "11e4120af59d389603a3d1d60d7ea89034da48e2a770e299cf970796cd3b544c"
+}
