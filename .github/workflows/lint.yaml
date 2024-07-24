@@ -56,7 +56,7 @@ jobs:
           rustup component add clippy
 
       - name: Store rust cache
-        uses: Swatinem/rust-cache@v2}
+        uses: Swatinem/rust-cache@v2
 
       - name: Run Clippy
         run: cargo clippy --release -- -D warnings
