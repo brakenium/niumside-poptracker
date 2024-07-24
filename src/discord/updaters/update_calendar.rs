@@ -165,86 +165,87 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
 
     message.edit(ctx, message_content).await?;
 
-    let scheduled_events = calendar.guild_id.scheduled_events(ctx.http.clone(), false).await?;
-
-    let events_scheduled_by_bot = scheduled_events.iter().filter(|event| {
-        let default_user = User::default();
-        let creator = event.creator.as_ref().unwrap_or(&default_user);
-
-        creator.id == ctx.cache.current_user().id
-    }).collect::<Vec<_>>();
-
-
-    for single_to_schedule in to_schedule_events {
-        let guild_id = calendar.guild_id.get();
-
-        #[allow(clippy::cast_possible_wrap)]
-        let database_record = sqlx::query!(
-                "SELECT discord_id, CE.calendar_events_id FROM calendar_events AS CE
-                LEFT JOIN discord_events AS DE ON DE.calendar_events_id = CE.calendar_events_id
-                WHERE
-                    CE.calendar_id = $1 AND
-                    CE.calendar_events_id = $2 AND
-                    DE.guild_id = $3",
-                calendar.google_calendar_id,
-                single_to_schedule.calendar_events_id,
-                guild_id as i64,
-            ).fetch_optional(&data.db_pool).await?;
-
-        if let Some(database_record) = database_record {
-            let discord_id = database_record.discord_id;
-
-            #[allow(clippy::cast_sign_loss)]
-            let event = events_scheduled_by_bot.iter().find(|event| event.id == discord_id as u64);
-
-            let discord_event = match create_or_edit_event(ctx, calendar, event.copied(), &single_to_schedule.event_fields).await {
-                Ok(discord_event) => discord_event,
-                Err(error) => {
-                    error!("Failed to create or edit event: {:?}", error);
-                    continue;
-                }
-            };
-
+    if calendar.should_update_discord_events {
+        let scheduled_events = calendar.guild_id.scheduled_events(ctx.http.clone(), false).await?;
+    
+        let events_scheduled_by_bot = scheduled_events.iter().filter(|event| {
+            let default_user = User::default();
+            let creator = event.creator.as_ref().unwrap_or(&default_user);
+    
+            creator.id == ctx.cache.current_user().id
+        }).collect::<Vec<_>>();
+    
+        for single_to_schedule in to_schedule_events {
+            let guild_id = calendar.guild_id.get();
+    
             #[allow(clippy::cast_possible_wrap)]
-            sqlx::query!(
-                    "INSERT INTO discord_events (
-                        calendar_events_id,
-                        guild_id,
-                        discord_id
-                    )
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT (calendar_events_id, guild_id) DO UPDATE SET discord_id = $3",
-                    database_record.calendar_events_id,
-                    guild_id as i64,
-                    discord_event.id.get() as i64,
-                )
-                .execute(&data.db_pool)
-                .await?;
-        }
-        else {
-            let discord_event = match create_or_edit_event(ctx, calendar, None, &single_to_schedule.event_fields).await {
-                Ok(discord_event) => discord_event,
-                Err(error) => {
-                    error!("Failed to create or edit event: {:?}", error);
-                    continue;
-                }
-            };
-
-            #[allow(clippy::cast_possible_wrap)]
-            sqlx::query!(
-                    "INSERT INTO discord_events (
-                        calendar_events_id,
-                        guild_id,
-                        discord_id
-                    )
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT (calendar_events_id, guild_id) DO UPDATE SET discord_id = $3",
+            let database_record = sqlx::query!(
+                    "SELECT discord_id, CE.calendar_events_id FROM calendar_events AS CE
+                    LEFT JOIN discord_events AS DE ON DE.calendar_events_id = CE.calendar_events_id
+                    WHERE
+                        CE.calendar_id = $1 AND
+                        CE.calendar_events_id = $2 AND
+                        DE.guild_id = $3",
+                    calendar.google_calendar_id,
                     single_to_schedule.calendar_events_id,
                     guild_id as i64,
-                    discord_event.id.get() as i64,
-                )
-                .execute(&data.db_pool)
-                .await?;
+                ).fetch_optional(&data.db_pool).await?;
+
+            if let Some(database_record) = database_record {
+                let discord_id = database_record.discord_id;
+    
+                #[allow(clippy::cast_sign_loss)]
+                let event = events_scheduled_by_bot.iter().find(|event| event.id == discord_id as u64);
+    
+                let discord_event = match create_or_edit_event(ctx, calendar, event.copied(), &single_to_schedule.event_fields).await {
+                    Ok(discord_event) => discord_event,
+                    Err(error) => {
+                        error!("Failed to create or edit event: {:?}", error);
+                        continue;
+                    }
+                };
+    
+                #[allow(clippy::cast_possible_wrap)]
+                sqlx::query!(
+                        "INSERT INTO discord_events (
+                            calendar_events_id,
+                            guild_id,
+                            discord_id
+                        )
+                        VALUES ($1, $2, $3)
+                        ON CONFLICT (calendar_events_id, guild_id) DO UPDATE SET discord_id = $3",
+                        database_record.calendar_events_id,
+                        guild_id as i64,
+                        discord_event.id.get() as i64,
+                    )
+                    .execute(&data.db_pool)
+                    .await?;
+            }
+            else {
+                let discord_event = match create_or_edit_event(ctx, calendar, None, &single_to_schedule.event_fields).await {
+                    Ok(discord_event) => discord_event,
+                    Err(error) => {
+                        error!("Failed to create or edit event: {:?}", error);
+                        continue;
+                    }
+                };
+    
+                #[allow(clippy::cast_possible_wrap)]
+                sqlx::query!(
+                        "INSERT INTO discord_events (
+                            calendar_events_id,
+                            guild_id,
+                            discord_id
+                        )
+                        VALUES ($1, $2, $3)
+                        ON CONFLICT (calendar_events_id, guild_id) DO UPDATE SET discord_id = $3",
+                        single_to_schedule.calendar_events_id,
+                        guild_id as i64,
+                        discord_event.id.get() as i64,
+                    )
+                    .execute(&data.db_pool)
+                    .await?;
+            }
         }
     }
 

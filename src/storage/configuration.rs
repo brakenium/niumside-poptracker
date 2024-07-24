@@ -61,6 +61,7 @@ pub struct DiscordCalendarConfig {
     pub channel_id: ChannelId,
     pub guild_id: GuildId,
     pub message_id: Option<MessageId>,
+    pub should_update_discord_events: bool
 }
 
 #[derive(Debug, Deserialize, Clone)]
