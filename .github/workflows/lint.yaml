@@ -55,12 +55,8 @@ jobs:
           rustup default stable
           rustup component add clippy
 
-      - name: Cache target directory
-        id: cache-target
-        uses: actions/cache/restore@v3
-        with:
-          path: target
-          key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
+      - name: Store rust cache
+        uses: Swatinem/rust-cache@v2}
 
       - name: Run Clippy
         run: cargo clippy --release -- -D warnings
@@ -75,12 +71,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Cache target directory
-        id: cache-target
-        uses: actions/cache/restore@v3
-        with:
-          path: target
-          key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
+      - name: Store rust cache
+        uses: Swatinem/rust-cache@v2
 
       - uses: actions-rs/audit-check@v1
         with:
@@ -102,16 +94,11 @@ jobs:
       - name: Install Rust toolchain
         run: |
           rustup update
-          rustup toolchain install stable
           rustup toolchain install nightly
-          rustup default stable
+          rustup default nightly
 
-      - name: Cache target directory
-        id: cache-target
-        uses: actions/cache/restore@v3
-        with:
-          path: target
-          key: ${{ matrix.target }}-target-${{ hashFiles('**/Cargo.lock') }}
+      - name: Store rust cache
+        uses: Swatinem/rust-cache@v2
 
       - name: Install cargo-udeps
         run: |
