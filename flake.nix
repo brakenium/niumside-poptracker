@@ -15,7 +15,7 @@
             # speechd
           ];
           buildDeps = with pkgs; [ pkg-config rustPlatform.bindgenHook ];
-          devDeps = with pkgs; [ gdb act ];
+          devDeps = with pkgs; [ gdb act sqlx-cli ];
 
           # cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
           # msrv = cargoToml.package.rust-version;
