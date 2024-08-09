@@ -10,28 +10,31 @@
       systems = [ "x86_64-linux" ];
       perSystem = { config, self', pkgs, lib, system, ... }:
         let
-          runtimeDeps = with pkgs; [ alsa-lib speechd ];
+          runtimeDeps = with pkgs; [
+            # alsa-lib
+            # speechd
+          ];
           buildDeps = with pkgs; [ pkg-config rustPlatform.bindgenHook ];
           devDeps = with pkgs; [ gdb act ];
 
-          cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
-          msrv = cargoToml.package.rust-version;
+          # cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+          # msrv = cargoToml.package.rust-version;
 
-          rustPackage = features:
-            (pkgs.makeRustPlatform {
-              cargo = pkgs.rust-bin.stable.latest.minimal;
-              rustc = pkgs.rust-bin.stable.latest.minimal;
-            }).buildRustPackage {
-              inherit (cargoToml.package) name version;
-              src = ./.;
-              cargoLock.lockFile = ./Cargo.lock;
-              buildFeatures = features;
-              buildInputs = runtimeDeps;
-              nativeBuildInputs = buildDeps;
-              # Uncomment if your cargo tests require networking or otherwise
-              # don't play nicely with the Nix build sandbox:
-              # doCheck = false;
-            };
+          # rustPackage = features:
+          #   (pkgs.makeRustPlatform {
+          #     cargo = pkgs.rust-bin.stable.latest.minimal;
+          #     rustc = pkgs.rust-bin.stable.latest.minimal;
+          #   }).buildRustPackage {
+          #     inherit (cargoToml.package) name version;
+          #     src = ./.;
+          #     cargoLock.lockFile = ./Cargo.lock;
+          #     buildFeatures = features;
+          #     buildInputs = runtimeDeps;
+          #     nativeBuildInputs = buildDeps;
+          #     # Uncomment if your cargo tests require networking or otherwise
+          #     # don't play nicely with the Nix build sandbox:
+          #     # doCheck = false;
+          #   };
 
           mkDevShell = rustc:
             pkgs.mkShell {
@@ -47,16 +50,16 @@
             overlays = [ (import inputs.rust-overlay) ];
           };
 
-          packages.default = self'.packages.example;
+          # packages.default = self'.packages.example;
           devShells.default = self'.devShells.stable;
 
-          packages.example = (rustPackage "foobar");
+          # packages.example = (rustPackage "foobar");
           # packages.example-base = (rustPackage "");
 
-          devShells.nightly = (mkDevShell (pkgs.rust-bin.selectLatestNightlyWith
-            (toolchain: toolchain.default)));
+          # devShells.nightly = (mkDevShell (pkgs.rust-bin.selectLatestNightlyWith
+          #   (toolchain: toolchain.default)));
           devShells.stable = (mkDevShell pkgs.rust-bin.stable.latest.default);
-          devShells.msrv = (mkDevShell pkgs.rust-bin.stable.${msrv}.default);
+          # devShells.msrv = (mkDevShell pkgs.rust-bin.stable.${msrv}.default);
         };
     };
 }
