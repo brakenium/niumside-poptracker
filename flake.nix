@@ -40,6 +40,7 @@
             pkgs.mkShell {
               shellHook = ''
                 export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
+                ${pkgs.xmlstarlet}/bin/xmlstarlet edit --inplace --update "/project/*[@name='RustProjectSettings']/*[@name='explicitPathToStdlib']/@value" --value ${pkgs.rustPlatform.rustLibSrc} .idea/workspace.xml
               '';
               buildInputs = runtimeDeps;
               nativeBuildInputs = buildDeps ++ devDeps ++ [ rustc ];
