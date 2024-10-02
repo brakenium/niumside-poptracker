@@ -6,3 +6,4 @@
 /config/production.yaml
 /static/config
 /.direnv
+/.idea/
