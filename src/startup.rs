@@ -1,4 +1,4 @@
-
+use std::thread;
 use crate::discord::{Data, Error};
 use crate::storage::configuration::{Settings};
 use crate::web::ApiDoc;
@@ -86,7 +86,7 @@ pub async fn services(
             realtime_url: Some(app_config.census.realtime_base_url),
         };
 
-        thread::spawn(move || census::realtime::client(census_realtime_config, &census_realtime_state));
+        thread::spawn(move || census::realtime::client(census_realtime_config, census_realtime_state));
     }
     
     let poise_client_future = tokio::spawn(async move {
@@ -104,12 +104,13 @@ pub async fn services(
             census::update_data::run(&update_data_pool).await
         });
 
+        let active_players_clean = active_players.clone();
         let active_players_process_loop_future = tokio::spawn(async move {
             active_players::process_loop(active_players.clone(), db_pool).await
         });
 
         let active_players_clean_future = tokio::spawn(async move {
-            active_players::clean(active_players.clone()).await
+            active_players::clean(active_players_clean).await
         });
 
         tokio::try_join!(

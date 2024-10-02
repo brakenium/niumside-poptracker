@@ -1,31 +1,31 @@
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 use rocket::{
     serde::{Serialize},
 };
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 use thiserror::Error;
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 use utoipa::ToSchema;
 
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 use crate::controllers::population::{get_current_tree, PopulationApiResponse, ZoneBreakdown};
 
 #[derive(Error, Debug, Serialize, ToSchema)]
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 pub enum Error {
     #[error("No data available")]
     NoDataAvailable,
 }
 
 #[derive(Serialize, ToSchema)]
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 pub struct Response {
     #[serde(flatten)]
     pub result: PossibleResults,
 }
 
 #[derive(Serialize, ToSchema)]
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 pub enum PossibleResults {
     #[serde(rename = "pop")]
     PopResult(PopulationApiResponse),
@@ -43,7 +43,7 @@ responses(
 )
 )]
 #[get("/population?<world>&<zone>&<team>&<loadout>")]
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 pub async fn population(
     world: Option<Vec<i32>>,
     zone: Option<Vec<i32>>,
@@ -75,7 +75,7 @@ pub async fn population(
 }
 
 #[allow(clippy::no_effect_underscore_binding)]
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 pub fn routes() -> Vec<rocket::Route> {
     routes![
         population

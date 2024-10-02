@@ -1,4 +1,4 @@
-use crate::census::constants::{Faction, Loadout, WorldID};
+use crate::census::constants::{Loadout, TeamID, WorldID, ZoneID};
 use crate::serde::naivedatetime;
 use serde::Serialize;
 use sqlx::PgPool;
@@ -6,13 +6,15 @@ use std::collections::HashMap;
 use tracing::error;
 use utoipa::ToSchema;
 
-pub type LoadoutBreakdown = HashMap<u16, u16>;
+pub type PopulationAmount = u16;
 
-pub type TeamBreakdown = HashMap<u16, LoadoutBreakdown>;
+pub type LoadoutBreakdown = HashMap<Loadout, PopulationAmount>;
 
-pub type ZoneBreakdown = HashMap<u32, TeamBreakdown>;
+pub type TeamBreakdown = HashMap<TeamID, LoadoutBreakdown>;
 
-pub type WorldBreakdown = HashMap<u32, ZoneBreakdown>;
+pub type ZoneBreakdown = HashMap<ZoneID, TeamBreakdown>;
+
+pub type WorldBreakdown = HashMap<WorldID, ZoneBreakdown>;
 
 pub struct PopBreakdown {
     pub timestamp: chrono::NaiveDateTime,
@@ -28,28 +30,28 @@ pub struct PopulationApiResponse {
 
 #[derive(Serialize, ToSchema)]
 pub struct PopWorld {
-    pub world_id: u32,
+    pub world_id: WorldID,
     pub world_population: u16,
     pub zones: Vec<PopZone>,
 }
 
 #[derive(Serialize, ToSchema)]
 pub struct PopZone {
-    pub zone_id: u32,
+    pub zone_id: ZoneID,
     pub zone_population: u16,
     pub teams: Vec<PopTeam>,
 }
 
 #[derive(Serialize, ToSchema)]
 pub struct PopTeam {
-    pub team_id: u16,
+    pub team_id: TeamID,
     pub team_population: u16,
     pub loadouts: Vec<PopLoadout>,
 }
 
 #[derive(Serialize, ToSchema)]
 pub struct PopLoadout {
-    pub loadout_id: u16,
+    pub loadout_id: Loadout,
     pub loadout_population: u16,
 }
 
@@ -111,21 +113,21 @@ pub async fn get_current(
 
     for record in population {
         #[allow(clippy::cast_possible_truncation)]
-        let Ok(_) = WorldID::try_from(record.world_id as u16) else {
+        let Ok(world_id) = WorldID::try_from(record.world_id as u16) else {
             error!(
                 "Invalid world ID is not defined in auraxis-rs: {}",
                 record.world_id
             );
             continue;
         };
-        let Ok(_) = Faction::try_from(record.team_id as u16) else {
+        let Ok(team_id) = TeamID::try_from(record.team_id as u16) else {
             error!(
                 "Invalid team ID (Faction enum) is not defined in auraxis-rs: {}",
                 record.team_id
             );
             continue;
         };
-        let Ok(_) = Loadout::try_from(record.loadout_id as u16) else {
+        let Ok(loadout_id) = Loadout::try_from(record.loadout_id as u16) else {
             error!(
                 "Invalid loadout ID is not defined in auraxis-rs: {}",
                 record.loadout_id
@@ -133,18 +135,16 @@ pub async fn get_current(
             continue;
         };
 
-        let world_id = record.world_id;
-        let team_id = record.team_id;
-        let loadout_id = record.loadout_id;
-        let zone_id = record.zone_id;
+        let zone_id = ZoneID(record.zone_id as u32);
+
         let amount = record.amount;
 
         let world = world_breakdown
-            .entry(world_id as u32)
+            .entry(world_id)
             .or_default();
-        let zone = world.entry(zone_id as u32).or_default();
-        let team = zone.entry(team_id as u16).or_default();
-        let loadout = team.entry(loadout_id as u16).or_insert(0);
+        let zone = world.entry(zone_id).or_default();
+        let team = zone.entry(team_id).or_default();
+        let loadout = team.entry(loadout_id).or_insert(0);
 
         *loadout += amount as u16;
     }

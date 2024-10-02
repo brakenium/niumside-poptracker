@@ -30,6 +30,8 @@ use poise::FrameworkBuilder;
 #[cfg(feature = "database")]
 use sqlx::PgPool;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
+use crate::active_players::ActivePlayerHashmap;
 
 struct Services {
     #[cfg(feature = "census")]
@@ -46,7 +48,7 @@ async fn agnostic_init(
     postgres: PgPool
 ) -> anyhow::Result<Services> {
     #[cfg(feature = "census")]
-    let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(HashMap::new()));
+    let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(ActivePlayerHashmap::new()));
 
     let rocket = web::init();
 

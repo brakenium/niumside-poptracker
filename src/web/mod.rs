@@ -1,6 +1,7 @@
-mod api;
+#[cfg(feature = "census_api")]
+mod census_api;
 
-#[cfg(feature = "census")]
+#[cfg(feature = "census_api")]
 use crate::controllers::population;
 use metrics_exporter_prometheus::PrometheusHandle;
 use rocket::{get, routes, Build, Rocket, State};
@@ -10,10 +11,10 @@ use utoipa_swagger_ui::SwaggerUi;
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        // #[cfg(feature = "census")]
+        // #[cfg(feature = "census_api")]
         // api::population,
         prom_metrics),
-    // #[cfg(feature = "census")]
+    // #[cfg(feature = "census_api")]
     // components(schemas(
     //     api::Response,
     //     api::PossibleResults,
@@ -97,8 +98,8 @@ pub fn init() -> Rocket<Build> {
             SwaggerUi::new("/api/<_..>").url("/api/openapi.json", ApiDoc::openapi()),
         );
 
-    #[cfg(feature = "census")]
-    let rocket = rocket.mount("/api", api::routes());
+    #[cfg(feature = "census_api")]
+    let rocket = rocket.mount("/api", census_api::routes());
 
     rocket
 }

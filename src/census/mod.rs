@@ -9,12 +9,8 @@ pub(crate) mod update_data;
 use event::Event;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::net::TcpStream;
 use subscription::SubscriptionSettings;
 use subscription::{CharacterSubscription, EventSubscription, WorldSubscription};
-use thiserror::Error;
-use tungstenite::stream::MaybeTlsStream;
-use tungstenite::ClientHandshake;
 use utils::{deserialize_from_str, serialize_optional_bool};
 
 pub const REALTIME_URL: &str = "wss://push.planetside2.com/streaming";
@@ -104,18 +100,18 @@ pub enum CensusMessage {
     },
 }
 
-#[derive(Error, Debug)]
-pub enum AuraxisError {
-    #[error("Websocket error")]
-    WebSocketError(#[from] tungstenite::Error),
-    #[error("Websocket handshake error")]
-    WebSocketHandshakeError(
-        #[from] tungstenite::handshake::HandshakeError<ClientHandshake<MaybeTlsStream<TcpStream>>>,
-    ),
-    #[error("Tokio message channel error")]
-    TokioChannnelError(#[from] tokio::sync::mpsc::error::SendError<tungstenite::Message>),
-    #[error("Ser(de) error")]
-    SerdeError(#[from] serde_json::Error),
-    #[error(transparent)]
-    Unknown(#[from] anyhow::Error),
-}
+// #[derive(Error, Debug)]
+// pub enum AuraxisError {
+//     #[error("Websocket error")]
+//     WebSocketError(#[from] tungstenite::Error),
+//     #[error("Websocket handshake error")]
+//     WebSocketHandshakeError(
+//         #[from] tungstenite::handshake::HandshakeError<ClientHandshake<MaybeTlsStream<TcpStream>>>,
+//     ),
+//     #[error("Tokio message channel error")]
+//     TokioChannnelError(#[from] tokio::sync::mpsc::error::SendError<tungstenite::Message>),
+//     #[error("Ser(de) error")]
+//     SerdeError(#[from] serde_json::Error),
+//     #[error(transparent)]
+//     Unknown(#[from] anyhow::Error),
+// }

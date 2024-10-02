@@ -6,6 +6,7 @@ use std::path::{Path};
 use calendar3::oauth2::{ServiceAccountKey};
 use poise::serenity_prelude::{ChannelId, GuildId, MessageId};
 use tracing::Level;
+use url::Url;
 
 pub trait DeserializeWith: Sized {
     fn deserialize_with<'de, D>(de: D) -> Result<Self, D::Error>

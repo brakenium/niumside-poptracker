@@ -1,10 +1,11 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
-use strum::{EnumIter, EnumVariantNames, FromRepr};
+use strum::{EnumIter, VariantNames, FromRepr};
+use niumside_poptracker::FromStr;
 
 #[repr(u16)]
 #[derive(
+    FromStr,
     Serialize,
     Deserialize,
     Copy,
@@ -16,7 +17,7 @@ use strum::{EnumIter, EnumVariantNames, FromRepr};
     TryFromPrimitive,
     IntoPrimitive,
     EnumIter,
-    EnumVariantNames,
+    VariantNames,
     strum::Display,
     FromRepr,
 )]
@@ -81,19 +82,9 @@ impl Loadout {
     }
 }
 
-impl FromStr for Loadout {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = u16::from_str(s)?;
-        let loadout = Self::try_from(id)?;
-
-        Ok(loadout)
-    }
-}
-
 #[repr(u16)]
 #[derive(
+    FromStr,
     Serialize,
     Deserialize,
     Copy,
@@ -105,7 +96,7 @@ impl FromStr for Loadout {
     TryFromPrimitive,
     IntoPrimitive,
     EnumIter,
-    EnumVariantNames,
+    VariantNames,
     strum::Display,
     FromRepr,
 )]
@@ -117,19 +108,11 @@ pub enum Faction {
     NS = 4,
 }
 
-impl FromStr for Faction {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = u16::from_str(s)?;
-        let faction = Self::try_from(id)?;
-
-        Ok(faction)
-    }
-}
+pub type TeamID = Faction;
 
 #[repr(u16)]
 #[derive(
+    FromStr,
     Serialize,
     Deserialize,
     Copy,
@@ -141,7 +124,7 @@ impl FromStr for Faction {
     TryFromPrimitive,
     IntoPrimitive,
     EnumIter,
-    EnumVariantNames,
+    VariantNames,
     strum::Display,
     FromRepr,
 )]
@@ -156,23 +139,30 @@ pub enum WorldID {
     Soltech = 40,
 }
 
-impl FromStr for WorldID {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = u16::from_str(s)?;
-        let world = Self::try_from(id)?;
-
-        Ok(world)
-    }
-}
-
 pub type CharacterID = u64;
 pub type OutfitID = u64;
-pub type ZoneID = u32;
-pub type InstanceID = u32;
+
+#[derive(FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ZoneID(pub u32);
+
+#[derive(FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct DefinitionID(pub u16);
+#[derive(FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct InstanceID(pub u16);
 pub type FacilityID = u32;
 pub type ExperienceID = u16;
 pub type VehicleID = u16;
 pub type WeaponID = u32;
 pub type FiremodeID = u32;
+
+impl From<ZoneID> for InstanceID {
+    fn from(zone_id: ZoneID) -> Self {
+        InstanceID(((zone_id.0 & 0xFFFF_0000) >> 16) as u16)
+    }
+}
+
+impl From<ZoneID> for DefinitionID {
+    fn from(zone_id: ZoneID) -> Self {
+        DefinitionID((zone_id.0 & 0xFFFF) as u16)
+    }
+}
