@@ -10,7 +10,6 @@ use async_trait::async_trait;
 use ezsockets::{ClientConfig, CloseCode, CloseFrame};
 use metrics::counter;
 use std::thread;
-use strum::Display;
 use tracing::{debug, error, info};
 use url::Url;
 
@@ -90,7 +89,7 @@ fn handle_census_msg(
     Ok(())
 }
 
-fn handle_connection_state(connected: bool, subscription: &SubscriptionSettings, client: &mut ezsockets::Client<CensusRealtimeClient>) -> Result<(), RealtimeError> {
+fn handle_connection_state(connected: bool, subscription: &SubscriptionSettings, client: &ezsockets::Client<CensusRealtimeClient>) -> Result<(), RealtimeError> {
     if !connected {
         error!("Disconnected from Census!");
         return Ok(());
@@ -158,7 +157,7 @@ pub fn get_subscription_settings() -> SubscriptionSettings {
 }
 
 pub async fn client(realtime_client_config: RealtimeClientConfig, state: State) {
-    let url = match Url::parse(&*get_census_address(realtime_client_config.clone())) {
+    let url = match Url::parse(&get_census_address(realtime_client_config.clone())) {
         Ok(url) => url,
         Err(err) => {
             error!("Failed to parse URL: {:?}", err);
@@ -166,8 +165,10 @@ pub async fn client(realtime_client_config: RealtimeClientConfig, state: State) 
             return;
         }
     };
+
     let config = ClientConfig::new(url);
 
+    info!("Setting up Census websocket client");
 
     let (_handle, future) = ezsockets::connect(move |client| CensusRealtimeClient {
         client,

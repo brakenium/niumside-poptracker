@@ -157,12 +157,12 @@ pub type FiremodeID = u32;
 
 impl From<ZoneID> for InstanceID {
     fn from(zone_id: ZoneID) -> Self {
-        InstanceID(((zone_id.0 & 0xFFFF_0000) >> 16) as u16)
+        Self(((zone_id.0 & 0xFFFF_0000) >> 16) as u16)
     }
 }
 
 impl From<ZoneID> for DefinitionID {
     fn from(zone_id: ZoneID) -> Self {
-        DefinitionID((zone_id.0 & 0xFFFF) as u16)
+        Self((zone_id.0 & 0xFFFF) as u16)
     }
 }

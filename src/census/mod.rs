@@ -4,7 +4,7 @@ pub mod realtime;
 
 mod subscription;
 mod utils;
-pub(crate) mod update_data;
+pub mod update_data;
 
 use event::Event;
 use serde::{Deserialize, Serialize};

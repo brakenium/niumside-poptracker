@@ -858,7 +858,7 @@ dependencies = [
  "getrandom",
  "http 0.2.12",
  "tokio",
- "tokio-rustls 0.24.1",
+ "tokio-native-tls",
  "tokio-tungstenite 0.20.1",
  "tokio-tungstenite-wasm",
  "tracing",
@@ -3863,11 +3863,10 @@ checksum = "212d5dcb2a1ce06d81107c3d0ffa3121fe974b73f068c8282cb1c32328113b6c"
 dependencies = [
  "futures-util",
  "log",
- "rustls 0.21.12",
+ "native-tls",
  "tokio",
- "tokio-rustls 0.24.1",
+ "tokio-native-tls",
  "tungstenite 0.20.1",
- "webpki-roots 0.25.4",
 ]
 
 [[package]]
@@ -4075,8 +4074,8 @@ dependencies = [
  "http 0.2.12",
  "httparse",
  "log",
+ "native-tls",
  "rand",
- "rustls 0.21.12",
  "sha1",
  "thiserror",
  "url 2.5.2",

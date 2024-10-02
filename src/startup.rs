@@ -1,10 +1,9 @@
-use std::thread;
 use crate::discord::{Data, Error};
-use crate::storage::configuration::{Settings};
+use crate::logging;
+use crate::storage::configuration::Settings;
 use crate::web::ApiDoc;
 #[cfg(feature = "census")]
 use crate::{active_players, census};
-use crate::logging;
 use poise::serenity_prelude::ClientBuilder;
 use poise::{serenity_prelude, FrameworkBuilder};
 #[cfg(feature = "database")]
@@ -62,7 +61,7 @@ pub async fn services(
                     #[cfg(feature = "database")]
                     db_pool: poise_db,
                     google: app_config.google,
-                    calendar: app_config.discord.calendar
+                    calendar: app_config.discord.calendar,
                 })
             })
         })
@@ -86,9 +85,11 @@ pub async fn services(
             realtime_url: Some(app_config.census.realtime_base_url),
         };
 
-        thread::spawn(move || census::realtime::client(census_realtime_config, census_realtime_state));
+        tokio::spawn(async move {
+            census::realtime::client(census_realtime_config, census_realtime_state).await
+        });
     }
-    
+
     let poise_client_future = tokio::spawn(async move {
         poise_client.start().await
     });
@@ -101,7 +102,7 @@ pub async fn services(
     {
         let update_data_pool = db_pool.clone();
         let census_update_data_future = tokio::spawn(async move {
-            census::update_data::run(&update_data_pool).await
+            census::update_data::run(&update_data_pool).await;
         });
 
         let active_players_clean = active_players.clone();
