@@ -1,4 +1,5 @@
 use crate::census::constants::{Loadout, TeamID, WorldID, ZoneID};
+use crate::controllers::zone::Zone;
 use crate::serde::naivedatetime;
 use serde::Serialize;
 use sqlx::PgPool;
@@ -21,35 +22,36 @@ pub struct PopBreakdown {
     pub worlds: WorldBreakdown,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 pub struct PopulationApiResponse {
     #[serde(with = "naivedatetime")]
     pub timestamp: chrono::NaiveDateTime,
     pub worlds: Vec<PopWorld>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 pub struct PopWorld {
     pub world_id: WorldID,
     pub world_population: u16,
     pub zones: Vec<PopZone>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 pub struct PopZone {
     pub zone_id: ZoneID,
+    pub full_zone_data: Option<Zone>,
     pub zone_population: u16,
     pub teams: Vec<PopTeam>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 pub struct PopTeam {
     pub team_id: TeamID,
     pub team_population: u16,
     pub loadouts: Vec<PopLoadout>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Copy, Clone)]
 pub struct PopLoadout {
     pub loadout_id: Loadout,
     pub loadout_population: u16,
@@ -104,8 +106,12 @@ pub async fn get_current(
     )
         .fetch_all(db_pool)
         .await else {
-            return None;
-        };
+        return None;
+    };
+
+    if population.is_empty() {
+        return None;
+    }
 
     let mut world_breakdown: WorldBreakdown = HashMap::new();
 
@@ -186,6 +192,7 @@ pub fn get_pop_worlds_from_world_breakdown(population: PopBreakdown) -> Populati
             }
             zones.push(PopZone {
                 zone_id,
+                full_zone_data: None,
                 zone_population: teams.iter().map(|t| t.team_population).sum(),
                 teams,
             });
@@ -229,3 +236,5 @@ pub async fn get_current_tree(
 
     Some(result)
 }
+
+

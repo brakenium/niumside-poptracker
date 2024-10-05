@@ -1,7 +1,9 @@
+use niumside_poptracker::FromStr;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
-use strum::{EnumIter, VariantNames, FromRepr};
-use niumside_poptracker::FromStr;
+use std::fmt::Display;
+use std::ops::Sub;
+use strum::{EnumIter, FromRepr, VariantNames};
 
 #[repr(u16)]
 #[derive(
@@ -20,6 +22,8 @@ use niumside_poptracker::FromStr;
     VariantNames,
     strum::Display,
     FromRepr,
+    PartialOrd,
+    Ord
 )]
 #[allow(clippy::upper_case_acronyms)]
 pub enum Loadout {
@@ -99,6 +103,8 @@ impl Loadout {
     VariantNames,
     strum::Display,
     FromRepr,
+    PartialOrd,
+    Ord
 )]
 pub enum Faction {
     Unknown = 0,
@@ -127,6 +133,8 @@ pub type TeamID = Faction;
     VariantNames,
     strum::Display,
     FromRepr,
+    PartialOrd,
+    Ord
 )]
 #[strum(ascii_case_insensitive)]
 pub enum WorldID {
@@ -164,5 +172,39 @@ impl From<ZoneID> for InstanceID {
 impl From<ZoneID> for DefinitionID {
     fn from(zone_id: ZoneID) -> Self {
         Self((zone_id.0 & 0xFFFF) as u16)
+    }
+}
+
+impl Display for DefinitionID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Display for InstanceID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Sub for InstanceID {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self(self.0 - rhs.0)
+    }
+}
+
+impl Sub for DefinitionID {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self(self.0 - rhs.0)
+    }
+}
+
+impl Display for ZoneID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
