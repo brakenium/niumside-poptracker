@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO team_population (team_id, zone_population_id) VALUES ($1, $2) RETURNING team_population_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "team_population_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9f90200add2220d6e8cc48448d7fb17b6dc642815626a291543812a8600e4ba6"
+}

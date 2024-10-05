@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO world_population (world_id, population_id) VALUES ($1, $2) RETURNING world_population_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "world_population_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c52e3d393f30758b481cf1d6e7344b4abc8a028c9153b172b61572c9bd30e066"
+}

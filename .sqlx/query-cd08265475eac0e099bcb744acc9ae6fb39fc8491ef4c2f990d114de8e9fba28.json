@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO zone\n                    (zone_id, name, description)\n                    VALUES ($1, $2, $3)\n                    ON CONFLICT (zone_id) DO UPDATE SET name = $2, description = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cd08265475eac0e099bcb744acc9ae6fb39fc8491ef4c2f990d114de8e9fba28"
+}
