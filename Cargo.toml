@@ -37,6 +37,7 @@ async-trait = "0.1.83"
 syn = "2.0.79"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
+openssl = { version = "0.10", features = ["vendored"], optional = true }
 
 [features]
 default = ["discord", "monitoring", "census"]
@@ -44,7 +45,7 @@ discord = ["dep:poise", "dep:serde_json", "dep:google-calendar3", "database"]
 database = ["dep:sqlx"]
 monitoring = ["api", "dep:metrics-exporter-prometheus", "dep:metrics"]
 api = ["dep:utoipa", "dep:utoipa-swagger-ui", "dep:rocket", "dep:serde_json"]
-census = ["dep:serde_json", "dep:reqwest", "database", "dep:serde_with", "dep:num_enum", "dep:ezsockets", "dep:strum"]
+census = ["dep:serde_json", "dep:reqwest", "database", "dep:serde_with", "dep:num_enum", "dep:ezsockets", "dep:openssl", "dep:strum"]
 census_api = ["dep:reqwest"]
 
 [lib]
