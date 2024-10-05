@@ -37,7 +37,7 @@ async-trait = "0.1.83"
 syn = "2.0.79"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
-openssl = { version = "0.10", features = ["vendored"], optional = true }
+openssl = { version = "0.x", default-features = false, features = ["v110"], optional = true }  # Disable default features for openssl
 
 [features]
 default = ["discord", "monitoring", "census"]
