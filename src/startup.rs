@@ -86,7 +86,7 @@ pub async fn services(
         };
 
         tokio::spawn(async move {
-            census::realtime::client(census_realtime_config, census_realtime_state).await
+            census::realtime::client(census_realtime_config, census_realtime_state).await;
         });
     }
 

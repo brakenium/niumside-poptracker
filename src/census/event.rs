@@ -244,9 +244,10 @@ pub struct VehicleDestroy {
 // And check if it is parsed correctly.
 // You can use the following code
 mod tests {
-    use super::*;
+    use crate::census::constants::{Faction, Loadout, WorldID, ZoneID};
+    use crate::census::event::{Event, GainExperience};
     use crate::census::CensusMessage;
-    use chrono::NaiveDateTime;
+    use chrono::{DateTime, NaiveDateTime, Utc};
 
     #[test]
     fn test_gain_experience_deserialization() {
@@ -268,11 +269,11 @@ mod tests {
                                               amount,
                                               team_id,
                                           }) => {
-                        assert_eq!(character_id, 5429573939285739921);
+                        assert_eq!(character_id, 5_429_573_939_285_739_921);
                         assert_eq!(experience_id, 140);
                         assert_eq!(loadout_id, Loadout::from(Loadout::VSHeavyAssault));
-                        assert_eq!(other_id, 34360508066);
-                        assert_eq!(timestamp, DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(1728117291, 0), Utc));
+                        assert_eq!(other_id, 34_360_508_066);
+                        assert_eq!(timestamp, DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(1_728_117_291, 0), Utc));
                         assert_eq!(world_id, WorldID::Cobalt);
                         assert_eq!(zone_id, ZoneID(8));
                         assert_eq!(amount, 28);
