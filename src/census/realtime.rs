@@ -41,10 +41,16 @@ pub enum RealtimeError {
 
 #[async_trait]
 impl ezsockets::ClientExt for CensusRealtimeClient {
-    type Call = CensusMessage;
+    type Call = ();
 
     async fn on_text(&mut self, text: String) -> Result<(), ezsockets::Error> {
-        info!("received message: {text}");
+        // info!("received message: {text}");
+        let parsed_message: Result<CensusMessage, serde_json::Error> = serde_json::from_str(&text);
+        match parsed_message {
+            Ok(message) => handle_census_msg(&mut self.client, &self.subscription, self.state.clone(), message)?,
+            Err(error) => error!("Failed to parse message: {text} - {error}"),
+        }
+
         Ok(())
     }
 
@@ -54,7 +60,7 @@ impl ezsockets::ClientExt for CensusRealtimeClient {
     }
 
     async fn on_call(&mut self, call: Self::Call) -> Result<(), ezsockets::Error> {
-        info!("received call: {call:#?}");
+        let () = call;
         Ok(())
     }
 
@@ -111,7 +117,8 @@ fn handle_connection_state(connected: bool, subscription: &SubscriptionSettings,
     match subscript_send {
         Ok(_) => {
             info!("Subscribed to Census!");
-            todo!("Handle subscription response");
+            // TODO: Handle subscription response
+            Ok(())
         }
         Err(err) => {
             error!("Failed to send subscription: {:?}", err);

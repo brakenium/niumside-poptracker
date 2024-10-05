@@ -2,6 +2,7 @@ use crate::census::constants::{
     CharacterID, ExperienceID, FacilityID, Faction, FiremodeID, Loadout, OutfitID, VehicleID,
     WeaponID, WorldID, ZoneID,
 };
+use crate::census::utils::deserialize_from_str_custom_impl;
 use crate::census::utils::{
     de_bool_from_str_int, deserialize_duration_from_str, deserialize_from_str, serialize_duration,
 };
@@ -238,13 +239,60 @@ pub struct VehicleDestroy {
     pub zone_id: ZoneID,
 }
 
+// Write it a test where it will parse the following string:
+// "{"payload":{"amount":"28","character_id":"5429573939285739921","event_name":"GainExperience","experience_id":"140","loadout_id":"20","other_id":"34360508066","team_id":"1","timestamp":"1728117291","world_id":"13","zone_id":"8"},"service":"event","type":"serviceMessage"}"
+// And check if it is parsed correctly.
+// You can use the following code
+mod tests {
+    use super::*;
+    use crate::census::CensusMessage;
+    use chrono::NaiveDateTime;
+
+    #[test]
+    fn test_gain_experience_deserialization() {
+        let json_str = r#"{"payload":{"amount":"28","character_id":"5429573939285739921","event_name":"GainExperience","experience_id":"140","loadout_id":"20","other_id":"34360508066","team_id":"1","timestamp":"1728117291","world_id":"13","zone_id":"8"},"service":"event","type":"serviceMessage"}"#;
+        let json_value = serde_json::from_str(json_str).unwrap();
+        let event: CensusMessage = serde_json::from_value(json_value).unwrap();
+
+        match event {
+            CensusMessage::ServiceMessage { payload, .. } => {
+                match payload {
+                    Event::GainExperience(GainExperience {
+                                              character_id,
+                                              experience_id,
+                                              loadout_id,
+                                              other_id,
+                                              timestamp,
+                                              world_id,
+                                              zone_id,
+                                              amount,
+                                              team_id,
+                                          }) => {
+                        assert_eq!(character_id, 5429573939285739921);
+                        assert_eq!(experience_id, 140);
+                        assert_eq!(loadout_id, Loadout::from(Loadout::VSHeavyAssault));
+                        assert_eq!(other_id, 34360508066);
+                        assert_eq!(timestamp, DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(1728117291, 0), Utc));
+                        assert_eq!(world_id, WorldID::Cobalt);
+                        assert_eq!(zone_id, ZoneID(8));
+                        assert_eq!(amount, 28);
+                        assert_eq!(team_id, Faction::VS);
+                    }
+                    _ => panic!("Unexpected event type"),
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Hash)]
 pub struct GainExperience {
     #[serde(deserialize_with = "deserialize_from_str")]
     pub character_id: CharacterID,
     #[serde(deserialize_with = "deserialize_from_str")]
     pub experience_id: ExperienceID,
-    #[serde(deserialize_with = "deserialize_from_str")]
+    #[serde(deserialize_with = "deserialize_from_str_custom_impl")]
     pub loadout_id: Loadout,
     #[serde(deserialize_with = "deserialize_from_str")]
     pub other_id: CharacterID,

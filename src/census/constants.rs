@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
 use strum::{EnumIter, VariantNames, FromRepr};

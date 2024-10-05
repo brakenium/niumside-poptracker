@@ -64,6 +64,17 @@ where
         .map_err(serde::de::Error::custom)
 }
 
+pub fn deserialize_from_str_custom_impl<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    T: std::str::FromStr,
+    T::Err: std::fmt::Display,
+    D: serde::Deserializer<'de>,
+{
+    String::deserialize(deserializer)?
+        .parse()
+        .map_err(serde::de::Error::custom)
+}
+
 pub fn deserialize_duration_from_str<'de, D>(deserializer: D) -> Result<Duration, D::Error>
 where
     D: serde::Deserializer<'de>,
