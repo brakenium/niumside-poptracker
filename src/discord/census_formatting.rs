@@ -66,7 +66,7 @@ pub fn single_world_breakdown_embed(
 
     total_population.sort_by_key(|p| p.faction as u16);
 
-    let mut description = "This overview is based on active players earning XP.\n\n".to_string();
+    let mut global_population_string = "".to_string();
 
     for pop_item in total_population {
         let icon: String = match Icons::try_from(pop_item.faction)
@@ -82,15 +82,16 @@ pub fn single_world_breakdown_embed(
             (pop_item.population as f64 / world.world_population as f64) * 100.0
         };
 
-        description = format!("{}{}: {} ({:.2})\n", description, icon, pop_item.population, percentage);
+        global_population_string = format!("{}{}: {} ({:.2})\n", global_population_string, icon, pop_item.population, percentage);
     }
 
-    description = format!("{}Total: {}\n", description, world.world_population);
+    global_population_string = format!("{}Total: {}\n", global_population_string, world.world_population);
 
     let mut embed = CreateEmbed::default()
         .title(format!("{} Population", world.world_id))
-        .thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string())
-        .description(description);
+        .thumbnail("https://www.planetside2.com/images/ps2-logo.png")
+        .description("This overview is based on active players earning XP.")
+        .field("Global Population", global_population_string, false);
 
     match serenity_prelude::Timestamp::from_unix_timestamp(timestamp.and_utc().timestamp()) {
         Ok(timestamp) => {
