@@ -32,7 +32,7 @@ pub async fn population(
             None
         }
     };
-    
+
     // Sort population by world ID and then by faction ID
     population.worlds.sort_by_key(|w| w.world_id);
     for world in &mut population.worlds {
@@ -53,9 +53,11 @@ pub async fn population(
 }
 
 #[allow(clippy::unused_async)]
-async fn world_id_autocomplete(
+async fn world_id_autocomplete<'a>(
     _ctx: Context<'_>,
-    _partial: &str,
-) -> impl Iterator<Item=serenity_prelude::AutocompleteChoice> {
-    WorldID::iter().map(|v| serenity_prelude::AutocompleteChoice::new(format!("{v}"), v as i16))
+    partial: &'a str,
+) -> impl Iterator<Item=serenity_prelude::AutocompleteChoice> + 'a {
+    // WorldID::iter().map(|v| serenity_prelude::AutocompleteChoice::new(format!("{v}"), v as i16))
+    //     Use partial to search for World that contains the partial string
+    WorldID::iter().filter(move |v| v.to_string().contains(partial)).map(|v| serenity_prelude::AutocompleteChoice::new(format!("{v}"), v as i16))
 }
