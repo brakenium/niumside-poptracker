@@ -1,17 +1,19 @@
 #[cfg(feature = "census")]
 use crate::census::constants::Faction;
-use crate::controllers::population::PopTeam;
 #[cfg(feature = "census")]
 use crate::controllers::population::{PopWorld, PopulationApiResponse};
 use crate::controllers::zone::Zone;
 #[cfg(feature = "census")]
 use crate::discord::icons::Icons;
-use chrono::Utc;
 use poise::serenity_prelude;
 use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
 use std::collections::HashMap;
-use std::ops::Sub;
 use tracing::error;
+
+struct TotalPopulation {
+    pub faction: Faction,
+    pub population: u16,
+}
 
 pub fn world_breakdown_message(population_breakdown: &PopulationApiResponse, full_zone_data: &Option<Vec<Zone>>) -> Vec<CreateEmbed> {
     let mut embeds = Vec::new();
@@ -32,13 +34,10 @@ pub fn single_world_breakdown_embed(
     full_zone_data: &Option<Vec<Zone>>,
     timestamp: chrono::NaiveDateTime,
 ) -> CreateEmbed {
-    let mut total_population: HashMap<Faction, u16> = HashMap::new();
+    let mut total_population: Vec<TotalPopulation> = Vec::new();
 
     for zone in &world.zones {
-        let mut sorted_teams = zone.teams.clone();
-        sorted_teams.sort_by_key(|t| t.team_id);
-
-        for team in sorted_teams {
+        for team in &zone.teams {
             let team_faction = match Faction::try_from(team.team_id) {
                 Ok(faction) => faction,
                 Err(_) => {
@@ -47,27 +46,43 @@ pub fn single_world_breakdown_embed(
                 }
             };
 
-            *total_population.entry(team_faction).or_insert(0) += team.team_population;
+            let team_index = total_population
+                .iter()
+                .position(|p| p.faction == team_faction);
+
+            match team_index {
+                Some(index) => {
+                    total_population[index].population += team.team_population;
+                }
+                None => {
+                    total_population.push(TotalPopulation {
+                        faction: team_faction,
+                        population: team.team_population,
+                    });
+                }
+            }
         }
     }
 
+    total_population.sort_by_key(|p| p.faction as u16);
+
     let mut description = "This overview is based on active players earning XP.\n\n".to_string();
 
-    for (faction, population) in total_population {
-        let icon: String = match Icons::try_from(faction)
+    for pop_item in total_population {
+        let icon: String = match Icons::try_from(pop_item.faction)
             .unwrap_or(Icons::Ps2White)
             .to_discord_emoji() {
             Some(emoji) => emoji.to_string(),
-            None => faction.to_string(),
+            None => pop_item.faction.to_string(),
         };
 
         let percentage = if world.world_population == 0 {
             0.0
         } else {
-            (population as f64 / world.world_population as f64) * 100.0
+            (pop_item.population as f64 / world.world_population as f64) * 100.0
         };
 
-        description = format!("{}{}: {} ({:.2})\n", description, icon, population, percentage);
+        description = format!("{}{}: {} ({:.2})\n", description, icon, pop_item.population, percentage);
     }
 
     description = format!("{}Total: {}\n", description, world.world_population);
