@@ -6,6 +6,8 @@ use crate::controllers::population::{PopWorld, PopulationApiResponse};
 use crate::controllers::zone::Zone;
 #[cfg(feature = "census")]
 use crate::discord::icons::Icons;
+use chrono::Utc;
+use poise::serenity_prelude;
 use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
 use std::collections::HashMap;
 use std::ops::Sub;
@@ -30,12 +32,13 @@ pub fn single_world_breakdown_embed(
     full_zone_data: &Option<Vec<Zone>>,
     timestamp: chrono::NaiveDateTime,
 ) -> CreateEmbed {
-    let footer = CreateEmbedFooter::new(format!("Last updated: {timestamp}"));
-
     let mut total_population: HashMap<Faction, u16> = HashMap::new();
 
     for zone in &world.zones {
-        for team in &zone.teams {
+        let mut sorted_teams = zone.teams.clone();
+        sorted_teams.sort_by_key(|t| t.team_id);
+
+        for team in sorted_teams {
             let team_faction = match Faction::try_from(team.team_id) {
                 Ok(faction) => faction,
                 Err(_) => {
@@ -48,7 +51,7 @@ pub fn single_world_breakdown_embed(
         }
     }
 
-    let mut total_population_string = "".to_string();
+    let mut description = "This overview is based on active players earning XP.\n\n".to_string();
 
     for (faction, population) in total_population {
         let icon: String = match Icons::try_from(faction)
@@ -58,29 +61,44 @@ pub fn single_world_breakdown_embed(
             None => faction.to_string(),
         };
 
-        total_population_string = format!("{}{}: {}\n", total_population_string, icon, population);
+        let percentage = if world.world_population == 0 {
+            0.0
+        } else {
+            (population as f64 / world.world_population as f64) * 100.0
+        };
+
+        description = format!("{}{}: {} ({:.2})\n", description, icon, population, percentage);
     }
+
+    description = format!("{}Total: {}\n", description, world.world_population);
 
     let mut embed = CreateEmbed::default()
         .title(format!("{} Population", world.world_id))
         .thumbnail("https://www.planetside2.com/images/ps2-logo.png".to_string())
-        .footer(footer)
-        .field(
-            "Server Population",
-            total_population_string,
-            false,
-        );
+        .description(description);
 
-    for zone in &world.zones {
-        let percentage = if world.world_population == 0 {
-            0.0
-        } else {
-            (zone.zone_population as f64 / world.world_population as f64) * 100.0
-        };
+    match serenity_prelude::Timestamp::from_unix_timestamp(timestamp.and_utc().timestamp()) {
+        Ok(timestamp) => {
+            embed = embed.timestamp(timestamp);
+        }
+        Err(e) => {
+            error!("Failed to convert timestamp to Discord timestamp, using string in footer: u{:?}", e);
 
-        let mut breakdown = format!("{} ({:.2}%) active players earning XP\n", zone.zone_population, percentage);
+            let footer = CreateEmbedFooter::new(format!("Last updated: {timestamp}"));
+            embed = embed.footer(footer);
+        }
+    }
 
-        for team in &zone.teams {
+    let mut sorted_zones = world.zones.clone();
+    sorted_zones.sort_by(|a, b| b.zone_population.cmp(&a.zone_population));
+
+    for zone in sorted_zones {
+        let mut breakdown = "".to_string();
+
+        let mut sorted_teams = zone.teams.clone();
+        sorted_teams.sort_by_key(|t| t.team_id);
+
+        for team in sorted_teams {
             let team_faction = match Faction::try_from(team.team_id) {
                 Ok(faction) => faction,
                 Err(_) => {
@@ -105,6 +123,8 @@ pub fn single_world_breakdown_embed(
             breakdown = format!("{}{}: {} ({:.2}%)\n", breakdown, team_icon, team.team_population, percentage);
         }
 
+        breakdown = format!("{}Total: {}\n", breakdown, zone.zone_population);
+
         let zone_name = match full_zone_data {
             Some(zones) => zones
                 .iter()
@@ -119,10 +139,18 @@ pub fn single_world_breakdown_embed(
             None => zone.zone_id.to_string(),
         };
 
+        let main_continent = [2, 4, 6, 8, 10, 344].contains(&zone.zone_id.0);
+
+        let percentage = if world.world_population == 0 {
+            0.0
+        } else {
+            (zone.zone_population as f64 / world.world_population as f64) * 100.0
+        };
+
         embed = embed.field(
-            zone_name,
+            format!("{zone_name} ({:.2}%)", percentage),
             breakdown,
-            false,
+            !main_continent,
         );
     }
 
