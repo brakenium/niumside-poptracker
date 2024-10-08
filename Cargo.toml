@@ -6,28 +6,27 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.38.1", features = ["full"] }
+tokio = { version = "1.40.0", features = ["full"] }
 tracing-subscriber = "0.3.18"
 tracing = "0.1.40"
 config = "0.14.0"
 url = { version = "2.5.2", features = ["serde"] }
-serde = { version = "1.0.204", features = ["derive"] }
-serde_json = { version = "1.0.117", optional = true }
-serde_with = { version = "3.8.1", features = ["chrono"], optional = true }
-chrono = "0.4.31"
-futures = { version = "0.3.30", optional = true }
-sqlx = { version = "0.8.0", features = ["runtime-tokio", "postgres", "chrono"], optional = true }
-thiserror = "1.0.63"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = { version = "1.0.128", optional = true }
+serde_with = { version = "3.11.0", features = ["chrono"], optional = true }
+chrono = "0.4.38"
+sqlx = { version = "0.8.2", features = ["runtime-tokio", "postgres", "chrono"], optional = true }
+thiserror = "1.0.64"
 metrics-exporter-prometheus = { version = "0.15.3", default-features = false, features = ["http-listener"], optional = true }
 metrics = { version = "0.23.0", optional = true }
 rocket = { version = "0.5.1", features = ["json"], optional = true }
 utoipa = { version = "4.2.3", features = ["rocket_extras", "chrono"], optional = true }
 utoipa-swagger-ui = { version = "7.1.0", features = ["rocket"], optional = true }
 poise = { version = "0.6.1", optional = true }
-strum = { version = "0.26.2", features = ["derive"], optional = true }
-anyhow = "1.0.86"
-num_enum = { version = "0.7.2", optional = true }
-reqwest = { version = "0.12.4", features = ["charset", "deflate", "http2", "json", "rustls-tls"], optional = true, default-features = false }
+strum = { version = "0.26.3", features = ["derive"], optional = true }
+anyhow = "1.0.89"
+num_enum = { version = "0.7.3", optional = true }
+reqwest = { version = "0.12.8", features = ["charset", "http2", "json", "rustls-tls"], optional = true, default-features = false }
 google-calendar3 = { version = "5.0.5", optional = true }
 hyper = "1.3.1"
 hyper-rustls = "0.27.2"
@@ -35,7 +34,7 @@ regex = "1.10.5"
 ezsockets = { version = "0.6.4", features = ["rustls", "native_client"], default-features = false, optional = true }
 async-trait = "0.1.83"
 syn = "2.0.79"
-proc-macro2 = "1.0.86"
+proc-macro2 = "1.0.87"
 quote = "1.0.37"
 
 [features]
