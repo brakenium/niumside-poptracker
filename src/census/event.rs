@@ -244,45 +244,47 @@ pub struct VehicleDestroy {
 // And check if it is parsed correctly.
 // You can use the following code
 mod tests {
+    #[cfg(test)]
     use crate::census::constants::{Faction, Loadout, WorldID, ZoneID};
+    #[cfg(test)]
     use crate::census::event::{Event, GainExperience};
+    #[cfg(test)]
     use crate::census::CensusMessage;
-    use chrono::{DateTime, NaiveDateTime, Utc};
+    #[cfg(test)]
+    use chrono::DateTime;
 
     #[test]
+    #[allow(clippy::unwrap_used)]
     fn test_gain_experience_deserialization() {
         let json_str = r#"{"payload":{"amount":"28","character_id":"5429573939285739921","event_name":"GainExperience","experience_id":"140","loadout_id":"20","other_id":"34360508066","team_id":"1","timestamp":"1728117291","world_id":"13","zone_id":"8"},"service":"event","type":"serviceMessage"}"#;
         let json_value = serde_json::from_str(json_str).unwrap();
         let event: CensusMessage = serde_json::from_value(json_value).unwrap();
 
-        match event {
-            CensusMessage::ServiceMessage { payload, .. } => {
-                match payload {
-                    Event::GainExperience(GainExperience {
-                                              character_id,
-                                              experience_id,
-                                              loadout_id,
-                                              other_id,
-                                              timestamp,
-                                              world_id,
-                                              zone_id,
-                                              amount,
-                                              team_id,
-                                          }) => {
-                        assert_eq!(character_id, 5_429_573_939_285_739_921);
-                        assert_eq!(experience_id, 140);
-                        assert_eq!(loadout_id, Loadout::from(Loadout::VSHeavyAssault));
-                        assert_eq!(other_id, 34_360_508_066);
-                        assert_eq!(timestamp, DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(1_728_117_291, 0), Utc));
-                        assert_eq!(world_id, WorldID::Cobalt);
-                        assert_eq!(zone_id, ZoneID(8));
-                        assert_eq!(amount, 28);
-                        assert_eq!(team_id, Faction::VS);
-                    }
-                    _ => panic!("Unexpected event type"),
+        if let CensusMessage::ServiceMessage { payload, .. } = event {
+            match payload {
+                Event::GainExperience(GainExperience {
+                                          character_id,
+                                          experience_id,
+                                          loadout_id,
+                                          other_id,
+                                          timestamp,
+                                          world_id,
+                                          zone_id,
+                                          amount,
+                                          team_id,
+                                      }) => {
+                    assert_eq!(character_id, 5_429_573_939_285_739_921);
+                    assert_eq!(experience_id, 140);
+                    assert_eq!(loadout_id, Loadout::VSHeavyAssault);
+                    assert_eq!(other_id, 34_360_508_066);
+                    assert_eq!(timestamp, DateTime::from_timestamp(1_728_117_291, 0).unwrap());
+                    assert_eq!(world_id, WorldID::Cobalt);
+                    assert_eq!(zone_id, ZoneID(8));
+                    assert_eq!(amount, 28);
+                    assert_eq!(team_id, Faction::VS);
                 }
+                _ => panic!("Unexpected event type"),
             }
-            _ => {}
         }
     }
 }

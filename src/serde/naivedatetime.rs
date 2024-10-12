@@ -11,6 +11,7 @@ where
     serializer.serialize_str(&s)
 }
 
+#[allow(dead_code)]
 pub fn deserialize<'de, D>(deserializer: D) -> Result<NaiveDateTime, D::Error>
 where
     D: serde::Deserializer<'de>,

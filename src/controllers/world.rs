@@ -17,8 +17,8 @@ pub async fn exists(db_pool: &PgPool, worlds: &i32) -> Result<bool, sqlx::Error>
         "SELECT EXISTS(SELECT 1 FROM world WHERE world_id = $1)",
         worlds
     )
-    .fetch_one(db_pool)
-    .await
+        .fetch_one(db_pool)
+        .await
     {
         Ok(result) => Ok(result.exists.unwrap_or(false)),
         Err(e) => Err(e),
@@ -35,6 +35,7 @@ pub async fn exists(db_pool: &PgPool, worlds: &i32) -> Result<bool, sqlx::Error>
 //
 // * `Ok(Vec<(i32, String)>)` - A vector of tuples containing the world ID and the world name
 // * `Err(sqlx::Error)` - The error returned by sqlx
+#[allow(dead_code)]
 pub async fn get_all(db_pool: &PgPool) -> Result<Vec<(i32, Option<String>)>, sqlx::Error> {
     sqlx::query!("SELECT world_id, name FROM world")
         .fetch_all(db_pool)
@@ -56,6 +57,7 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<(i32, Option<String>)>, sql
 //
 // * `Ok(Vec<(i32, String)>)` - A vector of tuples containing the world ID and the world name
 // * `Err(sqlx::Error)` - The error returned by sqlx
+#[allow(dead_code)]
 pub async fn get_all_existing(
     db_pool: &PgPool,
     worlds: &[i32],
@@ -64,10 +66,10 @@ pub async fn get_all_existing(
         "SELECT world_id, name FROM world WHERE world_id = ANY($1)",
         worlds
     )
-    .fetch_all(db_pool)
-    .await
-    .map(|worlds| {
-        // take the worlds record and return a vector of tuples containing the world ID and the world name
-        worlds.into_iter().map(|w| (w.world_id, w.name)).collect()
-    })
+        .fetch_all(db_pool)
+        .await
+        .map(|worlds| {
+            // take the worlds record and return a vector of tuples containing the world ID and the world name
+            worlds.into_iter().map(|w| (w.world_id, w.name)).collect()
+        })
 }

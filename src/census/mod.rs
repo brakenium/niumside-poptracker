@@ -7,24 +7,19 @@ mod utils;
 pub mod update_data;
 
 use event::Event;
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use subscription::SubscriptionSettings;
 use subscription::{CharacterSubscription, EventSubscription, WorldSubscription};
+use url::Url;
 use utils::{deserialize_from_str, serialize_optional_bool};
 
-pub const REALTIME_URL: &str = "wss://push.planetside2.com/streaming";
-
-#[cfg(test)]
-mod tests {
-    use crate::census::REALTIME_URL;
-    use url::Url;
-
-    #[test]
-    fn test_realtime_url_parsing() {
-        let parsed_url = Url::parse(REALTIME_URL);
-        assert!(parsed_url.is_ok(), "Failed to parse REALTIME_URL");
-    }
+lazy_static! {
+    pub static ref REALTIME_URL: Url = match Url::parse("wss://push.planetside2.com/streaming") {
+        Ok(url) => url,
+        Err(error) => panic!("Failed to parse URL: {error}"),
+    };
 }
 
 #[derive(Serialize, Clone, Debug)]

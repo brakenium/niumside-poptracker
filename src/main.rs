@@ -23,7 +23,9 @@ mod startup;
 mod storage;
 mod web;
 mod google_calendar;
+mod utils;
 
+use crate::active_players::ActivePlayerHashmap;
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
 use poise::FrameworkBuilder;
@@ -31,7 +33,6 @@ use poise::FrameworkBuilder;
 use sqlx::PgPool;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
-use crate::active_players::ActivePlayerHashmap;
 
 struct Services {
     #[cfg(feature = "census")]
@@ -90,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         initialised_services.active_players,
         addr,
     ))
-    .await?;
+        .await?;
 
     Ok(())
 }

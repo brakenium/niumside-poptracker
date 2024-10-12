@@ -42,7 +42,7 @@ pub async fn population(
         }
     }
 
-    let response = census_formatting::world_breakdown_message(&population, &full_zone_data);
+    let response = census_formatting::world_breakdown_message(&mut population, &full_zone_data);
 
     let mut reply = CreateReply::default();
     reply.embeds.extend(response);

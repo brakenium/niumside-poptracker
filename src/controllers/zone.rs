@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct Zone {
-    pub zone_id: i32,
+    pub id: i32,
     pub name: Option<Languages>,
     pub description: Option<Languages>,
 }
@@ -52,7 +52,7 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<Zone>, sqlx::Error> {
         .map(|zones| {
             //     take the zones record and return a vector of tuples containing the zone ID and the zone name
             zones.into_iter().map(|z| Zone {
-                zone_id: z.zone_id,
+                id: z.zone_id,
                 name: Some(Languages {
                     en: z.name,
                 }),
@@ -74,6 +74,7 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<Zone>, sqlx::Error> {
 ///
 /// * `Ok(Vec<(i32, String)>)` - A vector of tuples containing the zone ID and the zone name of the zones that exist
 /// * `Err(sqlx::Error)` - The error returned by sqlx
+#[allow(dead_code)]
 pub async fn get_all_existing(
     db_pool: &PgPool,
     zones: &[i32],

@@ -47,7 +47,7 @@ impl ezsockets::ClientExt for CensusRealtimeClient {
         // info!("received message: {text}");
         let parsed_message: Result<CensusMessage, serde_json::Error> = serde_json::from_str(&text);
         match parsed_message {
-            Ok(message) => handle_census_msg(&mut self.client, &self.subscription, self.state.clone(), message)?,
+            Ok(message) => handle_census_msg(&self.client, &self.subscription, self.state.clone(), message)?,
             Err(error) => error!("Failed to parse message: {text} - {error}"),
         }
 
@@ -71,7 +71,7 @@ impl ezsockets::ClientExt for CensusRealtimeClient {
 }
 
 fn handle_census_msg(
-    client: &mut ezsockets::Client<CensusRealtimeClient>,
+    client: &ezsockets::Client<CensusRealtimeClient>,
     subscription: &SubscriptionSettings,
     state: State,
     message: CensusMessage,
@@ -95,26 +95,30 @@ fn handle_census_msg(
     Ok(())
 }
 
-fn handle_connection_state(connected: bool, subscription: &SubscriptionSettings, client: &ezsockets::Client<CensusRealtimeClient>) -> Result<(), RealtimeError> {
-    if !connected {
-        error!("Disconnected from Census!");
-        return Ok(());
+fn close_connection(
+    client: &ezsockets::Client<CensusRealtimeClient>,
+) {
+    match client
+        .close(Some(CloseFrame {
+            code: CloseCode::Normal,
+            reason: "adios!".to_string(),
+        })) {
+        Ok(_) => {}
+        Err(err) => {
+            error!("Failed to close connection: {:?}", err);
+        }
     }
+}
 
-    info!("Connected to Census!");
+fn send_subscription(
+    client: &ezsockets::Client<CensusRealtimeClient>,
+    subscription: &SubscriptionSettings,
+) -> Result<(), RealtimeError> {
+    let subscription_action = Action::Subscribe(subscription.clone());
+    let subscription_json = serde_json::to_string(&subscription_action)?;
+    debug!("Subscribing with {:?}", subscription_json);
 
-    counter!("realtime_total_connections").increment(1);
-
-    debug!(
-        "Subscribing with {:?}",
-        serde_json::to_string(&Action::Subscribe(subscription.clone()))?
-    );
-
-    let subscript_send = client.text(serde_json::to_string(&Action::Subscribe(
-        subscription.clone(),
-    ))?);
-
-    match subscript_send {
+    match client.text(subscription_json) {
         Ok(_) => {
             info!("Subscribed to Census!");
             // TODO: Handle subscription response
@@ -122,31 +126,30 @@ fn handle_connection_state(connected: bool, subscription: &SubscriptionSettings,
         }
         Err(err) => {
             error!("Failed to send subscription: {:?}", err);
-            client
-                .close(Some(CloseFrame {
-                    code: CloseCode::Normal,
-                    reason: "adios!".to_string(),
-                }))
-                .unwrap();
+            close_connection(client);
             Ok(())
         }
     }
 }
 
+fn handle_connection_state(
+    connected: bool,
+    subscription: &SubscriptionSettings,
+    client: &ezsockets::Client<CensusRealtimeClient>,
+) -> Result<(), RealtimeError> {
+    if !connected {
+        error!("Disconnected from Census!");
+        return Ok(());
+    }
+
+    info!("Connected to Census!");
+    counter!("realtime_total_connections").increment(1);
+
+    send_subscription(client, subscription)
+}
+
 fn get_census_address(config: RealtimeClientConfig) -> String {
-    let base_url = match config.realtime_url {
-        Some(url) => url,
-        None => match Url::parse(REALTIME_URL) {
-            Ok(url) => url,
-            Err(err) => {
-                error!(
-                    "Failed to parse compiled constant REALTIME_URL into Url: {:?}",
-                    err
-                );
-                return String::new();
-            }
-        },
-    };
+    let base_url = config.realtime_url.unwrap_or_else(|| REALTIME_URL.clone()).to_string();
     format!(
         "{}?environment={}&service-id=s:{}",
         base_url, config.environment, config.service_id
@@ -182,9 +185,7 @@ pub async fn client(realtime_client_config: RealtimeClientConfig, state: State) 
         subscription: get_subscription_settings(),
         state,
     }, config).await;
-    tokio::spawn(async move {
-        future.await.unwrap();
-    });
+    tokio::spawn(future);
 
     // loop {
     //     let msg = match socket.read() {

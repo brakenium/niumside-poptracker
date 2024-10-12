@@ -1837,6 +1837,7 @@ dependencies = [
  "google-calendar3",
  "hyper 1.4.1",
  "hyper-rustls 0.27.2",
+ "lazy_static",
  "metrics",
  "metrics-exporter-prometheus",
  "num_enum",

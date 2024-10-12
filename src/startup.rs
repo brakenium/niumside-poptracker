@@ -11,6 +11,7 @@ use sqlx::PgPool;
 use utoipa::OpenApi;
 
 #[cfg(feature = "census")]
+#[allow(dead_code)]
 pub struct DbState {
     pub(crate) pool: PgPool,
 }

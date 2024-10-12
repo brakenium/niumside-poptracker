@@ -119,6 +119,7 @@ pub async fn get_current(
 
     for record in population {
         #[allow(clippy::cast_possible_truncation)]
+        #[allow(clippy::cast_sign_loss)]
         let Ok(world_id) = WorldID::try_from(record.world_id as u16) else {
             error!(
                 "Invalid world ID is not defined in auraxis-rs: {}",
@@ -126,6 +127,7 @@ pub async fn get_current(
             );
             continue;
         };
+        #[allow(clippy::cast_sign_loss)]
         let Ok(team_id) = TeamID::try_from(record.team_id as u16) else {
             error!(
                 "Invalid team ID (Faction enum) is not defined in auraxis-rs: {}",
@@ -133,6 +135,7 @@ pub async fn get_current(
             );
             continue;
         };
+        #[allow(clippy::cast_sign_loss)]
         let Ok(loadout_id) = Loadout::try_from(record.loadout_id as u16) else {
             error!(
                 "Invalid loadout ID is not defined in auraxis-rs: {}",
@@ -141,9 +144,11 @@ pub async fn get_current(
             continue;
         };
 
+        #[allow(clippy::cast_sign_loss)]
         let zone_id = ZoneID(record.zone_id as u32);
 
-        let amount = record.amount;
+        #[allow(clippy::cast_sign_loss)]
+        let amount = record.amount as u16;
 
         let world = world_breakdown
             .entry(world_id)
@@ -152,7 +157,7 @@ pub async fn get_current(
         let team = zone.entry(team_id).or_default();
         let loadout = team.entry(loadout_id).or_insert(0);
 
-        *loadout += amount as u16;
+        *loadout += amount;
     }
 
     Some(PopBreakdown {
