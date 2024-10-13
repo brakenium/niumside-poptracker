@@ -9,7 +9,7 @@ on:
     branches:
       - master
     paths:
-      - .github/workflows/builds.yaml
+      - .github/workflows/tests.yaml
       - migrations/**
       - src/**
       - .sqlx/**
