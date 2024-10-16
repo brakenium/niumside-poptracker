@@ -95,7 +95,7 @@ pub async fn get_current(
             AND ($2::INTEGER[] IS NULL OR zp.zone_id = ANY($2::INTEGER[]))
             AND ($3::SMALLINT[] IS NULL OR tp.team_id = ANY($3::SMALLINT[]))
             AND ($4::SMALLINT[] IS NULL OR lp.loadout_id = ANY($4::SMALLINT[]))
-            AND wp.population_id = (
+            AND p.population_id = (
                 SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id
             )
         ORDER BY p.timestamp",
