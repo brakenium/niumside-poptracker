@@ -4,6 +4,7 @@ use crate::serde::naivedatetime;
 use serde::Serialize;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use sqlx::postgres::PgPoolOptions;
 use tracing::error;
 use utoipa::ToSchema;
 
