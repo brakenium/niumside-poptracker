@@ -31,6 +31,10 @@ concurrency:
 jobs:
   cargo-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
     steps:
       - name: Checkout
         uses: actions/checkout@v4
