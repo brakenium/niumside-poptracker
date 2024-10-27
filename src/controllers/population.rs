@@ -92,13 +92,12 @@ pub async fn get_current(
         JOIN zone_population zp ON wp.world_population_id = zp.world_population_id
         JOIN team_population tp ON zp.zone_population_id = tp.zone_population_id
         JOIN loadout_population lp ON tp.team_population_id = lp.team_population_id
-        WHERE ($1::INTEGER[] IS NULL OR wp.world_id = ANY($1::INTEGER[]))
+        WHERE p.population_id = (
+                SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = ANY($1::INTEGER[])
+            )
             AND ($2::INTEGER[] IS NULL OR zp.zone_id = ANY($2::INTEGER[]))
             AND ($3::SMALLINT[] IS NULL OR tp.team_id = ANY($3::SMALLINT[]))
             AND ($4::SMALLINT[] IS NULL OR lp.loadout_id = ANY($4::SMALLINT[]))
-            AND p.population_id = (
-                SELECT MAX(wp2.population_id) FROM world_population wp2 WHERE wp2.world_id = wp.world_id
-            )
         ORDER BY p.timestamp",
         worlds,
         zones,
