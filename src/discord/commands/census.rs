@@ -1,6 +1,7 @@
 use crate::census::constants::WorldID;
 use crate::controllers::{population, zone};
-use crate::discord::{census_formatting, Context, Error};
+use crate::discord::formatters;
+use crate::discord::{Context, Error};
 use poise::{serenity_prelude, CreateReply};
 use strum::IntoEnumIterator;
 use tracing::error;
@@ -13,6 +14,9 @@ pub async fn population(
     #[autocomplete = "world_id_autocomplete"]
     server: i32,
 ) -> Result<(), Error> {
+    // Defer gives the bot longer to respond, so we don't get a "This interaction failed" error
+    ctx.defer().await?;
+
     let Some(mut population) = population::get_current_tree(
         &ctx.data().db_pool.clone(),
         Some(&[server]),
@@ -42,12 +46,14 @@ pub async fn population(
         }
     }
 
-    let response = census_formatting::world_breakdown_message(&mut population, &full_zone_data);
+    let response = formatters::census::world_breakdown_message(&mut population, &full_zone_data);
 
-    let mut reply = CreateReply::default();
-    reply.embeds.extend(response);
+    let final_reply = CreateReply {
+        embeds: response,
+        ..CreateReply::default()
+    };
 
-    ctx.send(reply).await?;
+    ctx.send(final_reply).await?;
 
     Ok(())
 }
