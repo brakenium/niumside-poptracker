@@ -1,11 +1,21 @@
 #[cfg(feature = "census_api")]
-use rocket::{
-    serde::{Serialize},
-};
+use rocket::response::status::BadRequest;
+#[cfg(feature = "census_api")]
+use rocket::serde::json::Json;
+#[cfg(feature = "census_api")]
+use rocket::serde::Serialize;
 #[cfg(feature = "census_api")]
 use thiserror::Error;
 #[cfg(feature = "census_api")]
 use utoipa::ToSchema;
+#[cfg(feature = "census_api")]
+use crate::startup::DbState;
+#[cfg(feature = "census_api")]
+use crate::web::State;
+#[cfg(feature = "census_api")]
+use rocket::routes;
+#[cfg(feature = "census_api")]
+use rocket::get;
 
 #[cfg(feature = "census_api")]
 use crate::controllers::population::{get_current_tree, PopulationApiResponse, ZoneBreakdown};
@@ -36,11 +46,11 @@ pub enum PossibleResults {
 }
 
 #[utoipa::path(
-context_path = "/api",
-responses(
+    context_path = "/api",
+    responses(
 (status = 200, description = "Successful response", body = Response),
 (status = 400, description = "Bad request", body = Error, example = json ! (Error::NoDataAvailable)),
-)
+    )
 )]
 #[get("/population?<world>&<zone>&<team>&<loadout>")]
 #[cfg(feature = "census_api")]
@@ -58,7 +68,7 @@ pub async fn population(
         team.as_deref(),
         loadout.as_deref(),
     )
-    .await
+        .await
     else {
         let response = Response {
             result: PossibleResults::Error(Error::NoDataAvailable),
