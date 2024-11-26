@@ -1,10 +1,10 @@
 use crate::constants;
+use calendar3::oauth2::ServiceAccountKey;
 use config::{Config, ConfigError, Environment, File};
+use poise::serenity_prelude::{ChannelId, GuildId, MessageId};
 use serde::{Deserialize, Deserializer};
 use std::env;
-use std::path::{Path};
-use calendar3::oauth2::{ServiceAccountKey};
-use poise::serenity_prelude::{ChannelId, GuildId, MessageId};
+use std::path::Path;
 use tracing::Level;
 use url::Url;
 
@@ -39,6 +39,8 @@ impl DeserializeWith for Level {
 #[cfg(feature = "census")]
 pub struct CensusConfig {
     pub realtime_base_url: Url,
+    pub census_base_url: Url,
+    pub lithafalcon_base_url: Url,
     pub service_id: String,
 }
 
@@ -62,7 +64,7 @@ pub struct DiscordCalendarConfig {
     pub channel_id: ChannelId,
     pub guild_id: GuildId,
     pub message_id: Option<MessageId>,
-    pub should_update_discord_events: bool
+    pub should_update_discord_events: bool,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -117,8 +119,8 @@ impl Settings {
                 Environment::with_prefix(
                     &constants::APPLICATION_NAME.to_uppercase().replace(' ', ""),
                 )
-                .separator("_")
-                .list_separator(","),
+                    .separator("_")
+                    .list_separator(","),
             )
             .build()?;
 

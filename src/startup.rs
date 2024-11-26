@@ -1,3 +1,4 @@
+use crate::census::rest;
 use crate::discord::{Data, Error};
 use crate::logging;
 use crate::storage::configuration::Settings;
@@ -103,7 +104,7 @@ pub async fn services(
     {
         let update_data_pool = db_pool.clone();
         let census_update_data_future = tokio::spawn(async move {
-            census::update_data::run(&update_data_pool).await;
+            rest::update_data::run(&update_data_pool).await;
         });
 
         let active_players_clean = active_players.clone();

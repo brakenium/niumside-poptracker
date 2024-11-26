@@ -15,7 +15,7 @@
             # speechd
           ];
           buildDeps = with pkgs; [ pkg-config rustPlatform.bindgenHook ];
-          devDeps = with pkgs; [ gdb act sqlx-cli ];
+          devDeps = with pkgs; [ gdb act sqlx-cli bacon ];
 
           # cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
           # msrv = cargoToml.package.rust-version;
@@ -40,7 +40,10 @@
             pkgs.mkShell {
               shellHook = ''
                 export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
-                ${pkgs.xmlstarlet}/bin/xmlstarlet edit --inplace --update "/project/*[@name='RustProjectSettings']/*[@name='explicitPathToStdlib']/@value" --value ${pkgs.rustPlatform.rustLibSrc} .idea/workspace.xml
+#                cat <<EOF > rust-toolchain.toml
+#                [toolchain]
+#                path = "${pkgs.rust-bin.stable.latest.default}"
+#                EOF
               '';
               buildInputs = runtimeDeps;
               nativeBuildInputs = buildDeps ++ devDeps ++ [ rustc ];

@@ -1,19 +1,21 @@
 census:
   service_id: example
   realtime_base_url: wss://push.nanite-systems.net/streaming
+  census_base_url: https://census.daybreakgames.com
+  lithafalcon_base_url: https://census.lithafalcon.cc
 
-# worlds:
-#   - id: Miller
-#   - id: Cobalt
-#   - id: Jaeger
-#     zones:
-#       - 2
-#       - 4
-#       - 6
-#       - 8
-#       - 344
+  # worlds:
+  #   - id: Miller
+  #   - id: Cobalt
+  #   - id: Jaeger
+  #     zones:
+  #       - 2
+  #       - 4
+  #       - 6
+  #       - 8
+  #       - 344
 
-# database:
+  # database:
   # connection_string: postgres://postgres:P@ssw0rd@localhost/niumside
 
 app:

@@ -4,7 +4,8 @@ pub mod realtime;
 
 mod subscription;
 mod utils;
-pub mod update_data;
+pub mod rest;
+pub mod structs;
 
 use event::Event;
 use lazy_static::lazy_static;
@@ -17,6 +18,11 @@ use utils::{deserialize_from_str, serialize_optional_bool};
 
 lazy_static! {
     pub static ref REALTIME_URL: Url = match Url::parse("wss://push.planetside2.com/streaming") {
+        Ok(url) => url,
+        Err(error) => panic!("Failed to parse URL: {error}"),
+    };
+
+    pub static ref CENSUS_URL: Url = match Url::parse("https://census.daybreakgames.com") {
         Ok(url) => url,
         Err(error) => panic!("Failed to parse URL: {error}"),
     };
