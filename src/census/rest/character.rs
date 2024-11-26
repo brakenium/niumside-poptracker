@@ -59,9 +59,9 @@ mod tests {
     use super::*;
     use crate::census::structs::character::Character;
 
-    const CHARACTER_ID: u64 = 5428830384575692145;
+    const CHARACTER_ID: u64 = 5_428_830_384_575_692_145;
     const CHARACTER_NAME: &str = "brakenium";
-    const CHARACTER_CREATION_TIMESTAMP: i64 = 1549564351;
+    const CHARACTER_CREATION_TIMESTAMP: i64 = 1_549_564_351;
 
     #[tokio::test]
     async fn test_get_by_id() {
