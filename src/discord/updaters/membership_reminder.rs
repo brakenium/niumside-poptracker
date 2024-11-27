@@ -86,7 +86,7 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
         let mut embed_fields: Vec<(String, String, bool)> = Vec::new();
 
         for char in &characters {
-            info!("Reminding user {} to log in character {} with faction_id: {}", usr.id, char.character_id, char.faction);
+            // info!("Reminding user {} to log in character {} with faction_id: {}", usr.id, char.character_id, char.faction);
             let wrapped_icons = Icons::try_from(char.faction)
                 .unwrap_or(Icons::Ps2White)
                 .to_discord_emoji();
