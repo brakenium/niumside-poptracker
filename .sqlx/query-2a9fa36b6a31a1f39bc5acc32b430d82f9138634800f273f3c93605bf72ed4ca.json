@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT discord_id, character_id, name, membership_reminder, last_membership_reminder\n        FROM planetside_characters\n        JOIN users ON planetside_characters.user_id = users.user_id\n        WHERE\n            membership_reminder = true\n            AND discord_id IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "discord_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "character_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "membership_reminder",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_membership_reminder",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "2a9fa36b6a31a1f39bc5acc32b430d82f9138634800f273f3c93605bf72ed4ca"
+}

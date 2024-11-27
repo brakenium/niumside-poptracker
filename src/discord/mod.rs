@@ -5,6 +5,7 @@ mod updaters;
 mod formatting;
 mod formatters;
 
+use crate::census::rest::client::CensusRestClient;
 use crate::discord::updaters::Updater;
 use crate::storage::configuration::{DiscordCalendarConfig, GoogleConfig};
 use poise::serenity_prelude as serenity;
@@ -21,6 +22,8 @@ pub struct Data {
     pub(crate) db_pool: PgPool,
     pub(crate) google: GoogleConfig,
     pub(crate) calendar: Vec<DiscordCalendarConfig>,
+    #[cfg(feature = "census")]
+    pub(crate) census_rest_client: CensusRestClient,
 } // User data, which is stored and accessible in all command invocations
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -49,6 +52,13 @@ fn event_handler(
                             error!("Failed to update calendar: {:?}", e);
                         }
                     };
+                    
+                    match updaters::membership_reminder::MembershipReminder::update(&ctx1, &data).await {
+                        Ok(()) => {}
+                        Err(e) => {
+                            error!("Failed to update membership reminder: {:?}", e);
+                        }
+                    };
 
                     tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
                 }
@@ -65,6 +75,8 @@ pub fn init() -> FrameworkBuilder<Data, Error> {
         commands: vec![
             #[cfg(feature = "census")]
             commands::census::population(),
+            #[cfg(feature = "census")]
+            commands::membership_reminder::dailyloginreminder(),
         ],
         event_handler: |ctx, event, framework, data| {
             Box::pin(async move {

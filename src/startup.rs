@@ -1,4 +1,5 @@
 use crate::census::rest;
+use crate::census::rest::client::CensusRestClient;
 use crate::discord::{Data, Error};
 use crate::logging;
 use crate::storage::configuration::Settings;
@@ -45,6 +46,12 @@ pub async fn services(
         .merge((rocket::Config::LOG_LEVEL, rocket::config::LogLevel::Off))
         .merge((rocket::Config::SHUTDOWN, shutdown));
 
+    #[cfg(feature = "census")]
+    let census_rest_client = CensusRestClient {
+        census_url: app_config.census.census_base_url,
+        service_id: app_config.census.service_id.clone(),
+    };
+
     let rocket = rocket
         .configure(config)
         .manage(logging::metrics())
@@ -55,6 +62,7 @@ pub async fn services(
 
     #[cfg(feature = "database")]
     let poise_db = db_pool.clone();
+    let discord_census_rest_client = census_rest_client.clone();
     let poise_framework = poise
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
@@ -64,6 +72,8 @@ pub async fn services(
                     db_pool: poise_db,
                     google: app_config.google,
                     calendar: app_config.discord.calendar,
+                    #[cfg(feature = "census")]
+                    census_rest_client: discord_census_rest_client,
                 })
             })
         })
@@ -83,7 +93,7 @@ pub async fn services(
 
         let census_realtime_config = census::realtime::RealtimeClientConfig {
             environment: "ps2".to_owned(),
-            service_id: app_config.census.service_id,
+            service_id: app_config.census.service_id.clone(),
             realtime_url: Some(app_config.census.realtime_base_url),
         };
 
@@ -104,7 +114,7 @@ pub async fn services(
     {
         let update_data_pool = db_pool.clone();
         let census_update_data_future = tokio::spawn(async move {
-            rest::update_data::run(&update_data_pool).await;
+            rest::update_data::run(&update_data_pool, &census_rest_client).await;
         });
 
         let active_players_clean = active_players.clone();

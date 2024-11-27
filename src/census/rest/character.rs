@@ -8,11 +8,7 @@ impl CensusRequestableObject for Character {
             Character::get_collection(),
         )?;
 
-        println!("Getting character by ID: {} using url: {}", id, url);
-
         url.set_query(Some(&format!("character_id={id}")));
-
-        println!("Getting character by ID: {} using url: {}", id, url);
 
         let response = reqwest::get(url).await?;
         let character: CensusResponse<Self> = response.json().await?;
@@ -33,16 +29,26 @@ impl CensusRequestableObject for Character {
         let name_lower = name.to_lowercase();
         url.set_query(Some(&format!("name.first_lower={name_lower}")));
 
-        println!("Getting character by name: {} using url: {}", name, url);
+        // println!("Getting character by name: {} using url: {}", name, url);
 
         let response = reqwest::get(url).await?;
         let character: CensusResponse<Self> = response.json().await?;
-        let return_value: Result<Self, CensusRequestError> = match character.objects.first() {
-            Some(character) => Ok(character.clone()),
-            None => Err(CensusRequestError::NotFound),
-        };
+        let return_value: Result<Self, CensusRequestError> = character.objects.first()
+            .map_or_else(
+        || Err(CensusRequestError::NotFound), 
+             |character| Ok(character.clone())
+            );
 
         return_value
+    }
+
+    async fn update_from_rest(&mut self, client: &CensusRestClient) -> Result<(), CensusRequestError> {
+        let character = Self::get_by_id(client, self.character_id as usize).await?;
+        self.name = character.name;
+        self.times = character.times;
+        self.faction = character.faction;
+
+        Ok(())
     }
 
     fn get_collection() -> CensusCollections {
@@ -70,7 +76,7 @@ mod tests {
         let character = Character::get_by_id(&client, CHARACTER_ID as usize).await.unwrap();
         assert_eq!(character.character_id, CHARACTER_ID);
         assert_eq!(character.name.first, CHARACTER_NAME);
-        assert_eq!(character.times.creation.timestamp(), CHARACTER_CREATION_TIMESTAMP);
+        assert_eq!(character.times.unwrap().creation.timestamp(), CHARACTER_CREATION_TIMESTAMP);
     }
 
     #[tokio::test]
@@ -80,6 +86,6 @@ mod tests {
         let character = Character::get_by_name(&client, CHARACTER_NAME).await.unwrap();
         assert_eq!(character.character_id, CHARACTER_ID);
         assert_eq!(character.name.first, CHARACTER_NAME);
-        assert_eq!(character.times.creation.timestamp(), CHARACTER_CREATION_TIMESTAMP);
+        assert_eq!(character.times.unwrap().creation.timestamp(), CHARACTER_CREATION_TIMESTAMP);
     }
 }

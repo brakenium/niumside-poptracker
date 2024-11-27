@@ -1,4 +1,8 @@
-use crate::census::constants::ZoneID;
+use crate::census::constants::{Faction, ZoneID};
+use crate::census::rest::client::{CensusRequestableObject, CensusRestClient};
+use crate::census::structs::character::{Character, CharacterName};
+use crate::controllers;
+use futures::StreamExt;
 use sqlx::PgPool;
 use tracing::{error, info};
 
@@ -91,8 +95,62 @@ pub async fn update_from_lithafalcon(db_pool: &PgPool) {
     }
 }
 
-pub async fn run(db_pool: &PgPool) {
+pub async fn update_characters(db_pool: &PgPool, census_rest_client: &CensusRestClient) {
+    let mut characters = sqlx::query!(
+        "SELECT character_id
+        FROM planetside_characters"
+    )
+        .fetch(db_pool);
+
+    while let Some(character) = characters.next().await {
+        let character = match character {
+            Ok(character) => {
+                let mut char = Character {
+                    character_id: character.character_id as u64,
+                    name: CharacterName {
+                        first: String::new(),
+                        first_lower: String::new(),
+                    },
+                    membership_reminder: None,
+                    times: None,
+                    faction: Faction::Unknown,
+                };
+
+                if char.update_from_rest(census_rest_client).await.is_err() {
+                    error!("Error while updating character from REST");
+                    continue;
+                }
+
+                char
+            }
+            Err(e) => {
+                error!("Error while fetching character from database: {e}");
+                continue;
+            }
+        };
+
+        let insert_action = sqlx::query!(
+            "UPDATE planetside_characters
+            SET
+                name = $2,
+                faction_id = $3
+            WHERE character_id = $1",
+            character.character_id as i64,
+            character.name.first,
+            character.faction as i16,
+        )
+            .execute(db_pool)
+            .await;
+
+        if insert_action.is_err() {
+            error!("Error while updating character in database");
+        }
+    }
+}
+
+pub async fn run(db_pool: &PgPool, census_rest_client: &CensusRestClient) {
     loop {
+        update_characters(db_pool, census_rest_client).await;
         update_from_lithafalcon(db_pool).await;
         tokio::time::sleep(tokio::time::Duration::from_secs(60 * 60)).await;
     }

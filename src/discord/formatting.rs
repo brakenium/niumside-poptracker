@@ -3,6 +3,8 @@ use calendar3::api::Event;
 use chrono::Utc;
 use crate::google_calendar::formatting::html_to_md;
 
+pub const DEFAULT_EMBED_COLOR: Colour = Colour(0x00_a9_a2);
+
 pub fn calendar_event(
     event: &Event,
     color: Colour,

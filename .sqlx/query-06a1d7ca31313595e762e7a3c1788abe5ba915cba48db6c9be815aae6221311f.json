@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users(\n            discord_id\n        ) VALUES ($1)\n        ON CONFLICT (discord_id) DO NOTHING\n        RETURNING user_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "06a1d7ca31313595e762e7a3c1788abe5ba915cba48db6c9be815aae6221311f"
+}

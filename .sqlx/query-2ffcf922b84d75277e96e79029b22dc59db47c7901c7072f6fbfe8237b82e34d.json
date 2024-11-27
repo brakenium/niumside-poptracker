@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT character_id, name, membership_reminder\n        FROM planetside_characters\n        WHERE user_id = (\n            SELECT character_id\n            FROM users\n            WHERE discord_id = $1\n        )",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "character_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "membership_reminder",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "2ffcf922b84d75277e96e79029b22dc59db47c7901c7072f6fbfe8237b82e34d"
+}

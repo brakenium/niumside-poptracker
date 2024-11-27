@@ -254,7 +254,6 @@ async fn update_single_calendar(ctx: &serenity::Context, data: &Data, calendar: 
 
 
 impl Updater for UpdateCalendar {
-
     async fn update(ctx: &serenity::Context, data: &Data) -> Result<(), discord::Error> {
         for calendar in &data.calendar {
             let result = update_single_calendar(ctx, data, calendar).await;

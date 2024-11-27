@@ -1,4 +1,4 @@
-use crate::census::constants::CharacterID;
+use crate::census::constants::{CharacterID, Faction};
 use crate::census::utils::deserialize_from_str;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -9,7 +9,17 @@ pub struct Character {
     #[serde(deserialize_with = "deserialize_from_str")]
     pub character_id: CharacterID,
     pub name: CharacterName,
-    pub times: CharacterTimes,
+    pub times: Option<CharacterTimes>,
+    pub membership_reminder: Option<MembershipReminderStatus>,
+    #[serde(deserialize_with = "deserialize_from_str")]
+    #[serde(rename = "faction_id")]
+    pub faction: Faction,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Hash)]
+pub struct MembershipReminderStatus {
+    pub enabled: bool,
+    pub last_reminder: Option<DateTime<Utc>>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Hash)]
@@ -18,14 +28,12 @@ pub struct CharacterName {
     pub first_lower: String,
 }
 
-// #[serde_as]
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Hash)]
 pub struct CharacterTimes {
     #[serde(
         deserialize_with = "TimestampSeconds::<String>::deserialize_as",
         serialize_with = "TimestampMilliSeconds::<i64>::serialize_as"
     )]
-    // #[serde_as(as = "Option<DurationSeconds<u64>>")]
     pub creation: DateTime<Utc>,
     #[serde(
         deserialize_with = "TimestampSeconds::<String>::deserialize_as",
@@ -41,4 +49,28 @@ pub struct CharacterTimes {
     pub login_count: usize,
     #[serde(deserialize_with = "deserialize_from_str")]
     pub minutes_played: usize,
+}
+
+impl Default for Character {
+    fn default() -> Self {
+        Self {
+            character_id: CharacterID::default(),
+            name: CharacterName {
+                first: String::new(),
+                first_lower: String::new(),
+            },
+            times: None,
+            membership_reminder: None,
+            faction: Faction::Unknown,
+        }
+    }
+}
+
+impl Character {
+    pub fn new(character_id: CharacterID) -> Self {
+        Self {
+            character_id,
+            ..Default::default()
+        }
+    }
 }

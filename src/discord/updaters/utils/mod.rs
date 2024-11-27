@@ -1,10 +1,10 @@
-use chrono::{DateTime, Utc};
-use poise::{serenity_prelude as serenity};
-use poise::serenity_prelude::{ChannelId, CreateMessage, CreateScheduledEvent, EditScheduledEvent, GetMessages, Message, MessageId, ScheduledEvent};
-use poise::serenity_prelude::ScheduledEventType::External;
-use tracing::log::error;
 use crate::discord;
 use crate::storage::configuration::DiscordCalendarConfig;
+use chrono::{DateTime, Utc};
+use poise::serenity_prelude as serenity;
+use poise::serenity_prelude::ScheduledEventType::External;
+use poise::serenity_prelude::{ChannelId, CreateMessage, CreateScheduledEvent, EditScheduledEvent, GetMessages, Message, MessageId, ScheduledEvent};
+use tracing::log::error;
 
 pub async fn get_message_or_create_new(
     ctx: &serenity::Context,
@@ -60,8 +60,7 @@ pub async fn create_or_edit_event(ctx: &serenity::Context, calendar: &DiscordCal
         }
 
         Ok(calendar.guild_id.edit_scheduled_event(ctx, event_id, edit_event).await?)
-    }
-    else {
+    } else {
         let mut create_event = CreateScheduledEvent::new(
             External,
             &event_fields.title,

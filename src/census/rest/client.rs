@@ -2,12 +2,14 @@ use crate::census::CENSUS_URL;
 use crate::storage::configuration::CensusConfig;
 use rocket::serde::{Deserialize, Serialize};
 use strum::Display;
+use tracing::{info, trace};
 use url::{form_urlencoded, Url};
 
+#[derive(Clone)]
 pub struct CensusRestClient {
     pub(crate) census_url: Url,
     // lithafalcon_url: Url,
-    service_id: String,
+    pub(crate) service_id: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Hash)]
@@ -31,11 +33,11 @@ pub enum CensusRequestType {
     Count,
 }
 
-impl Into<&str> for CensusRequestType {
-    fn into(self) -> &'static str {
-        match self {
-            Self::Get => "get",
-            Self::Count => "count",
+impl From<CensusRequestType> for &str {
+    fn from(request_type: CensusRequestType) -> &'static str {
+        match request_type {
+            CensusRequestType::Get => "get",
+            CensusRequestType::Count => "count",
         }
     }
 }
@@ -44,10 +46,10 @@ pub enum CensusNamespaces {
     Ps2V2,
 }
 
-impl Into<&str> for CensusNamespaces {
-    fn into(self) -> &'static str {
-        match self {
-            Self::Ps2V2 => "ps2:v2",
+impl From<CensusNamespaces> for &str {
+    fn from(namespace: CensusNamespaces) -> &'static str {
+        match namespace {
+            CensusNamespaces::Ps2V2 => "ps2:v2",
         }
     }
 }
@@ -67,6 +69,7 @@ impl Into<&str> for CensusCollections {
 pub trait CensusRequestableObject: Sized {
     async fn get_by_id(client: &CensusRestClient, id: usize) -> Result<Self, CensusRequestError>;
     async fn get_by_name(client: &CensusRestClient, name: &str) -> Result<Self, CensusRequestError>;
+    async fn update_from_rest(&mut self, client: &CensusRestClient) -> Result<(), CensusRequestError>;
     fn get_collection() -> CensusCollections;
     fn get_name() -> &'static str;
 }
@@ -84,29 +87,30 @@ impl Default for CensusRestClient {
     fn default() -> Self {
         Self {
             census_url: CENSUS_URL.clone(),
-            service_id: "s:example".to_string(),
+            service_id: "example".to_string(),
         }
     }
 }
 
 impl CensusRestClient {
-    pub fn new(census_url: Url, service_id: String) -> Self {
-        Self {
-            census_url,
-            service_id,
-        }
-    }
-
     pub fn get_request_url(&self, request_type: CensusRequestType, collection: CensusCollections) -> Result<Url, CensusRequestError> {
         let request_type: &str = Into::<&str>::into(request_type);
 
         let census_namespace: String = form_urlencoded::byte_serialize(
             Into::<&str>::into(CensusNamespaces::Ps2V2).as_bytes()
         ).collect();
+
+        let service_id: String = form_urlencoded::byte_serialize(
+            format!("s:{}", self.service_id).as_bytes()
+        ).collect();
+
         let url = self.census_url
+            .join(&format!("{service_id}/"))?
             .join(&format!("{request_type}/"))?
             .join(&format!("{census_namespace}/"))?
             .join(collection.into())?;
+
+        trace!("Generated census base URL: {url}");
 
         Ok(url)
     }

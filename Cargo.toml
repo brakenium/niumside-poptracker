@@ -37,6 +37,7 @@ syn = "2.0.79"
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
 lazy_static = "1.5.0"
+futures = "0.3.31"
 
 [features]
 default = ["discord", "monitoring", "census"]
