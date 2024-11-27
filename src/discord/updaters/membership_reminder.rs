@@ -61,7 +61,7 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
         character.update_from_rest(census_rest_client).await?;
 
         if let Some(times) = &character.times {
-            let hours_ago_21 = Utc::now() - chrono::Duration::hours(1);
+            let hours_ago_21 = Utc::now() - chrono::Duration::hours(21);
             let hours_ago_24 = Utc::now() - chrono::Duration::hours(24);
 
             if times.last_login > hours_ago_21 {
