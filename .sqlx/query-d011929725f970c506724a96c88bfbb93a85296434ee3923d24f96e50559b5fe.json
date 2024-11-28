@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO planetside_characters(\n            character_id,\n            user_id,\n            name,\n            membership_reminder,\n            faction_id\n        ) VALUES ($1, $2, $3, $4, $5)\n        ON CONFLICT (user_id, character_id) DO UPDATE\n        SET name = $3,\n            membership_reminder = $4,\n            faction_id = $5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4",
+        "Text",
+        "Bool",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d011929725f970c506724a96c88bfbb93a85296434ee3923d24f96e50559b5fe"
+}
