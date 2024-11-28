@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   rust-binary-builds:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         target:
@@ -86,7 +86,7 @@ jobs:
 
   docker-image-build-and-push:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: rust-binary-builds
     env:
       REGISTRY: ghcr.io
