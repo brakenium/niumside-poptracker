@@ -1,7 +1,7 @@
 -- Add migration script here
 BEGIN;
 
-CREATE TABLE public.users
+CREATE TABLE IF NOT EXISTS public.users
 (
     user_id    SERIAL NOT NULL,
     discord_id BIGINT
@@ -10,7 +10,7 @@ CREATE TABLE public.users
     CONSTRAINT "UK_users_discord_id" UNIQUE (discord_id)
 );
 
-CREATE TABLE public.planetside_characters
+CREATE TABLE IF NOT EXISTS public.planetside_characters
 (
     character_id             BIGINT   NOT NULL,
     user_id                  SERIAL   NOT NULL,
