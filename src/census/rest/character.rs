@@ -1,5 +1,6 @@
 use crate::census::rest::client::{CensusCollections, CensusRequestError, CensusRequestType, CensusRequestableObject, CensusResponse, CensusRestClient};
 use crate::census::structs::character::Character;
+use tracing::debug;
 
 impl CensusRequestableObject for Character {
     async fn get_by_id(client: &CensusRestClient, id: usize) -> Result<Self, CensusRequestError> {
@@ -9,6 +10,8 @@ impl CensusRequestableObject for Character {
         )?;
 
         url.set_query(Some(&format!("character_id={id}")));
+
+        debug!("Getting character by id: {} using url: {}", id, url);
 
         let response = reqwest::get(url).await?;
         let character: CensusResponse<Self> = response.json().await?;
@@ -29,14 +32,14 @@ impl CensusRequestableObject for Character {
         let name_lower = name.to_lowercase();
         url.set_query(Some(&format!("name.first_lower={name_lower}")));
 
-        // println!("Getting character by name: {} using url: {}", name, url);
+        debug!("Getting character by name: {} using url: {}", name, url);
 
         let response = reqwest::get(url).await?;
         let character: CensusResponse<Self> = response.json().await?;
         let return_value: Result<Self, CensusRequestError> = character.objects.first()
             .map_or_else(
-        || Err(CensusRequestError::NotFound), 
-             |character| Ok(character.clone())
+                || Err(CensusRequestError::NotFound),
+                |character| Ok(character.clone()),
             );
 
         return_value
