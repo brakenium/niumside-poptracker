@@ -124,6 +124,6 @@ mod tests {
     pub fn test_census_rest_client() {
         let client = CensusRestClient::default();
         let url = client.get_request_url(CensusRequestType::Get, CensusCollections::Character).unwrap();
-        assert_eq!(url.as_str(), "https://census.daybreakgames.com/get/ps2%3Av2/character");
+        assert_eq!(url.as_str(), "https://census.daybreakgames.com/s%3Aexample/get/ps2%3Av2/character");
     }
 }
