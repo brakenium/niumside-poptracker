@@ -14,7 +14,7 @@ pub struct CensusRestClient {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Hash)]
 pub struct CensusResponse<T: CensusRequestableObject> {
-    pub returned: usize,
+    pub returned: u64,
     #[serde(alias = "character_list")]
     pub objects: Vec<T>,
 }
@@ -67,7 +67,7 @@ impl Into<&str> for CensusCollections {
 }
 
 pub trait CensusRequestableObject: Sized {
-    async fn get_by_id(client: &CensusRestClient, id: usize) -> Result<Self, CensusRequestError>;
+    async fn get_by_id(client: &CensusRestClient, id: u64) -> Result<Self, CensusRequestError>;
     async fn get_by_name(client: &CensusRestClient, name: &str) -> Result<Self, CensusRequestError>;
     async fn update_from_rest(&mut self, client: &CensusRestClient) -> Result<(), CensusRequestError>;
     fn get_collection() -> CensusCollections;

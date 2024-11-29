@@ -3,7 +3,7 @@ use crate::census::structs::character::Character;
 use tracing::debug;
 
 impl CensusRequestableObject for Character {
-    async fn get_by_id(client: &CensusRestClient, id: usize) -> Result<Self, CensusRequestError> {
+    async fn get_by_id(client: &CensusRestClient, id: u64) -> Result<Self, CensusRequestError> {
         let mut url = client.get_request_url(
             CensusRequestType::Get,
             Character::get_collection(),
@@ -46,7 +46,7 @@ impl CensusRequestableObject for Character {
     }
 
     async fn update_from_rest(&mut self, client: &CensusRestClient) -> Result<(), CensusRequestError> {
-        let character = Self::get_by_id(client, self.character_id as usize).await?;
+        let character = Self::get_by_id(client, self.character_id as u64).await?;
         self.name = character.name;
         self.times = character.times;
         self.faction = character.faction;
@@ -76,7 +76,7 @@ mod tests {
     async fn test_get_by_id() {
         let client = CensusRestClient::default();
 
-        let character = Character::get_by_id(&client, CHARACTER_ID as usize).await.unwrap();
+        let character = Character::get_by_id(&client, CHARACTER_ID as u64).await.unwrap();
         assert_eq!(character.character_id, CHARACTER_ID);
         assert_eq!(character.name.first, CHARACTER_NAME);
         assert_eq!(character.times.unwrap().creation.timestamp(), CHARACTER_CREATION_TIMESTAMP);

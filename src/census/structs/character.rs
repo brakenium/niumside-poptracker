@@ -46,9 +46,9 @@ pub struct CharacterTimes {
     )]
     pub last_save: DateTime<Utc>,
     #[serde(deserialize_with = "deserialize_from_str")]
-    pub login_count: usize,
+    pub login_count: u64,
     #[serde(deserialize_with = "deserialize_from_str")]
-    pub minutes_played: usize,
+    pub minutes_played: u64,
 }
 
 impl Default for Character {
