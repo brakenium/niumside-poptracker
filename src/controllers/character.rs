@@ -60,3 +60,20 @@ pub async fn get_characters_by_discord_id(pool: &PgPool, discord_id: &i64) -> Re
 
     Ok(character_vec)
 }
+
+pub async fn reset_reminder_for_characters(pool: &PgPool, discord_ids: Vec<i64>) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE planetside_characters
+        SET last_membership_reminder = NOW()
+        WHERE user_id = (
+            SELECT user_id
+            FROM users
+            WHERE discord_id = ANY($1)
+        )",
+        &discord_ids
+    )
+        .execute(pool)
+        .await?;
+
+    Ok(())
+}
