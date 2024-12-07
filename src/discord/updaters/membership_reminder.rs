@@ -1,6 +1,7 @@
 use crate::census::constants::Faction;
 use crate::census::rest::client::{CensusRequestableObject, CensusRestClient};
 use crate::census::structs::character::{Character, CharacterName, MembershipReminderStatus};
+use crate::controllers::character::reset_reminder_for_characters;
 use crate::discord::formatting::DEFAULT_EMBED_COLOR;
 use crate::discord::icons::Icons;
 use crate::discord::updaters::Updater;
