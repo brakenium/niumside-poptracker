@@ -137,18 +137,16 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
         let message = CreateMessage::new()
             .embed(embed);
 
-        usr.direct_message(ctx, message).await?;
+        match usr.direct_message(ctx, message).await {
+            Ok(_) => {
+                for char in characters {
+                    reset_reminder_for_characters(&data.db_pool, vec![char.character_id as i64]).await?;
+                }
 
-        for char in characters {
-            sqlx::query!(
-                "UPDATE planetside_characters
-                SET last_membership_reminder = NOW()
-                WHERE character_id = $1",
-                char.character_id as i64
-            )
-                .execute(&data.db_pool)
-                .await?;
-        }
+                info!("Sent membership reminder to user {}", usr.id);
+            }
+            Err(e) => info!("Failed to send membership reminder to user {}: {}", usr.id, e),
+        };
     }
 
     Ok(())
