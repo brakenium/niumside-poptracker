@@ -47,7 +47,13 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
         let Some(discord_id) = char.discord_id else { continue };
 
         let user_id = UserId::new(discord_id as u64);
-        let discord_user = ctx.http.get_user(user_id).await?;
+        let discord_user = match ctx.http.get_user(user_id).await {
+            Ok(user) => user,
+            Err(e) => {
+                info!("Failed to get user with id {}: {}", user_id, e);
+                continue;
+            }
+        };
 
         let last_reminder_time: Option<DateTime<Utc>> = char.last_membership_reminder.map(|last_reminder| last_reminder.and_utc());
 
@@ -58,7 +64,13 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
 
         let mut character = Character::new(char.character_id as u64);
 
-        character.update_from_rest(census_rest_client).await?;
+        match character.update_from_rest(census_rest_client).await {
+            Ok(()) => (),
+            Err(e) => {
+                info!("Failed to update character {}: {}", char.character_id, e);
+                continue;
+            }
+        };
 
         if let Some(times) = &character.times {
             let hours_ago_21 = Utc::now() - chrono::Duration::hours(21);
