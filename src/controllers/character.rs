@@ -1,4 +1,3 @@
-use crate::census::constants::Faction;
 use crate::census::structs::character::{Character, CharacterName, MembershipReminderStatus};
 use sqlx::PgPool;
 
@@ -61,7 +60,7 @@ pub async fn get_characters_by_discord_id(pool: &PgPool, discord_id: &i64) -> Re
     Ok(character_vec)
 }
 
-pub async fn reset_reminder_for_characters(pool: &PgPool, discord_ids: Vec<i64>) -> Result<(), sqlx::Error> {
+pub async fn reset_reminder_for_discord_users(pool: &PgPool, discord_ids: Vec<i64>) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE planetside_characters
         SET last_membership_reminder = NOW()
