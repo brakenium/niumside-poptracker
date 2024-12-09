@@ -9,7 +9,7 @@ use poise::CreateReply;
 /// 
 /// # Returns
 /// 
-/// A CreateReply with an embed indicating that the bot is fetching data
+/// A `CreateReply` with an embed indicating that the bot is fetching data
 pub fn fetching_data(what_to_await: &str) -> CreateReply {
     let embed = CreateEmbed::new()
         .title("Fetching data...")

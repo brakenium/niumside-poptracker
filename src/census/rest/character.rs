@@ -6,7 +6,7 @@ impl CensusRequestableObject for Character {
     async fn get_by_id(client: &CensusRestClient, id: u64) -> Result<Self, CensusRequestError> {
         let mut url = client.get_request_url(
             CensusRequestType::Get,
-            Character::get_collection(),
+            Self::get_collection(),
         )?;
 
         url.set_query(Some(&format!("character_id={id}")));
@@ -26,7 +26,7 @@ impl CensusRequestableObject for Character {
     async fn get_by_name(client: &CensusRestClient, name: &str) -> Result<Self, CensusRequestError> {
         let mut url = client.get_request_url(
             CensusRequestType::Get,
-            Character::get_collection(),
+            Self::get_collection(),
         )?;
 
         let name_lower = name.to_lowercase();
@@ -46,7 +46,7 @@ impl CensusRequestableObject for Character {
     }
 
     async fn update_from_rest(&mut self, client: &CensusRestClient) -> Result<(), CensusRequestError> {
-        let character = Self::get_by_id(client, self.character_id as u64).await?;
+        let character = Self::get_by_id(client, self.character_id).await?;
         self.name = character.name;
         self.times = character.times;
         self.faction = character.faction;
@@ -76,7 +76,7 @@ mod tests {
     async fn test_get_by_id() {
         let client = CensusRestClient::default();
 
-        let character = Character::get_by_id(&client, CHARACTER_ID as u64).await.unwrap();
+        let character = Character::get_by_id(&client, CHARACTER_ID).await.unwrap();
         assert_eq!(character.character_id, CHARACTER_ID);
         assert_eq!(character.name.first, CHARACTER_NAME);
         assert_eq!(character.times.unwrap().creation.timestamp(), CHARACTER_CREATION_TIMESTAMP);

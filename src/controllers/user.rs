@@ -1,5 +1,5 @@
 use sqlx::PgPool;
-use tracing::{error, trace};
+use tracing::error;
 
 pub async fn insert_or_update(
     db_pool: &PgPool,

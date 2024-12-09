@@ -2,7 +2,7 @@ use crate::census::CENSUS_URL;
 use crate::storage::configuration::CensusConfig;
 use rocket::serde::{Deserialize, Serialize};
 use strum::Display;
-use tracing::{info, trace};
+use tracing::trace;
 use url::{form_urlencoded, Url};
 
 #[derive(Clone)]
@@ -58,10 +58,10 @@ pub enum CensusCollections {
     Character,
 }
 
-impl Into<&str> for CensusCollections {
-    fn into(self) -> &'static str {
-        match self {
-            Self::Character => "character",
+impl From<CensusCollections> for &str {
+    fn from(val: CensusCollections) -> Self {
+        match val {
+            CensusCollections::Character => "character",
         }
     }
 }

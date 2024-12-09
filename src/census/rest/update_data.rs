@@ -1,7 +1,6 @@
 use crate::census::constants::{Faction, ZoneID};
 use crate::census::rest::client::{CensusRequestableObject, CensusRestClient};
 use crate::census::structs::character::{Character, CharacterName};
-use crate::controllers;
 use futures::StreamExt;
 use sqlx::PgPool;
 use tracing::{error, info};

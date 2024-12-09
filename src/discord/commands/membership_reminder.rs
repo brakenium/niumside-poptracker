@@ -4,7 +4,7 @@ use crate::controllers;
 use crate::discord::formatting::DEFAULT_EMBED_COLOR;
 use crate::discord::icons::Icons;
 use crate::discord::{Context, Error};
-use poise::serenity_prelude::{CreateEmbed, CreateMessage};
+use poise::serenity_prelude::CreateEmbed;
 use poise::CreateReply;
 use tracing::error;
 
