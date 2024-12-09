@@ -16,6 +16,7 @@ struct TotalPopulation {
     pub population: u16,
 }
 
+#[allow(clippy::ref_option)]
 pub fn world_breakdown_message(
     population_breakdown: &mut PopulationApiResponse,
     full_zone_data: &Option<Vec<Zone>>,
@@ -106,6 +107,7 @@ fn add_timestamp_to_embed(mut embed: CreateEmbed, datetime: chrono::DateTime<Utc
     embed
 }
 
+#[allow(clippy::ref_option)]
 pub fn single_world_breakdown_embed(
     world: &mut PopWorld,
     full_zone_data: &Option<Vec<Zone>>,

@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize, Serializer};
 use serde_json::json;
 
 #[allow(clippy::trivially_copy_pass_by_ref)]
+#[allow(clippy::ref_option)]
 pub fn serialize_optional_bool<S>(value: &Option<bool>, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,

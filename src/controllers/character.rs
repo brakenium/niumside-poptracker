@@ -7,6 +7,8 @@ pub async fn insert_or_update_character(
     user_id: &i32,
     membership_reminder: &bool,
 ) -> Result<(), sqlx::Error> {
+    #[allow(clippy::cast_possible_wrap)]
+    let char_id = character.character_id as i64;
     sqlx::query!(
         "INSERT INTO planetside_characters(
             character_id,
@@ -19,7 +21,7 @@ pub async fn insert_or_update_character(
         SET name = $3,
             membership_reminder = $4,
             faction_id = $5",
-        character.character_id as i64,
+        char_id,
         user_id,
         character.name.first,
         membership_reminder,
@@ -51,8 +53,10 @@ pub async fn get_characters_by_discord_id(
     let mut character_vec = Vec::new();
 
     for char in &characters {
+        #[allow(clippy::cast_sign_loss)]
+        let char_id = char.character_id as u64;
         character_vec.push(Character {
-            character_id: char.character_id as u64,
+            character_id: char_id,
             name: CharacterName {
                 first: char.name.clone(),
                 first_lower: char.name.to_lowercase(),

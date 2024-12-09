@@ -2,13 +2,15 @@ use sqlx::PgPool;
 use tracing::error;
 
 pub async fn insert_or_update(db_pool: &PgPool, discord_id: &u64) -> Result<i32, sqlx::Error> {
+    #[allow(clippy::cast_possible_wrap)]
+    let discord_id_to_insert = *discord_id as i64;
     let insert_action = sqlx::query!(
         "INSERT INTO users(
             discord_id
         ) VALUES ($1)
         ON CONFLICT (discord_id) DO NOTHING
         RETURNING user_id",
-        *discord_id as i64
+        discord_id_to_insert
     )
     .fetch_one(db_pool)
     .await;
@@ -31,11 +33,13 @@ pub async fn insert_or_update(db_pool: &PgPool, discord_id: &u64) -> Result<i32,
 }
 
 pub async fn get_by_discord_id(db_pool: &PgPool, discord_id: &u64) -> Result<i32, sqlx::Error> {
+    #[allow(clippy::cast_possible_wrap)]
+    let discord_id_to_insert = *discord_id as i64;
     let user = sqlx::query!(
         "SELECT user_id
         FROM users
         WHERE discord_id = $1",
-        *discord_id as i64
+        discord_id_to_insert
     )
     .fetch_one(db_pool)
     .await;

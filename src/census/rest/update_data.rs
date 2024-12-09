@@ -109,6 +109,7 @@ pub async fn update_characters(db_pool: &PgPool, census_rest_client: &CensusRest
         let character = match character {
             Ok(character) => {
                 let mut char = Character {
+                    #[allow(clippy::cast_sign_loss)]
                     character_id: character.character_id as u64,
                     name: CharacterName {
                         first: String::new(),
@@ -132,13 +133,16 @@ pub async fn update_characters(db_pool: &PgPool, census_rest_client: &CensusRest
             }
         };
 
+        #[allow(clippy::cast_possible_wrap)]
+        let char_id = character.character_id as i64;
+
         let insert_action = sqlx::query!(
             "UPDATE planetside_characters
             SET
                 name = $2,
                 faction_id = $3
             WHERE character_id = $1",
-            character.character_id as i64,
+            char_id,
             character.name.first,
             character.faction as i16,
         )

@@ -55,6 +55,7 @@ async fn get_users_to_remind(
             continue;
         };
 
+        #[allow(clippy::cast_sign_loss)]
         let user_id = UserId::new(discord_id as u64);
         let discord_user = match ctx.http.get_user(user_id).await {
             Ok(user) => user,
@@ -73,6 +74,7 @@ async fn get_users_to_remind(
             last_reminder: last_reminder_time,
         };
 
+        #[allow(clippy::cast_sign_loss)]
         let mut character = Character::new(char.character_id as u64);
 
         match character.update_from_rest(census_rest_client).await {

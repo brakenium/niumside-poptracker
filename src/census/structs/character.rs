@@ -3,6 +3,7 @@ use crate::census::utils::deserialize_from_str;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeAs, SerializeAs, TimestampMilliSeconds, TimestampSeconds};
+#[allow(clippy::struct_field_names)]
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Hash)]
 pub struct Character {

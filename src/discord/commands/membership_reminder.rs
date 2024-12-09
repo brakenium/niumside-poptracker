@@ -10,7 +10,8 @@ use tracing::error;
 
 /// Change daily login reminder settings. Will remind 1 hour before daily login reset.
 #[poise::command(slash_command, track_edits, subcommands("specific", "all"))]
-pub async fn dailyloginreminder(ctx: Context<'_>) -> Result<(), Error> {
+#[allow(clippy::unused_async)]
+pub async fn dailyloginreminder(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -26,7 +27,7 @@ pub async fn specific(
         &ctx.data().db_pool,
         &ctx.author().id.get(),
     )
-    .await
+        .await
     {
         Ok(user) => user,
         Err(e) => {
@@ -53,7 +54,7 @@ pub async fn specific(
             &user,
             &enable,
         )
-        .await
+            .await
         {
             Ok(()) => updated_characters.push(character),
             Err(e) => {
@@ -115,6 +116,10 @@ pub async fn all(
     #[description = "Enable or disable daily login reminder"] enable: bool,
 ) -> Result<(), Error> {
     ctx.defer().await?;
+
+    #[allow(clippy::cast_possible_wrap)]
+    let discord_id = ctx.author().id.get() as i64;
+
     sqlx::query!(
         "UPDATE planetside_characters
         SET membership_reminder = $1
@@ -124,10 +129,10 @@ pub async fn all(
             WHERE discord_id = $2
         )",
         enable,
-        ctx.author().id.get() as i64,
+        discord_id,
     )
-    .execute(&ctx.data().db_pool)
-    .await?;
+        .execute(&ctx.data().db_pool)
+        .await?;
 
     ctx.say("Updated daily login reminder settings for all characters")
         .await?;
