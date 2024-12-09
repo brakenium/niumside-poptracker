@@ -77,10 +77,13 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
             let hours_ago_21 = Utc::now() - chrono::Duration::hours(21);
             let hours_ago_24 = Utc::now() - chrono::Duration::hours(24);
 
-            if times.last_login > hours_ago_21 {
+            let first_reminder_minimum = Utc::now() - Duration::hours(21);
+            let forgotten_reminder_minimum = Utc::now() - Duration::hours(24);
+
+            if times.last_login > first_reminder_minimum {
                 continue;
             } else if let Some(last_reminder) = membership_reminder.last_reminder {
-                if last_reminder > hours_ago_24 {
+                if last_reminder > forgotten_reminder_minimum {
                     continue;
                 }
             }
