@@ -24,7 +24,7 @@ pub async fn population(
         None,
         None,
     )
-        .await
+    .await
     else {
         return Err(Error::from("Failed to get population"));
     };
@@ -62,8 +62,14 @@ pub async fn population(
 async fn world_id_autocomplete<'a>(
     _ctx: Context<'_>,
     partial: &'a str,
-) -> impl Iterator<Item=serenity_prelude::AutocompleteChoice> + 'a {
+) -> impl Iterator<Item = serenity_prelude::AutocompleteChoice> + 'a {
     // WorldID::iter().map(|v| serenity_prelude::AutocompleteChoice::new(format!("{v}"), v as i16))
     //     Use partial to search for World that contains the partial string
-    WorldID::iter().filter(move |v| v.to_string().to_lowercase().contains(&partial.to_lowercase())).map(|v| serenity_prelude::AutocompleteChoice::new(format!("{v}"), v as i16))
+    WorldID::iter()
+        .filter(move |v| {
+            v.to_string()
+                .to_lowercase()
+                .contains(&partial.to_lowercase())
+        })
+        .map(|v| serenity_prelude::AutocompleteChoice::new(format!("{v}"), v as i16))
 }

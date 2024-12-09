@@ -17,8 +17,8 @@ pub async fn exists(db_pool: &PgPool, factions: &i16) -> Result<bool, sqlx::Erro
         "SELECT EXISTS(SELECT 1 FROM faction WHERE faction_id = $1)",
         factions
     )
-        .fetch_one(db_pool)
-        .await
+    .fetch_one(db_pool)
+    .await
     {
         Ok(result) => Ok(result.exists.unwrap_or(false)),
         Err(e) => Err(e),
@@ -69,13 +69,13 @@ pub async fn get_all_existing(
         "SELECT faction_id, name FROM faction WHERE faction_id = ANY($1)",
         factions
     )
-        .fetch_all(db_pool)
-        .await
-        .map(|factions| {
-            // take the factions record and return a vector of tuples containing the faction ID and the faction name
-            factions
-                .into_iter()
-                .map(|f| (f.faction_id, f.name))
-                .collect()
-        })
+    .fetch_all(db_pool)
+    .await
+    .map(|factions| {
+        // take the factions record and return a vector of tuples containing the faction ID and the faction name
+        factions
+            .into_iter()
+            .map(|f| (f.faction_id, f.name))
+            .collect()
+    })
 }

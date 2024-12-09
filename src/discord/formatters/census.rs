@@ -16,7 +16,10 @@ struct TotalPopulation {
     pub population: u16,
 }
 
-pub fn world_breakdown_message(population_breakdown: &mut PopulationApiResponse, full_zone_data: &Option<Vec<Zone>>) -> Vec<CreateEmbed> {
+pub fn world_breakdown_message(
+    population_breakdown: &mut PopulationApiResponse,
+    full_zone_data: &Option<Vec<Zone>>,
+) -> Vec<CreateEmbed> {
     let mut embeds = Vec::new();
 
     for world in &mut population_breakdown.worlds {
@@ -30,10 +33,7 @@ pub fn world_breakdown_message(population_breakdown: &mut PopulationApiResponse,
     embeds
 }
 
-fn create_population_string(
-    total_population: &Vec<TotalPopulation>,
-    world: &PopWorld,
-) -> String {
+fn create_population_string(total_population: &Vec<TotalPopulation>, world: &PopWorld) -> String {
     let mut population_string = String::new();
 
     for pop_item in total_population {
@@ -41,14 +41,15 @@ fn create_population_string(
             .unwrap_or(Icons::Ps2White)
             .to_discord_emoji();
 
-        let icon: String = wrapped_icons.map_or_else(
-            || pop_item.faction.to_string(),
-            |emoji| emoji.to_string(),
-        );
+        let icon: String =
+            wrapped_icons.map_or_else(|| pop_item.faction.to_string(), |emoji| emoji.to_string());
 
         let percentage = safe_percentage(pop_item.population, world.world_population);
 
-        population_string = format!("{}{}: {} ({:.2})\n", population_string, icon, pop_item.population, percentage);
+        population_string = format!(
+            "{}{}: {} ({:.2})\n",
+            population_string, icon, pop_item.population, percentage
+        );
     }
 
     format!("{}Total: {}\n", population_string, world.world_population)
@@ -86,16 +87,16 @@ fn create_population_embed_base() -> CreateEmbed {
         .description("This overview is based on active players earning XP.")
 }
 
-fn add_timestamp_to_embed(
-    mut embed: CreateEmbed,
-    datetime: chrono::DateTime<Utc>,
-) -> CreateEmbed {
+fn add_timestamp_to_embed(mut embed: CreateEmbed, datetime: chrono::DateTime<Utc>) -> CreateEmbed {
     match serenity_prelude::Timestamp::from_unix_timestamp(datetime.timestamp()) {
         Ok(timestamp) => {
             embed = embed.timestamp(timestamp);
         }
         Err(e) => {
-            error!("Failed to convert timestamp to Discord timestamp, using string in footer: u{:?}", e);
+            error!(
+                "Failed to convert timestamp to Discord timestamp, using string in footer: u{:?}",
+                e
+            );
 
             let footer = CreateEmbedFooter::new(format!("Last updated: {datetime}"));
             embed = embed.footer(footer);
@@ -122,7 +123,9 @@ pub fn single_world_breakdown_embed(
 
     let mut embed = add_timestamp_to_embed(embed, timestamp.and_utc());
 
-    world.zones.sort_by(|a, b| b.zone_population.cmp(&a.zone_population));
+    world
+        .zones
+        .sort_by(|a, b| b.zone_population.cmp(&a.zone_population));
 
     for zone in &world.zones {
         let mut breakdown = String::new();
@@ -142,26 +145,32 @@ pub fn single_world_breakdown_embed(
 
             let percentage = safe_percentage(team.team_population, zone.zone_population);
 
-            breakdown = format!("{}{}: {} ({:.2}%)\n", breakdown, team_icon, team.team_population, percentage);
+            breakdown = format!(
+                "{}{}: {} ({:.2}%)\n",
+                breakdown, team_icon, team.team_population, percentage
+            );
         }
 
         breakdown = format!("{}Total: {}\n", breakdown, zone.zone_population);
 
         #[allow(clippy::cast_sign_loss)]
-        let zone_name = full_zone_data.as_ref().map_or_else(|| zone.zone_id.to_string(), |zones| {
-            zones
-                .iter()
-                .find(|z| z.id as u32 == zone.zone_id.0)
-                .map_or_else(
-                    || zone.zone_id.to_string(),
-                    |z| {
-                        z.name.as_ref()
-                            .map_or_else(|| zone.zone_id.to_string(), |name|
-                                name.en.clone().unwrap_or_else(|| zone.zone_id.to_string())
+        let zone_name = full_zone_data.as_ref().map_or_else(
+            || zone.zone_id.to_string(),
+            |zones| {
+                zones
+                    .iter()
+                    .find(|z| z.id as u32 == zone.zone_id.0)
+                    .map_or_else(
+                        || zone.zone_id.to_string(),
+                        |z| {
+                            z.name.as_ref().map_or_else(
+                                || zone.zone_id.to_string(),
+                                |name| name.en.clone().unwrap_or_else(|| zone.zone_id.to_string()),
                             )
-                    },
-                )
-        });
+                        },
+                    )
+            },
+        );
 
         let main_continent = [2, 4, 6, 8, 10, 344].contains(&zone.zone_id.0);
 

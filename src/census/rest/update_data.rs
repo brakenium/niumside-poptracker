@@ -36,16 +36,15 @@ struct ZoneResponse {
 
 pub async fn update_from_lithafalcon(db_pool: &PgPool) {
     let request_url = format!("{LITHAFALCON_BASE_URL}/get/PS2/zone?c:censusJSON=false&c:lang=en&c:show=zone_id,name,description");
-    let request = match reqwest::get(request_url)
-        .await {
+    let request = match reqwest::get(request_url).await {
         Ok(response) => response,
         Err(e) => {
             error!("Error while requesting zones from lithafalcon: {e}");
             return;
         }
     }
-        .json::<ZoneResponse>()
-        .await;
+    .json::<ZoneResponse>()
+    .await;
 
     match request {
         Ok(response) => {
@@ -62,18 +61,23 @@ pub async fn update_from_lithafalcon(db_pool: &PgPool) {
 
             for zone in zones {
                 let zone_name = zone.name.unwrap_or_else(CensusMultiLanguage::default);
-                let zone_description = zone.description.unwrap_or_else(CensusMultiLanguage::default);
+                let zone_description = zone
+                    .description
+                    .unwrap_or_else(CensusMultiLanguage::default);
 
                 #[allow(clippy::cast_possible_wrap)]
                 match sqlx::query!(
-                "INSERT INTO zone
+                    "INSERT INTO zone
                     (zone_id, name, description)
                     VALUES ($1, $2, $3)
                     ON CONFLICT (zone_id) DO UPDATE SET name = $2, description = $3",
-                zone.zone_id.0 as i32, zone_name.en, zone_description.en
+                    zone.zone_id.0 as i32,
+                    zone_name.en,
+                    zone_description.en
                 )
-                    .execute(&mut *transaction)
-                    .await {
+                .execute(&mut *transaction)
+                .await
+                {
                     Ok(_) => {}
                     Err(e) => {
                         error!("Error while inserting zone into database: {e}");
@@ -99,7 +103,7 @@ pub async fn update_characters(db_pool: &PgPool, census_rest_client: &CensusRest
         "SELECT character_id
         FROM planetside_characters"
     )
-        .fetch(db_pool);
+    .fetch(db_pool);
 
     while let Some(character) = characters.next().await {
         let character = match character {
@@ -138,8 +142,8 @@ pub async fn update_characters(db_pool: &PgPool, census_rest_client: &CensusRest
             character.name.first,
             character.faction as i16,
         )
-            .execute(db_pool)
-            .await;
+        .execute(db_pool)
+        .await;
 
         if insert_action.is_err() {
             error!("Error while updating character in database");
@@ -163,13 +167,14 @@ mod tests {
     #[tokio::test]
     async fn test_parsing_from_lithafalcon() {
         let request_url = format!("{LITHAFALCON_BASE_URL}/get/PS2/zone?c:censusJSON=false&c:lang=en&c:show=zone_id,name,description");
-        match reqwest::get(request_url)
-            .await {
+        match reqwest::get(request_url).await {
             Ok(response) => response,
             Err(e) => {
                 panic!("Error while requesting zones from lithafalcon: {e}");
             }
-        }.json::<ZoneResponse>()
-            .await.expect("Unable to parse JSON");
+        }
+        .json::<ZoneResponse>()
+        .await
+        .expect("Unable to parse JSON");
     }
 }

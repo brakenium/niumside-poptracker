@@ -10,9 +10,7 @@ use tracing::error;
 
 /// Change daily login reminder settings. Will remind 1 hour before daily login reset.
 #[poise::command(slash_command, track_edits, subcommands("specific", "all"))]
-pub async fn dailyloginreminder(
-    ctx: Context<'_>,
-) -> Result<(), Error> {
+pub async fn dailyloginreminder(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -20,13 +18,16 @@ pub async fn dailyloginreminder(
 #[poise::command(slash_command, track_edits)]
 pub async fn specific(
     ctx: Context<'_>,
-    #[description = "Character to enable daily login reminder for"]
-    characters: Vec<String>,
-    #[description = "Enable or disable daily login reminder"]
-    enable: bool,
+    #[description = "Character to enable daily login reminder for"] characters: Vec<String>,
+    #[description = "Enable or disable daily login reminder"] enable: bool,
 ) -> Result<(), Error> {
     ctx.defer().await?;
-    let user = match controllers::user::insert_or_update(&ctx.data().db_pool, &ctx.author().id.get()).await {
+    let user = match controllers::user::insert_or_update(
+        &ctx.data().db_pool,
+        &ctx.author().id.get(),
+    )
+    .await
+    {
         Ok(user) => user,
         Err(e) => {
             error!("Error while updating user in database: {e}");
@@ -51,7 +52,9 @@ pub async fn specific(
             &character,
             &user,
             &enable,
-        ).await {
+        )
+        .await
+        {
             Ok(()) => updated_characters.push(character),
             Err(e) => {
                 error!("Error while updating character in database: {e}");
@@ -80,10 +83,8 @@ pub async fn specific(
             .unwrap_or(Icons::Ps2White)
             .to_discord_emoji();
 
-        let icon: String = wrapped_icons.map_or_else(
-            || character.faction.to_string(),
-            |emoji| emoji.to_string(),
-        );
+        let icon: String =
+            wrapped_icons.map_or_else(|| character.faction.to_string(), |emoji| emoji.to_string());
 
         description.push_str(&format!("{} {}", icon, character.name.first));
     }
@@ -100,8 +101,7 @@ pub async fn specific(
         .description(description)
         .color(DEFAULT_EMBED_COLOR);
 
-    let reply = CreateReply::default()
-        .embed(embed);
+    let reply = CreateReply::default().embed(embed);
 
     ctx.send(reply).await?;
 
@@ -112,8 +112,7 @@ pub async fn specific(
 #[poise::command(slash_command, track_edits)]
 pub async fn all(
     ctx: Context<'_>,
-    #[description = "Enable or disable daily login reminder"]
-    enable: bool,
+    #[description = "Enable or disable daily login reminder"] enable: bool,
 ) -> Result<(), Error> {
     ctx.defer().await?;
     sqlx::query!(
@@ -127,10 +126,11 @@ pub async fn all(
         enable,
         ctx.author().id.get() as i64,
     )
-        .execute(&ctx.data().db_pool)
-        .await?;
+    .execute(&ctx.data().db_pool)
+    .await?;
 
-    ctx.say("Updated daily login reminder settings for all characters").await?;
+    ctx.say("Updated daily login reminder settings for all characters")
+        .await?;
 
     Ok(())
 }

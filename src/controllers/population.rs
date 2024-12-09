@@ -150,9 +150,7 @@ pub async fn get_current(
         #[allow(clippy::cast_sign_loss)]
         let amount = record.amount as u16;
 
-        let world = world_breakdown
-            .entry(world_id)
-            .or_default();
+        let world = world_breakdown.entry(world_id).or_default();
         let zone = world.entry(zone_id).or_default();
         let team = zone.entry(team_id).or_default();
         let loadout = team.entry(loadout_id).or_insert(0);
@@ -241,5 +239,3 @@ pub async fn get_current_tree(
 
     Some(result)
 }
-
-

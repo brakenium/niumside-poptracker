@@ -10,23 +10,23 @@ pub fn html_to_md(description: &str) -> String {
     if let Ok(bold_regex) = Regex::new(r"</?(b|strong)>") {
         md = bold_regex.replace_all(&md, "**").to_string();
     };
-    
+
     if let Ok(italics_regex) = Regex::new(r"</?(i|em)>") {
         md = italics_regex.replace_all(&md, "*").to_string();
     };
-    
+
     if let Ok(underline_regex) = Regex::new(r"</?u>") {
         md = underline_regex.replace_all(&md, "__").to_string();
     };
-    
+
     if let Ok(strike_regex) = Regex::new(r"</?strike>") {
         md = strike_regex.replace_all(&md, "~~").to_string();
     };
-    
+
     if let Ok(underline_regex) = Regex::new(r"__+") {
         md = underline_regex.replace_all(&md, "").to_string();
     };
-    
+
     if let Ok(span_regex) = Regex::new(r"</?span>") {
         md = span_regex.replace_all(&md, "").to_string();
     };

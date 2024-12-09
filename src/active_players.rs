@@ -103,11 +103,11 @@ async fn insert_loadout(
             "INSERT INTO loadout (loadout_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *loadout_id as i32
         )
-            .execute(db_pool)
-            .await
-            .unwrap_or_else(|error| {
-                panic!("Failed database insert: {error}");
-            });
+        .execute(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
         sqlx::query!(
             "INSERT INTO loadout_population (loadout_id, team_population_id, amount) VALUES ($1, $2, $3)",
             *loadout_id as i32,
@@ -129,11 +129,11 @@ async fn insert_zone(zone_map: &ZoneBreakdown, world_population_id: i32, db_pool
             "INSERT INTO zone (zone_id) VALUES ($1) ON CONFLICT DO NOTHING",
             zone_id.0 as i64
         )
-            .execute(db_pool)
-            .await
-            .unwrap_or_else(|error| {
-                panic!("Failed database insert: {error}");
-            });
+        .execute(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
         let zone_population_id = sqlx::query!(
             "INSERT INTO zone_population (zone_id, world_population_id) VALUES ($1, $2) RETURNING zone_population_id",
             zone_id.0 as i64,
@@ -156,11 +156,11 @@ async fn insert_team(team_map: &TeamBreakdown, zone_population_id: i32, db_pool:
             "INSERT INTO faction (faction_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *team_id as i32
         )
-            .execute(db_pool)
-            .await
-            .unwrap_or_else(|error| {
-                panic!("Failed database insert: {error}");
-            });
+        .execute(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
 
         let faction_population_id = sqlx::query!(
                 "INSERT INTO team_population (team_id, zone_population_id) VALUES ($1, $2) RETURNING team_population_id",
@@ -193,11 +193,11 @@ pub async fn store_pop(loadout_breakdown: &WorldBreakdown, db_pool: &Pool<Postgr
             "INSERT INTO world (world_id) VALUES ($1) ON CONFLICT DO NOTHING",
             *world_id as i32
         )
-            .execute(db_pool)
-            .await
-            .unwrap_or_else(|error| {
-                panic!("Failed database insert: {error}");
-            });
+        .execute(db_pool)
+        .await
+        .unwrap_or_else(|error| {
+            panic!("Failed database insert: {error}");
+        });
 
         let world_population_id = sqlx::query!(
             "INSERT INTO world_population (world_id, population_id) VALUES ($1, $2) RETURNING world_population_id",

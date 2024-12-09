@@ -27,8 +27,8 @@ pub async fn exists(db_pool: &PgPool, zones: &i32) -> Result<bool, sqlx::Error> 
         "SELECT EXISTS(SELECT 1 FROM zone WHERE zone_id = $1)",
         zones
     )
-        .fetch_one(db_pool)
-        .await
+    .fetch_one(db_pool)
+    .await
     {
         Ok(result) => Ok(result.exists.unwrap_or(false)),
         Err(e) => Err(e),
@@ -51,15 +51,14 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<Zone>, sqlx::Error> {
         .await
         .map(|zones| {
             //     take the zones record and return a vector of tuples containing the zone ID and the zone name
-            zones.into_iter().map(|z| Zone {
-                id: z.zone_id,
-                name: Some(Languages {
-                    en: z.name,
-                }),
-                description: Some(Languages {
-                    en: z.description,
-                }),
-            }).collect()
+            zones
+                .into_iter()
+                .map(|z| Zone {
+                    id: z.zone_id,
+                    name: Some(Languages { en: z.name }),
+                    description: Some(Languages { en: z.description }),
+                })
+                .collect()
         })
 }
 
@@ -83,10 +82,10 @@ pub async fn get_all_existing(
         "SELECT zone_id, name FROM zone WHERE zone_id = ANY($1)",
         zones
     )
-        .fetch_all(db_pool)
-        .await
-        .map(|zones| {
-            // take the zones record and return a vector of tuples containing the zone ID and the zone name
-            zones.into_iter().map(|z| (z.zone_id, z.name)).collect()
-        })
+    .fetch_all(db_pool)
+    .await
+    .map(|zones| {
+        // take the zones record and return a vector of tuples containing the zone ID and the zone name
+        zones.into_iter().map(|z| (z.zone_id, z.name)).collect()
+    })
 }

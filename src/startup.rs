@@ -20,12 +20,10 @@ pub struct DbState {
 
 pub async fn services(
     rocket: rocket::Rocket<rocket::Build>,
-    #[cfg(feature = "database")]
-    db_pool: PgPool,
+    #[cfg(feature = "database")] db_pool: PgPool,
     app_config: Settings,
     poise: FrameworkBuilder<Data, Error>,
-    #[cfg(feature = "census")]
-    active_players: active_players::ActivePlayerDb,
+    #[cfg(feature = "census")] active_players: active_players::ActivePlayerDb,
     addr: std::net::SocketAddr,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let shutdown = rocket::config::Shutdown {
@@ -83,7 +81,8 @@ pub async fn services(
     let mut poise_client = ClientBuilder::new(app_config.discord.token, intents)
         .framework(poise_framework)
         .await
-        .ok().ok_or("Failed to create Discord client")?;
+        .ok()
+        .ok_or("Failed to create Discord client")?;
 
     #[cfg(feature = "census")]
     {
@@ -102,13 +101,9 @@ pub async fn services(
         });
     }
 
-    let poise_client_future = tokio::spawn(async move {
-        poise_client.start().await
-    });
+    let poise_client_future = tokio::spawn(async move { poise_client.start().await });
 
-    let rocket_future = tokio::spawn(async move {
-        rocket.launch().await
-    });
+    let rocket_future = tokio::spawn(async move { rocket.launch().await });
 
     #[cfg(feature = "census")]
     {
@@ -122,9 +117,8 @@ pub async fn services(
             active_players::process_loop(active_players.clone(), db_pool).await
         });
 
-        let active_players_clean_future = tokio::spawn(async move {
-            active_players::clean(active_players_clean).await
-        });
+        let active_players_clean_future =
+            tokio::spawn(async move { active_players::clean(active_players_clean).await });
 
         tokio::try_join!(
             census_update_data_future,
@@ -133,10 +127,7 @@ pub async fn services(
         )?;
     }
 
-    tokio::try_join!(
-        poise_client_future,
-        rocket_future
-    ).ok();
+    tokio::try_join!(poise_client_future, rocket_future).ok();
 
     Ok(())
 }

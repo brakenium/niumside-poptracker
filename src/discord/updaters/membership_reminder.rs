@@ -6,7 +6,10 @@ use crate::discord::icons::Icons;
 use crate::discord::updaters::Updater;
 use crate::discord::{Data, Error};
 use chrono::{DateTime, Duration, Utc};
-use poise::serenity_prelude::{Context, CreateEmbed, CreateMessage, FormattedTimestamp, FormattedTimestampStyle, Timestamp, User, UserId};
+use poise::serenity_prelude::{
+    Context, CreateEmbed, CreateMessage, FormattedTimestamp, FormattedTimestampStyle, Timestamp,
+    User, UserId,
+};
 use sqlx::PgPool;
 use std::collections::HashMap;
 use tracing::info;
@@ -29,7 +32,11 @@ pub struct MembershipReminder;
 
 type UsersToRemind = HashMap<User, Vec<Character>>;
 
-async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client: &CensusRestClient) -> Result<UsersToRemind, Error> {
+async fn get_users_to_remind(
+    ctx: &Context,
+    db_pool: &PgPool,
+    census_rest_client: &CensusRestClient,
+) -> Result<UsersToRemind, Error> {
     let mut users: UsersToRemind = HashMap::new();
 
     let characters_to_remind = sqlx::query!(
@@ -40,11 +47,13 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
             membership_reminder = true
             AND discord_id IS NOT NULL"
     )
-        .fetch_all(db_pool)
-        .await?;
+    .fetch_all(db_pool)
+    .await?;
 
     for char in characters_to_remind {
-        let Some(discord_id) = char.discord_id else { continue };
+        let Some(discord_id) = char.discord_id else {
+            continue;
+        };
 
         let user_id = UserId::new(discord_id as u64);
         let discord_user = match ctx.http.get_user(user_id).await {
@@ -55,7 +64,9 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
             }
         };
 
-        let last_reminder_time: Option<DateTime<Utc>> = char.last_membership_reminder.map(|last_reminder| last_reminder.and_utc());
+        let last_reminder_time: Option<DateTime<Utc>> = char
+            .last_membership_reminder
+            .map(|last_reminder| last_reminder.and_utc());
 
         let membership_reminder = MembershipReminderStatus {
             enabled: char.membership_reminder,
@@ -85,9 +96,7 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
             }
         }
 
-        users.entry(discord_user)
-            .or_default()
-            .push(character);
+        users.entry(discord_user).or_default().push(character);
     }
 
     Ok(users)
@@ -103,28 +112,27 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
                 .unwrap_or(Icons::Ps2White)
                 .to_discord_emoji();
 
-            let icon: String = wrapped_icons.map_or_else(
-                || char.faction.to_string(),
-                |emoji| emoji.to_string(),
-            );
+            let icon: String =
+                wrapped_icons.map_or_else(|| char.faction.to_string(), |emoji| emoji.to_string());
 
             let char_name = &char.name.first;
 
-            let last_login = char.times.as_ref().map_or_else(
-                String::new,
-                |times| Timestamp::from_unix_timestamp(
-                    times.last_login.timestamp()
-                )
-                    .map_or_else(
-                        |_| String::new(),
-                        |ts| format!(
+            let last_login = char.times.as_ref().map_or_else(String::new, |times| {
+                Timestamp::from_unix_timestamp(times.last_login.timestamp()).map_or_else(
+                    |_| String::new(),
+                    |ts| {
+                        format!(
                             "{} on {} at {}",
-                            FormattedTimestamp::new(ts, FormattedTimestampStyle::RelativeTime.into()),
+                            FormattedTimestamp::new(
+                                ts,
+                                FormattedTimestampStyle::RelativeTime.into()
+                            ),
                             FormattedTimestamp::new(ts, FormattedTimestampStyle::ShortDate.into()),
                             FormattedTimestamp::new(ts, FormattedTimestampStyle::ShortTime.into()),
-                        ),
-                    ),
-            );
+                        )
+                    },
+                )
+            });
 
             embed_fields.push((
                 format!("{icon} {char_name}"),
@@ -139,22 +147,28 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
             .color(DEFAULT_EMBED_COLOR)
             .fields(embed_fields);
 
-        let message = CreateMessage::new()
-            .embed(embed);
+        let message = CreateMessage::new().embed(embed);
 
         match usr.direct_message(ctx, message).await {
             Ok(_) => {
-                match reset_reminder_for_discord_users(&data.db_pool, vec![i64::from(usr.id)]).await {
+                match reset_reminder_for_discord_users(&data.db_pool, vec![i64::from(usr.id)]).await
+                {
                     Ok(()) => (),
                     Err(e) => {
-                        info!("Failed to reset membership reminders for Discord user {}: {}", usr, e);
+                        info!(
+                            "Failed to reset membership reminders for Discord user {}: {}",
+                            usr, e
+                        );
                         continue;
                     }
                 }
 
                 info!("Sent membership reminder to user {}", usr.id);
             }
-            Err(e) => info!("Failed to send membership reminder to user {}: {}", usr.id, e),
+            Err(e) => info!(
+                "Failed to send membership reminder to user {}: {}",
+                usr.id, e
+            ),
         };
     }
 

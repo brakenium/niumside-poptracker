@@ -1,5 +1,13 @@
 #[cfg(feature = "census_api")]
+use crate::startup::DbState;
+#[cfg(feature = "census_api")]
+use crate::web::State;
+#[cfg(feature = "census_api")]
+use rocket::get;
+#[cfg(feature = "census_api")]
 use rocket::response::status::BadRequest;
+#[cfg(feature = "census_api")]
+use rocket::routes;
 #[cfg(feature = "census_api")]
 use rocket::serde::json::Json;
 #[cfg(feature = "census_api")]
@@ -8,14 +16,6 @@ use rocket::serde::Serialize;
 use thiserror::Error;
 #[cfg(feature = "census_api")]
 use utoipa::ToSchema;
-#[cfg(feature = "census_api")]
-use crate::startup::DbState;
-#[cfg(feature = "census_api")]
-use crate::web::State;
-#[cfg(feature = "census_api")]
-use rocket::routes;
-#[cfg(feature = "census_api")]
-use rocket::get;
 
 #[cfg(feature = "census_api")]
 use crate::controllers::population::{get_current_tree, PopulationApiResponse, ZoneBreakdown};
@@ -68,7 +68,7 @@ pub async fn population(
         team.as_deref(),
         loadout.as_deref(),
     )
-        .await
+    .await
     else {
         let response = Response {
             result: PossibleResults::Error(Error::NoDataAvailable),
@@ -87,7 +87,5 @@ pub async fn population(
 #[allow(clippy::no_effect_underscore_binding)]
 #[cfg(feature = "census_api")]
 pub fn routes() -> Vec<rocket::Route> {
-    routes![
-        population
-    ]
+    routes![population]
 }

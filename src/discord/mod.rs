@@ -1,9 +1,9 @@
 mod commands;
+mod formatters;
+mod formatting;
 #[cfg(feature = "census")]
 mod icons;
 mod updaters;
-mod formatting;
-mod formatters;
 
 use crate::census::rest::client::CensusRestClient;
 use crate::discord::updaters::Updater;
@@ -52,8 +52,10 @@ fn event_handler(
                             error!("Failed to update calendar: {:?}", e);
                         }
                     };
-                    
-                    match updaters::membership_reminder::MembershipReminder::update(&ctx1, &data).await {
+
+                    match updaters::membership_reminder::MembershipReminder::update(&ctx1, &data)
+                        .await
+                    {
                         Ok(()) => {}
                         Err(e) => {
                             error!("Failed to update membership reminder: {:?}", e);
@@ -79,9 +81,7 @@ pub fn init() -> FrameworkBuilder<Data, Error> {
             commands::membership_reminder::dailyloginreminder(),
         ],
         event_handler: |ctx, event, framework, data| {
-            Box::pin(async move {
-                event_handler(ctx, event, framework, data)
-            })
+            Box::pin(async move { event_handler(ctx, event, framework, data) })
         },
         ..Default::default()
     })

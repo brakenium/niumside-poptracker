@@ -68,8 +68,12 @@ impl From<CensusCollections> for &str {
 
 pub trait CensusRequestableObject: Sized {
     async fn get_by_id(client: &CensusRestClient, id: u64) -> Result<Self, CensusRequestError>;
-    async fn get_by_name(client: &CensusRestClient, name: &str) -> Result<Self, CensusRequestError>;
-    async fn update_from_rest(&mut self, client: &CensusRestClient) -> Result<(), CensusRequestError>;
+    async fn get_by_name(client: &CensusRestClient, name: &str)
+        -> Result<Self, CensusRequestError>;
+    async fn update_from_rest(
+        &mut self,
+        client: &CensusRestClient,
+    ) -> Result<(), CensusRequestError>;
     fn get_collection() -> CensusCollections;
     fn get_name() -> &'static str;
 }
@@ -93,18 +97,22 @@ impl Default for CensusRestClient {
 }
 
 impl CensusRestClient {
-    pub fn get_request_url(&self, request_type: CensusRequestType, collection: CensusCollections) -> Result<Url, CensusRequestError> {
+    pub fn get_request_url(
+        &self,
+        request_type: CensusRequestType,
+        collection: CensusCollections,
+    ) -> Result<Url, CensusRequestError> {
         let request_type: &str = Into::<&str>::into(request_type);
 
-        let census_namespace: String = form_urlencoded::byte_serialize(
-            Into::<&str>::into(CensusNamespaces::Ps2V2).as_bytes()
-        ).collect();
+        let census_namespace: String =
+            form_urlencoded::byte_serialize(Into::<&str>::into(CensusNamespaces::Ps2V2).as_bytes())
+                .collect();
 
-        let service_id: String = form_urlencoded::byte_serialize(
-            format!("s:{}", self.service_id).as_bytes()
-        ).collect();
+        let service_id: String =
+            form_urlencoded::byte_serialize(format!("s:{}", self.service_id).as_bytes()).collect();
 
-        let url = self.census_url
+        let url = self
+            .census_url
             .join(&format!("{service_id}/"))?
             .join(&format!("{request_type}/"))?
             .join(&format!("{census_namespace}/"))?
@@ -123,7 +131,12 @@ mod tests {
     #[test]
     pub fn test_census_rest_client() {
         let client = CensusRestClient::default();
-        let url = client.get_request_url(CensusRequestType::Get, CensusCollections::Character).unwrap();
-        assert_eq!(url.as_str(), "https://census.daybreakgames.com/s%3Aexample/get/ps2%3Av2/character");
+        let url = client
+            .get_request_url(CensusRequestType::Get, CensusCollections::Character)
+            .unwrap();
+        assert_eq!(
+            url.as_str(),
+            "https://census.daybreakgames.com/s%3Aexample/get/ps2%3Av2/character"
+        );
     }
 }

@@ -47,7 +47,12 @@ impl ezsockets::ClientExt for CensusRealtimeClient {
         // info!("received message: {text}");
         let parsed_message: Result<CensusMessage, serde_json::Error> = serde_json::from_str(&text);
         match parsed_message {
-            Ok(message) => handle_census_msg(&self.client, &self.subscription, self.state.clone(), message)?,
+            Ok(message) => handle_census_msg(
+                &self.client,
+                &self.subscription,
+                self.state.clone(),
+                message,
+            )?,
             Err(error) => error!("Failed to parse message: {text} - {error}"),
         }
 
@@ -95,14 +100,11 @@ fn handle_census_msg(
     Ok(())
 }
 
-fn close_connection(
-    client: &ezsockets::Client<CensusRealtimeClient>,
-) {
-    match client
-        .close(Some(CloseFrame {
-            code: CloseCode::Normal,
-            reason: "adios!".to_string(),
-        })) {
+fn close_connection(client: &ezsockets::Client<CensusRealtimeClient>) {
+    match client.close(Some(CloseFrame {
+        code: CloseCode::Normal,
+        reason: "adios!".to_string(),
+    })) {
         Ok(_) => {}
         Err(err) => {
             error!("Failed to close connection: {:?}", err);
@@ -149,7 +151,10 @@ fn handle_connection_state(
 }
 
 fn get_census_address(config: RealtimeClientConfig) -> String {
-    let base_url = config.realtime_url.unwrap_or_else(|| REALTIME_URL.clone()).to_string();
+    let base_url = config
+        .realtime_url
+        .unwrap_or_else(|| REALTIME_URL.clone())
+        .to_string();
     format!(
         "{}?environment={}&service-id=s:{}",
         base_url, config.environment, config.service_id
@@ -180,11 +185,15 @@ pub async fn client(realtime_client_config: RealtimeClientConfig, state: State) 
 
     info!("Setting up Census websocket client");
 
-    let (_handle, future) = ezsockets::connect(move |client| CensusRealtimeClient {
-        client,
-        subscription: get_subscription_settings(),
-        state,
-    }, config).await;
+    let (_handle, future) = ezsockets::connect(
+        move |client| CensusRealtimeClient {
+            client,
+            subscription: get_subscription_settings(),
+            state,
+        },
+        config,
+    )
+    .await;
     tokio::spawn(future);
 
     // loop {

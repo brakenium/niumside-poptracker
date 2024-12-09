@@ -2,10 +2,10 @@ pub mod constants;
 pub mod event;
 pub mod realtime;
 
-mod subscription;
-mod utils;
 pub mod rest;
 pub mod structs;
+mod subscription;
+mod utils;
 
 use event::Event;
 use lazy_static::lazy_static;
@@ -21,7 +21,6 @@ lazy_static! {
         Ok(url) => url,
         Err(error) => panic!("Failed to parse URL: {error}"),
     };
-
     pub static ref CENSUS_URL: Url = match Url::parse("https://census.daybreakgames.com") {
         Ok(url) => url,
         Err(error) => panic!("Failed to parse URL: {error}"),

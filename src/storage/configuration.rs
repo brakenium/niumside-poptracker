@@ -119,8 +119,8 @@ impl Settings {
                 Environment::with_prefix(
                     &constants::APPLICATION_NAME.to_uppercase().replace(' ', ""),
                 )
-                    .separator("_")
-                    .list_separator(","),
+                .separator("_")
+                .list_separator(","),
             )
             .build()?;
 

@@ -1,42 +1,41 @@
 pub mod formatting;
 
+use crate::storage::configuration::GoogleConfig;
 use calendar3::api::{CalendarListEntry, Colors, Event, Events};
-use calendar3::CalendarHub;
+use calendar3::client::chrono::Utc;
 use calendar3::hyper::client::HttpConnector;
 use calendar3::hyper_rustls::HttpsConnector;
 use calendar3::oauth2::authenticator::Authenticator;
-use calendar3::client::chrono::Utc;
-use crate::storage::configuration::GoogleConfig;
+use calendar3::CalendarHub;
 use google_calendar3::oauth2;
 use google_calendar3::{hyper, hyper_rustls};
 use tracing::info;
 
 async fn creds(google: &GoogleConfig) -> Option<Authenticator<HttpsConnector<HttpConnector>>> {
-    let creds = match oauth2::ServiceAccountAuthenticator::builder(
-        google.auth.clone(),
-    )
-        .build().await {
+    let creds = match oauth2::ServiceAccountAuthenticator::builder(google.auth.clone())
+        .build()
+        .await
+    {
         Ok(creds) => creds,
         Err(err) => {
             info!("Failed to get creds for Google calendar: {:?}", err);
             return None;
         }
     };
-    
+
     Some(creds)
 }
 
 pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector<HttpConnector>>> {
     let auth = creds(google).await?;
 
-    let tls_connector = match hyper_rustls::HttpsConnectorBuilder::new()
-        .with_native_roots() {
-        Ok(connector) => connector
-            .https_only()
-            .enable_http1()
-            .build(),
+    let tls_connector = match hyper_rustls::HttpsConnectorBuilder::new().with_native_roots() {
+        Ok(connector) => connector.https_only().enable_http1().build(),
         Err(err) => {
-            info!("Failed to build TLS connector for Google calendar: {:?}", err);
+            info!(
+                "Failed to build TLS connector for Google calendar: {:?}",
+                err
+            );
             return None;
         }
     };
@@ -51,18 +50,22 @@ pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector
 pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<Events> {
     let from_date = Utc::now();
     let to_date = from_date + chrono::Duration::days(7);
-    
+
     info!("From date: {}", from_date);
     info!("To date: {}", to_date);
 
     let hub = get_hub(google).await?;
 
-    let events = match hub.events().list(calendar_id)
+    let events = match hub
+        .events()
+        .list(calendar_id)
         .time_zone("Europe/Amsterdam")
         .time_min(from_date)
         .time_max(to_date)
         .single_events(true)
-        .doit().await {
+        .doit()
+        .await
+    {
         Ok(events) => events,
         Err(err) => {
             info!("Failed to get events for Google calendar: {:?}", err);
@@ -101,8 +104,13 @@ pub async fn get_event_color(google: &GoogleConfig, event: &Event) -> Option<Str
     color.foreground.clone()
 }
 
-async fn add_cal_to_list(google: &GoogleConfig, calendar_id: String) -> Result<(), Box<dyn std::error::Error>> {
-    let hub = get_hub(google).await.ok_or("Failed to get hub for google calendar")?;
+async fn add_cal_to_list(
+    google: &GoogleConfig,
+    calendar_id: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let hub = get_hub(google)
+        .await
+        .ok_or("Failed to get hub for google calendar")?;
 
     let calendar_list_entry = CalendarListEntry {
         id: Some(calendar_id),
@@ -110,8 +118,10 @@ async fn add_cal_to_list(google: &GoogleConfig, calendar_id: String) -> Result<(
         ..Default::default()
     };
 
-    hub.calendar_list().insert(calendar_list_entry)
-        .doit().await?;
+    hub.calendar_list()
+        .insert(calendar_list_entry)
+        .doit()
+        .await?;
 
     Ok(())
 }
@@ -129,7 +139,7 @@ pub async fn get_calendar_color(google: &GoogleConfig, calendar_id: &str) -> Opt
         cal
     } else {
         match add_cal_to_list(google, calendar_id.to_string()).await {
-            Ok(()) => {},
+            Ok(()) => {}
             Err(err) => {
                 info!("Failed to add calendar to list: {:?}", err);
                 return None;

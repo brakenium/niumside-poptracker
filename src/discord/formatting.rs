@@ -1,7 +1,7 @@
-use poise::serenity_prelude::{Colour, CreateEmbed, FormattedTimestamp};
+use crate::google_calendar::formatting::html_to_md;
 use calendar3::api::Event;
 use chrono::Utc;
-use crate::google_calendar::formatting::html_to_md;
+use poise::serenity_prelude::{Colour, CreateEmbed, FormattedTimestamp};
 
 pub const DEFAULT_EMBED_COLOR: Colour = Colour(0x00_a9_a2);
 
@@ -21,11 +21,21 @@ pub fn calendar_event(
         let end = end_ref.date_time.unwrap_or_default();
         formatted_end = FormattedTimestamp::new(end.into(), None).to_string();
     }
-    
-    let description = html_to_md(&event.description.clone().unwrap_or_else(|| "No description".to_string()));
+
+    let description = html_to_md(
+        &event
+            .description
+            .clone()
+            .unwrap_or_else(|| "No description".to_string()),
+    );
 
     CreateEmbed::default()
-        .title(event.summary.clone().unwrap_or_else(|| "No title".to_string()))
+        .title(
+            event
+                .summary
+                .clone()
+                .unwrap_or_else(|| "No title".to_string()),
+        )
         .description(description)
         .field("Start", formatted_start, true)
         .field("End", formatted_end, true)

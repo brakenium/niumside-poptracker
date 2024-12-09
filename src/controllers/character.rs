@@ -1,7 +1,12 @@
 use crate::census::structs::character::{Character, CharacterName, MembershipReminderStatus};
 use sqlx::PgPool;
 
-pub async fn insert_or_update_character(pool: &PgPool, character: &Character, user_id: &i32, membership_reminder: &bool) -> Result<(), sqlx::Error> {
+pub async fn insert_or_update_character(
+    pool: &PgPool,
+    character: &Character,
+    user_id: &i32,
+    membership_reminder: &bool,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "INSERT INTO planetside_characters(
             character_id,
@@ -20,13 +25,16 @@ pub async fn insert_or_update_character(pool: &PgPool, character: &Character, us
         membership_reminder,
         character.faction as i32
     )
-        .execute(pool)
-        .await?;
+    .execute(pool)
+    .await?;
 
     Ok(())
 }
 
-pub async fn get_characters_by_discord_id(pool: &PgPool, discord_id: &i64) -> Result<Vec<Character>, sqlx::Error> {
+pub async fn get_characters_by_discord_id(
+    pool: &PgPool,
+    discord_id: &i64,
+) -> Result<Vec<Character>, sqlx::Error> {
     let characters = sqlx::query!(
         "SELECT character_id, name, membership_reminder
         FROM planetside_characters
@@ -37,8 +45,8 @@ pub async fn get_characters_by_discord_id(pool: &PgPool, discord_id: &i64) -> Re
         )",
         discord_id
     )
-        .fetch_all(pool)
-        .await?;
+    .fetch_all(pool)
+    .await?;
 
     let mut character_vec = Vec::new();
 
@@ -60,7 +68,10 @@ pub async fn get_characters_by_discord_id(pool: &PgPool, discord_id: &i64) -> Re
     Ok(character_vec)
 }
 
-pub async fn reset_reminder_for_discord_users(pool: &PgPool, discord_ids: Vec<i64>) -> Result<(), sqlx::Error> {
+pub async fn reset_reminder_for_discord_users(
+    pool: &PgPool,
+    discord_ids: Vec<i64>,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE planetside_characters
         SET last_membership_reminder = NOW()
@@ -71,8 +82,8 @@ pub async fn reset_reminder_for_discord_users(pool: &PgPool, discord_ids: Vec<i6
         )",
         &discord_ids
     )
-        .execute(pool)
-        .await?;
+    .execute(pool)
+    .await?;
 
     Ok(())
 }

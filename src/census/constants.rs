@@ -23,7 +23,7 @@ use strum::{EnumIter, FromRepr, VariantNames};
     strum::Display,
     FromRepr,
     PartialOrd,
-    Ord
+    Ord,
 )]
 #[allow(clippy::upper_case_acronyms)]
 pub enum Loadout {
@@ -104,7 +104,7 @@ impl Loadout {
     strum::Display,
     FromRepr,
     PartialOrd,
-    Ord
+    Ord,
 )]
 pub enum Faction {
     Unknown = 0,
@@ -134,7 +134,7 @@ pub type TeamID = Faction;
     strum::Display,
     FromRepr,
     PartialOrd,
-    Ord
+    Ord,
 )]
 #[strum(ascii_case_insensitive)]
 pub enum WorldID {
@@ -150,12 +150,18 @@ pub enum WorldID {
 pub type CharacterID = u64;
 pub type OutfitID = u64;
 
-#[derive(FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
+)]
 pub struct ZoneID(pub u32);
 
-#[derive(FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
+)]
 pub struct DefinitionID(pub u16);
-#[derive(FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
+)]
 pub struct InstanceID(pub u16);
 pub type FacilityID = u32;
 pub type ExperienceID = u16;

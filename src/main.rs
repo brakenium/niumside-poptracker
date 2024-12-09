@@ -16,14 +16,14 @@ mod controllers;
 mod discord;
 #[cfg(feature = "census")]
 mod event_handlers;
+mod google_calendar;
 mod logging;
 #[cfg(feature = "census")]
 mod serde;
 mod startup;
 mod storage;
-mod web;
-mod google_calendar;
 mod utils;
+mod web;
 
 use crate::active_players::ActivePlayerHashmap;
 use crate::discord::{Data, Error};
@@ -44,12 +44,10 @@ struct Services {
 }
 
 #[allow(clippy::unused_async)]
-async fn agnostic_init(
-    #[cfg(feature = "database")]
-    postgres: PgPool
-) -> anyhow::Result<Services> {
+async fn agnostic_init(#[cfg(feature = "database")] postgres: PgPool) -> anyhow::Result<Services> {
     #[cfg(feature = "census")]
-    let active_players: active_players::ActivePlayerDb = Arc::new(Mutex::new(ActivePlayerHashmap::new()));
+    let active_players: active_players::ActivePlayerDb =
+        Arc::new(Mutex::new(ActivePlayerHashmap::new()));
 
     let rocket = web::init();
 
@@ -76,8 +74,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let initialised_services = agnostic_init(
         #[cfg(feature = "database")]
-        postgres
-    ).await?;
+        postgres,
+    )
+    .await?;
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
 
@@ -91,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         initialised_services.active_players,
         addr,
     ))
-        .await?;
+    .await?;
 
     Ok(())
 }

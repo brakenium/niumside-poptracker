@@ -1,7 +1,7 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, Data};
+use syn::{parse_macro_input, Data, DeriveInput};
 
 #[proc_macro_derive(FromStr)]
 pub fn from_str_derive(input: TokenStream) -> TokenStream {
@@ -35,7 +35,7 @@ pub fn from_str_derive(input: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
+        }
         Data::Struct(_) => {
             quote! {
                 impl std::str::FromStr for #name {
@@ -47,7 +47,7 @@ pub fn from_str_derive(input: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
+        }
         _ => unimplemented!(),
     };
 

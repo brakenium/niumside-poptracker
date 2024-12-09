@@ -27,11 +27,26 @@ mod tests {
 
     #[test]
     fn test_icons_to_discord_emoji() {
-        assert_eq!(Icons::VS.to_discord_emoji(), parse_emoji("<:VS:683285085818191976>"));
-        assert_eq!(Icons::NC.to_discord_emoji(), parse_emoji("<:NC:683285084320694302>"));
-        assert_eq!(Icons::TR.to_discord_emoji(), parse_emoji("<:TR:683285084463431720>"));
-        assert_eq!(Icons::NS.to_discord_emoji(), parse_emoji("<:NS:722816749707198574>"));
-        assert_eq!(Icons::Ps2White.to_discord_emoji(), parse_emoji("<:Ps2White:722814368022134790>"));
+        assert_eq!(
+            Icons::VS.to_discord_emoji(),
+            parse_emoji("<:VS:683285085818191976>")
+        );
+        assert_eq!(
+            Icons::NC.to_discord_emoji(),
+            parse_emoji("<:NC:683285084320694302>")
+        );
+        assert_eq!(
+            Icons::TR.to_discord_emoji(),
+            parse_emoji("<:TR:683285084463431720>")
+        );
+        assert_eq!(
+            Icons::NS.to_discord_emoji(),
+            parse_emoji("<:NS:722816749707198574>")
+        );
+        assert_eq!(
+            Icons::Ps2White.to_discord_emoji(),
+            parse_emoji("<:Ps2White:722814368022134790>")
+        );
     }
 }
 

@@ -263,21 +263,24 @@ mod tests {
         if let CensusMessage::ServiceMessage { payload, .. } = event {
             match payload {
                 Event::GainExperience(GainExperience {
-                                          character_id,
-                                          experience_id,
-                                          loadout_id,
-                                          other_id,
-                                          timestamp,
-                                          world_id,
-                                          zone_id,
-                                          amount,
-                                          team_id,
-                                      }) => {
+                    character_id,
+                    experience_id,
+                    loadout_id,
+                    other_id,
+                    timestamp,
+                    world_id,
+                    zone_id,
+                    amount,
+                    team_id,
+                }) => {
                     assert_eq!(character_id, 5_429_573_939_285_739_921);
                     assert_eq!(experience_id, 140);
                     assert_eq!(loadout_id, Loadout::VSHeavyAssault);
                     assert_eq!(other_id, 34_360_508_066);
-                    assert_eq!(timestamp, DateTime::from_timestamp(1_728_117_291, 0).unwrap());
+                    assert_eq!(
+                        timestamp,
+                        DateTime::from_timestamp(1_728_117_291, 0).unwrap()
+                    );
                     assert_eq!(world_id, WorldID::Cobalt);
                     assert_eq!(zone_id, ZoneID(8));
                     assert_eq!(amount, 28);
