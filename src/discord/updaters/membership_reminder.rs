@@ -118,7 +118,12 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
                 )
                     .map_or_else(
                         |_| String::new(),
-                        |ts| FormattedTimestamp::new(ts, FormattedTimestampStyle::RelativeTime.into()).to_string(),
+                        |ts| format!(
+                            "{} on {} at {}",
+                            FormattedTimestamp::new(ts, FormattedTimestampStyle::RelativeTime.into()),
+                            FormattedTimestamp::new(ts, FormattedTimestampStyle::ShortDate.into()),
+                            FormattedTimestamp::new(ts, FormattedTimestampStyle::ShortTime.into()),
+                        ),
                     ),
             );
 
