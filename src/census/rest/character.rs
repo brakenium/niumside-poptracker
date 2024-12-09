@@ -15,13 +15,14 @@ impl CensusRequestableObject for Character {
 
         let response = reqwest::get(url).await?;
         let character: CensusResponse<Self> = response.json().await?;
-        let return_value: Result<Self, CensusRequestError> = if let Some(character) = character.objects.first() {
-            Ok(character.clone())
-        } else if character.objects.is_empty() {
-            Err(CensusRequestError::NotFound)
-        } else {
-            unreachable!()
-        };
+        let return_value: Result<Self, CensusRequestError> =
+            if let Some(character) = character.objects.first() {
+                Ok(character.clone())
+            } else if character.objects.is_empty() {
+                Err(CensusRequestError::NotFound)
+            } else {
+                unreachable!()
+            };
 
         return_value
     }

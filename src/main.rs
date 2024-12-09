@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         #[cfg(feature = "database")]
         postgres,
     )
-        .await?;
+    .await?;
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
 
@@ -91,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         initialised_services.active_players,
         addr,
     ))
-        .await?;
+    .await?;
 
     Ok(())
 }

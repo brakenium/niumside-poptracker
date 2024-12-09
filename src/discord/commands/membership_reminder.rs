@@ -27,7 +27,7 @@ pub async fn specific(
         &ctx.data().db_pool,
         &ctx.author().id.get(),
     )
-        .await
+    .await
     {
         Ok(user) => user,
         Err(e) => {
@@ -54,7 +54,7 @@ pub async fn specific(
             &user,
             &enable,
         )
-            .await
+        .await
         {
             Ok(()) => updated_characters.push(character),
             Err(e) => {
@@ -131,8 +131,8 @@ pub async fn all(
         enable,
         discord_id,
     )
-        .execute(&ctx.data().db_pool)
-        .await?;
+    .execute(&ctx.data().db_pool)
+    .await?;
 
     ctx.say("Updated daily login reminder settings for all characters")
         .await?;
