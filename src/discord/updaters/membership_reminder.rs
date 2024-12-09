@@ -6,7 +6,7 @@ use crate::discord::formatting::DEFAULT_EMBED_COLOR;
 use crate::discord::icons::Icons;
 use crate::discord::updaters::Updater;
 use crate::discord::{Data, Error};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use poise::serenity_prelude::{Context, CreateEmbed, CreateMessage, FormattedTimestamp, FormattedTimestampStyle, Timestamp, User, UserId};
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -74,8 +74,14 @@ async fn get_users_to_remind(ctx: &Context, db_pool: &PgPool, census_rest_client
         };
 
         if let Some(times) = &character.times {
-            let hours_ago_21 = Utc::now() - chrono::Duration::hours(21);
-            let hours_ago_24 = Utc::now() - chrono::Duration::hours(24);
+            let user_in_db = sqlx::query!(
+                "SELECT membership_reminder_forgotten_interval, membership_reminder_first_interval
+                FROM users
+                WHERE discord_id = $1",
+                discord_id
+            )
+                .fetch_one(db_pool)
+                .await?;
 
             let first_reminder_minimum = Utc::now() - Duration::hours(21);
             let forgotten_reminder_minimum = Utc::now() - Duration::hours(24);

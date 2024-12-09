@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT membership_reminder_forgotten_interval, membership_reminder_first_interval\n                FROM users\n                WHERE user_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "membership_reminder_forgotten_interval",
+        "type_info": "Interval"
+      },
+      {
+        "ordinal": 1,
+        "name": "membership_reminder_first_interval",
+        "type_info": "Interval"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "aad83c471a80fe8a36df9d18e6cbd72b4e35c00e6e56706770f145e0b008c13d"
+}
