@@ -3,6 +3,7 @@
 #![warn(clippy::unwrap_used)]
 #![warn(clippy::expect_used)]
 #![allow(clippy::module_name_repetitions)]
+#![allow(dead_code)]
 
 extern crate google_calendar3 as calendar3;
 
@@ -76,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         #[cfg(feature = "database")]
         postgres,
     )
-    .await?;
+        .await?;
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
 
@@ -90,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         initialised_services.active_players,
         addr,
     ))
-    .await?;
+        .await?;
 
     Ok(())
 }
