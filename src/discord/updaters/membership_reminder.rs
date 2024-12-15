@@ -1,6 +1,6 @@
 use crate::census::rest::client::{CensusRequestableObject, CensusRestClient};
 use crate::census::structs::character::{Character, MembershipReminderStatus};
-use crate::controllers::character::reset_reminder_for_discord_users;
+use crate::controllers::character::reset_reminder_for_characters;
 use crate::discord::formatting::DEFAULT_EMBED_COLOR;
 use crate::discord::icons::Icons;
 use crate::discord::updaters::Updater;
@@ -153,7 +153,8 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
 
         match usr.direct_message(ctx, message).await {
             Ok(_) => {
-                match reset_reminder_for_discord_users(&data.db_pool, vec![i64::from(usr.id)]).await
+                let character_ids: Vec<i64> = characters.iter().map(|c| c.character_id as i64).collect();
+                match reset_reminder_for_characters(&data.db_pool, character_ids).await
                 {
                     Ok(()) => (),
                     Err(e) => {
