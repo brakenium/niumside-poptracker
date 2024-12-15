@@ -68,6 +68,9 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
+      - name: Install bindgen-cli
+        run: cargo install --force --locked bindgen-cli
+
       - name: Build
         run: cargo build --release --target ${{ matrix.target }} || (cargo clean && cargo build --release --target ${{ matrix.target }})
 
