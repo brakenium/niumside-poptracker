@@ -35,6 +35,7 @@ use poise::FrameworkBuilder;
 use sqlx::PgPool;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
+use tracing::error;
 
 struct Services {
     #[cfg(feature = "census")]
@@ -67,13 +68,18 @@ async fn agnostic_init(#[cfg(feature = "database")] postgres: PgPool) -> anyhow:
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    rustls::crypto::ring::default_provider()
-        .install_default()
-        .expect("failed to install rustls ring provider");
-
     let app_config = Settings::new(Path::new("config"))?;
 
     logging::tracing(app_config.app.log_level);
+
+    match rustls::crypto::ring::default_provider()
+        .install_default() {
+        Ok(()) => (),
+        Err(e) => {
+            error!("Could not set ring as default rustls crypto provider: {e:?}");
+            return Err("Failed to set crypto provider".into());
+        },
+    }
 
     #[cfg(feature = "database")]
     let postgres = storage::db_pool::create(&app_config.database.connection_string.clone()).await?;
