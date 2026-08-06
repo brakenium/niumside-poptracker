@@ -159,7 +159,7 @@ pub async fn run(db_pool: &PgPool, census_rest_client: &CensusRestClient) {
     loop {
         update_characters(db_pool, census_rest_client).await;
         update_from_lithafalcon(db_pool).await;
-        tokio::time::sleep(tokio::time::Duration::from_secs(60 * 60)).await;
+        tokio::time::sleep(tokio::time::Duration::from_hours(1)).await;
     }
 }
 

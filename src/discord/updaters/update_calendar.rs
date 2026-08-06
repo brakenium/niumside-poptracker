@@ -1,8 +1,8 @@
-use crate::discord::updaters::utils::{
-    create_or_edit_event, get_message_or_create_new, ToScheduleEventFields,
-};
 use crate::discord::updaters::Updater;
-use crate::discord::{formatting, Data};
+use crate::discord::updaters::utils::{
+    ToScheduleEventFields, create_or_edit_event, get_message_or_create_new,
+};
+use crate::discord::{Data, formatting};
 use crate::google_calendar::formatting::html_to_md;
 use crate::google_calendar::get_calendar_color;
 use crate::storage::configuration::{DiscordCalendarConfig, GoogleConfig};
@@ -36,7 +36,7 @@ async fn get_color_from_event(
     let mut color = Colour::default();
     if let Ok(color_int) = u32::from_str_radix(&color_string[1..], 16) {
         color.0 = color_int;
-    };
+    }
 
     color
 }
@@ -167,15 +167,13 @@ async fn update_single_calendar(
     data: &Data,
     calendar: &DiscordCalendarConfig,
 ) -> Result<(), discord::Error> {
-    let events =
-        match google_calendar::get_next_week(&data.google, &calendar.google_calendar_id).await {
-            None => {
-                let error = Err(discord::Error::from("Failed to get events"));
-                error!("Failed to get events: {:?}", error);
-                return error;
-            }
-            Some(events) => events,
-        };
+    let Some(events) =
+        google_calendar::get_next_week(&data.google, &calendar.google_calendar_id).await
+    else {
+        let error = Err(discord::Error::from("Failed to get events"));
+        error!("Failed to get events: {:?}", error);
+        return error;
+    };
 
     let (to_schedule_events, embeds) = get_to_schedule_events(
         events,

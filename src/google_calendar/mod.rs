@@ -1,20 +1,32 @@
 pub mod formatting;
 
 use crate::storage::configuration::GoogleConfig;
-use calendar3::api::{CalendarListEntry, Colors, Event, Events};
-use calendar3::client::chrono::Utc;
-use calendar3::hyper::client::HttpConnector;
-use calendar3::hyper_rustls::HttpsConnector;
-use calendar3::oauth2::authenticator::Authenticator;
-use calendar3::CalendarHub;
-use google_calendar3::oauth2;
-use google_calendar3::{hyper, hyper_rustls};
+use chrono::Utc;
+use google_calendar3::CalendarHub;
+use google_calendar3::api::{CalendarListEntry, Colors, Event, Events};
+use google_calendar3::hyper_rustls::HttpsConnector;
+use google_calendar3::hyper_util::client::legacy::connect::HttpConnector;
+use google_calendar3::yup_oauth2::authenticator::Authenticator;
+use google_calendar3::{hyper_rustls, hyper_util, yup_oauth2};
 use tracing::info;
 
 async fn creds(google: &GoogleConfig) -> Option<Authenticator<HttpsConnector<HttpConnector>>> {
-    let creds = match oauth2::ServiceAccountAuthenticator::builder(google.auth.clone())
-        .build()
-        .await
+    let connector = hyper_rustls::HttpsConnectorBuilder::new()
+        .with_native_roots()
+        .ok()?
+        .https_only()
+        .enable_http2()
+        .build();
+
+    let executor = hyper_util::rt::TokioExecutor::new();
+    let creds = match yup_oauth2::ServiceAccountAuthenticator::with_client(
+        google.auth.clone(),
+        yup_oauth2::client::CustomHyperClientBuilder::from(
+            hyper_util::client::legacy::Client::builder(executor).build(connector),
+        ),
+    )
+    .build()
+    .await
     {
         Ok(creds) => creds,
         Err(err) => {
@@ -29,20 +41,24 @@ async fn creds(google: &GoogleConfig) -> Option<Authenticator<HttpsConnector<Htt
 pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector<HttpConnector>>> {
     let auth = creds(google).await?;
 
-    let tls_connector = match hyper_rustls::HttpsConnectorBuilder::new().with_native_roots() {
-        Ok(connector) => connector.https_only().enable_http1().build(),
-        Err(err) => {
-            info!(
-                "Failed to build TLS connector for Google calendar: {:?}",
-                err
-            );
-            return None;
-        }
-    };
+    let token = auth
+        .token(&["https://www.googleapis.com/auth/calendar.readonly"])
+        .await
+        .ok()?;
 
-    let http_client = hyper::Client::builder().build(tls_connector);
+    info!("Google calendar token: {:?}", token);
 
-    let hub = CalendarHub::new(http_client, auth);
+    let client = hyper_util::client::legacy::Client::builder(hyper_util::rt::TokioExecutor::new())
+        .build(
+            hyper_rustls::HttpsConnectorBuilder::new()
+                .with_native_roots()
+                .ok()?
+                .https_or_http()
+                .enable_http2()
+                .build(),
+        );
+
+    let hub = CalendarHub::new(client, auth);
 
     Some(hub)
 }
@@ -56,6 +72,29 @@ pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<E
 
     let hub = get_hub(google).await?;
 
+    info!("Calendar ID: >{}<", calendar_id);
+    let events = hub
+        .events()
+        .list(calendar_id)
+        .time_min(from_date)
+        .time_max(to_date)
+        .single_events(true)
+        .max_results(2500)
+        .doit()
+        .await;
+
+    match events {
+        Ok((_, events)) => {
+            for event in events.items.unwrap_or_default() {
+                info!("Event: {:?}", event.summary);
+            }
+        }
+        Err(err) => {
+            info!("Failed to fetch events: {:?}", err);
+            return None;
+        }
+    }
+
     let events = match hub
         .events()
         .list(calendar_id)
@@ -63,12 +102,14 @@ pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<E
         .time_min(from_date)
         .time_max(to_date)
         .single_events(true)
+        .max_results(2500)
         .doit()
         .await
     {
         Ok(events) => events,
         Err(err) => {
-            info!("Failed to get events for Google calendar: {:?}", err);
+            info!("Calendar ID: {}", calendar_id);
+            info!("Google Calendar error: {:#?}", err);
             return None;
         }
     };

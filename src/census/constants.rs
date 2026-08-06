@@ -24,6 +24,7 @@ use strum::{EnumIter, FromRepr, VariantNames};
     FromRepr,
     PartialOrd,
     Ord,
+    utoipa::ToSchema,
 )]
 #[allow(clippy::upper_case_acronyms)]
 pub enum Loadout {
@@ -105,6 +106,7 @@ impl Loadout {
     FromRepr,
     PartialOrd,
     Ord,
+    utoipa::ToSchema,
 )]
 pub enum Faction {
     Unknown = 0,
@@ -135,6 +137,7 @@ pub type TeamID = Faction;
     FromRepr,
     PartialOrd,
     Ord,
+    utoipa::ToSchema,
 )]
 #[strum(ascii_case_insensitive)]
 pub enum WorldID {
@@ -152,6 +155,7 @@ pub type OutfitID = u64;
 
 #[derive(
     FromStr, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
+    utoipa::ToSchema,
 )]
 pub struct ZoneID(pub u32);
 

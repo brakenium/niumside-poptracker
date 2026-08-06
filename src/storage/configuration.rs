@@ -1,10 +1,10 @@
 use crate::constants;
-use calendar3::oauth2::ServiceAccountKey;
 use config::{Config, ConfigError, Environment, File};
 use poise::serenity_prelude::{ChannelId, GuildId, MessageId};
 use serde::{Deserialize, Deserializer};
 use std::env;
 use std::path::Path;
+use calendar3::yup_oauth2::ServiceAccountKey;
 use tracing::Level;
 use url::Url;
 

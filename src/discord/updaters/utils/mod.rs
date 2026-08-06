@@ -24,8 +24,7 @@ pub async fn get_message_or_create_new(
                 .first()
                 .ok_or_else(|| {
                     error!(
-                        "Failed to get message ({:?}) in channel ({:?})",
-                        message_id, guild_channel
+                        "Failed to get message ({message_id:?}) in channel ({guild_channel:?})"
                     );
                     discord::Error::from("Failed to get message")
                 })?

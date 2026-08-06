@@ -83,7 +83,7 @@ async fn get_users_to_remind(
                 info!("Failed to update character {}: {}", char.character_id, e);
                 continue;
             }
-        };
+        }
 
         if let Some(times) = &character.times {
             let first_reminder_minimum = Utc::now() - Duration::hours(21);
@@ -91,10 +91,10 @@ async fn get_users_to_remind(
 
             if times.last_login > first_reminder_minimum {
                 continue;
-            } else if let Some(last_reminder) = membership_reminder.last_reminder {
-                if last_reminder > forgotten_reminder_minimum {
-                    continue;
-                }
+            } else if let Some(last_reminder) = membership_reminder.last_reminder
+                && last_reminder > forgotten_reminder_minimum
+            {
+                continue;
             }
         }
 
@@ -153,9 +153,11 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
 
         match usr.direct_message(ctx, message).await {
             Ok(_) => {
-                let character_ids: Vec<i64> = characters.iter().map(|c| c.character_id as i64).collect();
-                match reset_reminder_for_characters(&data.db_pool, character_ids).await
-                {
+                #[allow(clippy::cast_possible_wrap)]
+                // Sqlx expects i64 because of postgres datatypes. As far as I can tell, character IDs are always within the combined bounds of i64 and u64
+                let character_ids: Vec<i64> =
+                    characters.iter().map(|c| c.character_id as i64).collect();
+                match reset_reminder_for_characters(&data.db_pool, character_ids).await {
                     Ok(()) => (),
                     Err(e) => {
                         info!(
@@ -172,7 +174,7 @@ async fn remind_users(ctx: &Context, data: &Data, users: UsersToRemind) -> Resul
                 "Failed to send membership reminder to user {}: {}",
                 usr.id, e
             ),
-        };
+        }
     }
 
     Ok(())

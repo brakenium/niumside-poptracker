@@ -5,6 +5,7 @@ mod formatting;
 mod icons;
 mod updaters;
 
+#[cfg(feature = "census")]
 use crate::census::rest::client::CensusRestClient;
 use crate::discord::updaters::Updater;
 use crate::storage::configuration::{DiscordCalendarConfig, GoogleConfig};
@@ -51,8 +52,9 @@ fn event_handler(
                         Err(e) => {
                             error!("Failed to update calendar: {:?}", e);
                         }
-                    };
+                    }
 
+                    #[cfg(feature = "census")]
                     match updaters::membership_reminder::MembershipReminder::update(&ctx1, &data)
                         .await
                     {
@@ -60,9 +62,9 @@ fn event_handler(
                         Err(e) => {
                             error!("Failed to update membership reminder: {:?}", e);
                         }
-                    };
+                    }
 
-                    tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
+                    tokio::time::sleep(tokio::time::Duration::from_mins(15)).await;
                 }
             });
         }

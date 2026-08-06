@@ -7,6 +7,7 @@ use crate::discord::{Context, Error};
 use poise::serenity_prelude::CreateEmbed;
 use poise::CreateReply;
 use tracing::error;
+use std::fmt::Write as _;
 
 /// Change daily login reminder settings. Will remind 1 hour before daily login reset.
 #[poise::command(slash_command, track_edits, subcommands("specific", "all"))]
@@ -40,44 +41,45 @@ pub async fn specific(
     let mut failed_characters: Vec<String> = Vec::new();
 
     for char in characters {
-        let character = match Character::get_by_name(&ctx.data().census_rest_client, &char).await {
-            Ok(character) => character,
-            Err(e) => {
+        let Ok(character) = Character::get_by_name(&ctx.data().census_rest_client, &char).await else {
+            if let Err(e) = Character::get_by_name(&ctx.data().census_rest_client, &char).await {
                 error!("Error while fetching character from REST: {e}");
-                failed_characters.push(char);
-                continue;
             }
+            failed_characters.push(char);
+            continue;
         };
+
         match controllers::character::insert_or_update_character(
             &ctx.data().db_pool,
             &character,
             &user,
             &enable,
         )
-        .await
+            .await
         {
             Ok(()) => updated_characters.push(character),
             Err(e) => {
                 error!("Error while updating character in database: {e}");
                 failed_characters.push(char);
-                continue;
             }
-        };
+        }
     }
 
     let mut description = String::new();
 
     if updated_characters.is_empty() {
-        description.push_str("No characters updated");
+        let _ = writeln!(description, "No characters updated");
+        // description.push_str("No characters updated");
         ctx.say(description).await?;
         return Ok(());
     }
 
-    if enable {
-        description.push_str("Enabled daily login reminder for the following characters:\n");
-    } else {
-        description.push_str("Disabled daily login reminder for the following characters:\n");
-    }
+    let status = if enable { "Enabled" } else { "Disabled" };
+
+    let _ = writeln!(
+        description,
+        "{status} daily login reminder for the following characters:\n"
+    );
 
     for character in updated_characters {
         let wrapped_icons = Icons::try_from(character.faction)
@@ -87,13 +89,14 @@ pub async fn specific(
         let icon: String =
             wrapped_icons.map_or_else(|| character.faction.to_string(), |emoji| emoji.to_string());
 
-        description.push_str(&format!("{} {}", icon, character.name.first));
+        let _ = writeln!(description, "{} {}", icon, character.name.first);
     }
 
     if !failed_characters.is_empty() {
-        description.push_str("\n\nFailed to update the following characters:\n");
+        let _ = writeln!(description, "\n\nFailed to update the following characters:\n");
+
         for character in failed_characters {
-            description.push_str(&format!("- {character}"));
+            let _ = writeln!(description, "- {character}");
         }
     }
 

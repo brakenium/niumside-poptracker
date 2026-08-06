@@ -2,7 +2,6 @@ pub mod gain_experience;
 
 use crate::active_players::ActivePlayerDb;
 use crate::census::event::Event;
-use tracing::error;
 
 #[derive(thiserror::Error, Debug)]
 pub enum EventHandlerErrors {
@@ -29,5 +28,5 @@ pub fn receive_events(event: Event, active_players: &ActivePlayerDb) {
         Event::AchievementEarned => todo!(),
         Event::SkillAdded => todo!(),
         Event::BattleRankUp => todo!(),
-    };
+    }
 }

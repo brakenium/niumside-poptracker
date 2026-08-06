@@ -7,7 +7,7 @@ use crate::census::Action;
 use crate::census::{CensusMessage, REALTIME_URL};
 use crate::event_handlers::receive_events;
 use async_trait::async_trait;
-use ezsockets::{ClientConfig, CloseCode, CloseFrame};
+use ezsockets::{ClientConfig, CloseCode, CloseFrame, Utf8Bytes};
 use metrics::counter;
 use std::thread;
 use tracing::{debug, error, info};
@@ -43,7 +43,7 @@ pub enum RealtimeError {
 impl ezsockets::ClientExt for CensusRealtimeClient {
     type Call = ();
 
-    async fn on_text(&mut self, text: String) -> Result<(), ezsockets::Error> {
+    async fn on_text(&mut self, text: Utf8Bytes) -> Result<(), ezsockets::Error> {
         // info!("received message: {text}");
         let parsed_message: Result<CensusMessage, serde_json::Error> = serde_json::from_str(&text);
         match parsed_message {
@@ -59,7 +59,7 @@ impl ezsockets::ClientExt for CensusRealtimeClient {
         Ok(())
     }
 
-    async fn on_binary(&mut self, bytes: Vec<u8>) -> Result<(), ezsockets::Error> {
+    async fn on_binary(&mut self, bytes: ezsockets::Bytes) -> Result<(), ezsockets::Error> {
         info!("received bytes: {bytes:?}");
         Ok(())
     }
@@ -103,7 +103,7 @@ fn handle_census_msg(
 fn close_connection(client: &ezsockets::Client<CensusRealtimeClient>) {
     match client.close(Some(CloseFrame {
         code: CloseCode::Normal,
-        reason: "adios!".to_string(),
+        reason: "adios!".into(),
     })) {
         Ok(_) => {}
         Err(err) => {

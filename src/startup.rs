@@ -1,4 +1,6 @@
+#[cfg(feature = "census")]
 use crate::census::rest;
+#[cfg(feature = "census")]
 use crate::census::rest::client::CensusRestClient;
 use crate::discord::{Data, Error};
 use crate::logging;
@@ -60,6 +62,7 @@ pub async fn services(
 
     #[cfg(feature = "database")]
     let poise_db = db_pool.clone();
+    #[cfg(feature = "census")]
     let discord_census_rest_client = census_rest_client.clone();
     let poise_framework = poise
         .setup(|ctx, _ready, framework| {

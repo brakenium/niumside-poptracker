@@ -26,6 +26,7 @@ mod storage;
 mod utils;
 mod web;
 
+#[cfg(feature = "census")]
 use crate::active_players::ActivePlayerHashmap;
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
@@ -66,6 +67,10 @@ async fn agnostic_init(#[cfg(feature = "database")] postgres: PgPool) -> anyhow:
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .expect("failed to install rustls ring provider");
+
     let app_config = Settings::new(Path::new("config"))?;
 
     logging::tracing(app_config.app.log_level);

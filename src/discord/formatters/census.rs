@@ -127,7 +127,7 @@ pub fn single_world_breakdown_embed(
 
     world
         .zones
-        .sort_by(|a, b| b.zone_population.cmp(&a.zone_population));
+        .sort_by_key(|b| std::cmp::Reverse(b.zone_population));
 
     for zone in &world.zones {
         let mut breakdown = String::new();
