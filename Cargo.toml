@@ -37,7 +37,7 @@ futures = "0.3.33"
 rustls = { version = "0.23.43", features = ["ring"], optional = true }
 
 [features]
-default = ["discord", "monitoring"]
+default = ["discord", "monitoring", "census"]
 discord = ["dep:poise", "dep:serde_json", "dep:google-calendar3", "dep:rustls", "database"]
 database = ["dep:sqlx"]
 monitoring = ["api", "dep:metrics-exporter-prometheus", "dep:metrics"]
