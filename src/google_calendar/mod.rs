@@ -1,5 +1,6 @@
 pub mod formatting;
 
+use calendar3::api::Scope;
 use crate::storage::configuration::GoogleConfig;
 use chrono::Utc;
 use google_calendar3::CalendarHub;
@@ -41,13 +42,6 @@ async fn creds(google: &GoogleConfig) -> Option<Authenticator<HttpsConnector<Htt
 pub async fn get_hub(google: &GoogleConfig) -> Option<CalendarHub<HttpsConnector<HttpConnector>>> {
     let auth = creds(google).await?;
 
-    let token = auth
-        .token(&["https://www.googleapis.com/auth/calendar.readonly"])
-        .await
-        .ok()?;
-
-    info!("Google calendar token: {:?}", token);
-
     let client = hyper_util::client::legacy::Client::builder(hyper_util::rt::TokioExecutor::new())
         .build(
             hyper_rustls::HttpsConnectorBuilder::new()
@@ -72,32 +66,10 @@ pub async fn get_next_week(google: &GoogleConfig, calendar_id: &str) -> Option<E
 
     let hub = get_hub(google).await?;
 
-    info!("Calendar ID: >{}<", calendar_id);
-    let events = hub
-        .events()
-        .list(calendar_id)
-        .time_min(from_date)
-        .time_max(to_date)
-        .single_events(true)
-        .max_results(2500)
-        .doit()
-        .await;
-
-    match events {
-        Ok((_, events)) => {
-            for event in events.items.unwrap_or_default() {
-                info!("Event: {:?}", event.summary);
-            }
-        }
-        Err(err) => {
-            info!("Failed to fetch events: {:?}", err);
-            return None;
-        }
-    }
-
     let events = match hub
         .events()
         .list(calendar_id)
+        .add_scope(Scope::Readonly)
         .time_zone("Europe/Amsterdam")
         .time_min(from_date)
         .time_max(to_date)
