@@ -1,66 +1,51 @@
 {
+  description = "Rust Rover environment";
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
-      perSystem = { config, self', pkgs, lib, system, ... }:
-        let
-          runtimeDeps = with pkgs; [
-            # alsa-lib
-            # speechd
-          ];
-          buildDeps = with pkgs; [ pkg-config rustPlatform.bindgenHook ];
-          devDeps = with pkgs; [ gdb act sqlx-cli bacon ];
-
-          # cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
-          # msrv = cargoToml.package.rust-version;
-
-          # rustPackage = features:
-          #   (pkgs.makeRustPlatform {
-          #     cargo = pkgs.rust-bin.stable.latest.minimal;
-          #     rustc = pkgs.rust-bin.stable.latest.minimal;
-          #   }).buildRustPackage {
-          #     inherit (cargoToml.package) name version;
-          #     src = ./.;
-          #     cargoLock.lockFile = ./Cargo.lock;
-          #     buildFeatures = features;
-          #     buildInputs = runtimeDeps;
-          #     nativeBuildInputs = buildDeps;
-          #     # Uncomment if your cargo tests require networking or otherwise
-          #     # don't play nicely with the Nix build sandbox:
-          #     # doCheck = false;
-          #   };
-
-          mkDevShell = rustc:
-            pkgs.mkShell {
-              shellHook = ''
-                export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
-                ${pkgs.xmlstarlet}/bin/xmlstarlet edit --inplace --update "/project/*[@name='RustProjectSettings']/*[@name='explicitPathToStdlib']/@value" --value ${pkgs.rustPlatform.rustLibSrc} .idea/workspace.xml
-              '';
-              buildInputs = runtimeDeps;
-              nativeBuildInputs = buildDeps ++ devDeps ++ [ rustc ];
-            };
-        in {
-          _module.args.pkgs = import inputs.nixpkgs {
-            inherit system;
-            overlays = [ (import inputs.rust-overlay) ];
-          };
-
-          # packages.default = self'.packages.example;
-          devShells.default = self'.devShells.stable;
-
-          # packages.example = (rustPackage "foobar");
-          # packages.example-base = (rustPackage "");
-
-          # devShells.nightly = (mkDevShell (pkgs.rust-bin.selectLatestNightlyWith
-          #   (toolchain: toolchain.default)));
-          devShells.stable = (mkDevShell pkgs.rust-bin.stable.latest.default);
-          # devShells.msrv = (mkDevShell pkgs.rust-bin.stable.${msrv}.default);
+  outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ (import rust-overlay) ];
         };
-    };
+
+        rustToolchain = pkgs.rust-bin.stable."1.88.0".default.override {
+          extensions = [ "rust-src" "clippy" "rustfmt" ];
+        };
+      in {
+        devShell = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [
+            rustToolchain
+          ];
+
+          buildInputs = with pkgs; [
+            openssl
+            pkg-config
+
+            rust-analyzer
+#            jetbrains.rust-rover
+            sqlx-cli
+            bacon
+          ];
+
+          shellHook = ''
+            mkdir -p ~/.rust-rover/toolchain
+
+            ln -sfn ${rustToolchain}/lib ~/.rust-rover/toolchain
+            ln -sfn ${rustToolchain}/bin ~/.rust-rover/toolchain
+
+            export RUST_SRC_PATH="$HOME/.rust-rover/toolchain/lib/rustlib/src/rust/library"
+          '';
+        };
+      }
+    );
 }
