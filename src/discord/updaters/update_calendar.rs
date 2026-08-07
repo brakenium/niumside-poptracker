@@ -186,7 +186,14 @@ async fn update_single_calendar(
     let mut message =
         get_message_or_create_new(ctx, calendar.channel_id, calendar.message_id).await?;
 
-    let message_content = EditMessage::new().content("").embeds(embeds);
+    let message_text = if embeds.is_empty() {
+        "No events to display"
+    }
+    else {
+        ""
+    };
+
+    let message_content = EditMessage::new().content(message_text).embeds(embeds);
 
     message.edit(ctx, message_content).await?;
 
