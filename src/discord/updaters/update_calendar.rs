@@ -168,7 +168,7 @@ async fn update_single_calendar(
     calendar: &DiscordCalendarConfig,
 ) -> Result<(), discord::Error> {
     let Some(events) =
-        google_calendar::get_next_week(&data.google, &calendar.google_calendar_id).await
+        google_calendar::get_next_week(&data.google, &calendar.google_calendar_id, &calendar.window_to_show_days).await
     else {
         let error = Err(discord::Error::from("Failed to get events"));
         error!("Failed to get events: {:?}", error);

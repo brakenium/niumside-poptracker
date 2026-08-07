@@ -65,6 +65,7 @@ pub struct DiscordCalendarConfig {
     pub guild_id: GuildId,
     pub message_id: Option<MessageId>,
     pub should_update_discord_events: bool,
+    pub window_to_show_days: u8,
 }
 
 #[derive(Debug, Deserialize, Clone)]
