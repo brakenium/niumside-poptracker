@@ -111,15 +111,17 @@ impl Settings {
             // Add in settings from the environment (with a prefix of APP)
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
             .add_source(
-                Environment::with_prefix(&constants::PROJECT_NAME.to_uppercase().replace(' ', ""))
-                    .separator("_")
+                Environment::with_prefix(
+                    &constants::PROJECT_NAME.to_uppercase().replace(' ', "")
+                )
+                    .separator(".")
                     .list_separator(","),
             )
             .add_source(
                 Environment::with_prefix(
                     &constants::APPLICATION_NAME.to_uppercase().replace(' ', ""),
                 )
-                .separator("_")
+                .separator(".")
                 .list_separator(","),
             )
             .build()?;
