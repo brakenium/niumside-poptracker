@@ -4,6 +4,13 @@ census:
   census_base_url: https://census.daybreakgames.com
   lithafalcon_base_url: https://census.lithafalcon.cc
 
+planetside_news:
+  sources:
+    - name: News
+      url: https://news.ps2.brakenium.xyz/news.json
+    - name: Patch notes
+      url: https://news.ps2.brakenium.xyz/patch-notes.json
+
   # worlds:
   #   - id: Miller
   #   - id: Cobalt

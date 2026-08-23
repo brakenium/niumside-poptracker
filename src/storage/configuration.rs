@@ -82,6 +82,17 @@ pub struct GoogleConfig {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct DataSource {
+    pub name: String,
+    pub url: Url,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct PlanetsideNewsConfig {
+    pub sources: Vec<DataSource>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
 pub struct Settings {
     #[cfg(feature = "census")]
@@ -90,6 +101,7 @@ pub struct Settings {
     pub app: AppConfig,
     pub discord: DiscordConfig,
     pub google: GoogleConfig,
+    pub planetside_news: PlanetsideNewsConfig,
 }
 
 // TODO: Check system config directories for config files

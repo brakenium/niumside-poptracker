@@ -28,6 +28,7 @@ mod web;
 
 #[cfg(feature = "census")]
 use crate::active_players::ActivePlayerHashmap;
+use crate::web::AppState;
 use crate::discord::{Data, Error};
 use crate::storage::configuration::Settings;
 use poise::FrameworkBuilder;
@@ -42,7 +43,8 @@ struct Services {
     active_players: active_players::ActivePlayerDb,
     #[cfg(feature = "database")]
     db_pool: PgPool,
-    rocket: rocket::Rocket<rocket::Build>,
+    http: axum::Router<AppState>,
+    http_state: AppState,
     poise: FrameworkBuilder<Data, Error>,
 }
 
@@ -52,7 +54,10 @@ async fn agnostic_init(#[cfg(feature = "database")] postgres: PgPool) -> anyhow:
     let active_players: active_players::ActivePlayerDb =
         Arc::new(Mutex::new(ActivePlayerHashmap::new()));
 
-    let rocket = web::init();
+    let (http, http_state) = web::init(
+        #[cfg(feature = "database")]
+        postgres.clone(),
+    );
 
     let poise = discord::init();
 
@@ -61,7 +66,8 @@ async fn agnostic_init(#[cfg(feature = "database")] postgres: PgPool) -> anyhow:
         active_players,
         #[cfg(feature = "database")]
         db_pool: postgres,
-        rocket,
+        http,
+        http_state,
         poise,
     })
 }
@@ -93,7 +99,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8000));
 
     Box::pin(startup::services(
-        initialised_services.rocket,
+        initialised_services.http,
+        initialised_services.http_state,
         #[cfg(feature = "database")]
         initialised_services.db_pool,
         app_config,

@@ -5,6 +5,7 @@ use poise::serenity_prelude as serenity;
 #[cfg(feature = "census")]
 pub mod membership_reminder;
 pub mod update_calendar;
+pub mod planetside_news;
 mod utils;
 
 pub trait Updater {

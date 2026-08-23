@@ -1,6 +1,6 @@
 use crate::census::CENSUS_URL;
 use crate::storage::configuration::CensusConfig;
-use rocket::serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use strum::Display;
 use tracing::trace;
 use url::{form_urlencoded, Url};
